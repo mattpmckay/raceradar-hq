@@ -10,38 +10,45 @@ interface Scheme {
   accentLighter: string
   accentBg: string
   accentCtaBg: string
+  btnTextColor: string  // white for dark accents, black for light accents (volt)
 }
 
 const SCHEMES: Scheme[] = [
   {
-    name: 'Electric Orange',
-    slug: 'orange',
-    accent: '#f97316',
-    accentHover: '#ea580c',
-    accentLight: '#fb923c',
-    accentLighter: '#fdba74',
-    accentBg: 'rgba(249,115,22,0.15)',
-    accentCtaBg: 'rgba(249,115,22,0.20)',
+    // HYROX brand: signature hot pink on black
+    name: 'HYROX Pink',
+    slug: 'hyrox',
+    accent: '#FF0080',
+    accentHover: '#D4006C',
+    accentLight: '#FF3399',
+    accentLighter: '#FF66BB',
+    accentBg: 'rgba(255,0,128,0.12)',
+    accentCtaBg: 'rgba(255,0,128,0.16)',
+    btnTextColor: '#fff',
   },
   {
-    name: 'Neon Magenta',
-    slug: 'magenta',
-    accent: '#E4007C',
-    accentHover: '#c0006a',
-    accentLight: '#ff1a8f',
-    accentLighter: '#ff66b8',
-    accentBg: 'rgba(228,0,124,0.15)',
-    accentCtaBg: 'rgba(228,0,124,0.20)',
+    // Nike: iconic volt yellow-green on black
+    name: 'Nike Volt',
+    slug: 'nike',
+    accent: '#D4FF00',
+    accentHover: '#BBDF00',
+    accentLight: '#DDFF33',
+    accentLighter: '#E8FF77',
+    accentBg: 'rgba(212,255,0,0.10)',
+    accentCtaBg: 'rgba(212,255,0,0.14)',
+    btnTextColor: '#000',  // volt is light — use black text for contrast
   },
   {
-    name: 'Electric Blue',
-    slug: 'blue',
-    accent: '#2563eb',
-    accentHover: '#1d4ed8',
-    accentLight: '#3b82f6',
-    accentLighter: '#60a5fa',
-    accentBg: 'rgba(37,99,235,0.15)',
-    accentCtaBg: 'rgba(37,99,235,0.20)',
+    // WHOOP: signature mint-green on black
+    name: 'WHOOP Mint',
+    slug: 'whoop',
+    accent: '#00F0A0',
+    accentHover: '#00CC88',
+    accentLight: '#33F5B5',
+    accentLighter: '#66F7C7',
+    accentBg: 'rgba(0,240,160,0.10)',
+    accentCtaBg: 'rgba(0,240,160,0.14)',
+    btnTextColor: '#000',  // mint is light — use black text for contrast
   },
 ]
 
@@ -60,7 +67,7 @@ export function PreviewHomepage({ currentSlug }: { currentSlug: string }) {
           background-color: ${scheme.accent};
           padding: 0.75rem 1.5rem;
           font-size: 1rem; font-weight: 600;
-          color: #fff; text-decoration: none;
+          color: ${scheme.btnTextColor}; text-decoration: none;
           transition: background-color 0.15s;
         }
         .pa-btn:hover { background-color: ${scheme.accentHover}; }
@@ -142,7 +149,7 @@ export function PreviewHomepage({ currentSlug }: { currentSlug: string }) {
             </nav>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <span style={{ fontSize: '0.875rem', color: '#9ca3af', fontWeight: 600 }}>Log in</span>
-              <span className="pa-btn" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem', cursor: 'default' }}>Sign up</span>
+              <span className="pa-btn" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem', cursor: 'default', color: scheme.btnTextColor }}>Sign up</span>
             </div>
           </div>
         </div>

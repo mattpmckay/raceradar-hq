@@ -6,7 +6,10 @@
       "Bash(node *)",
       "Bash(npm run *)",
       "Bash(npx tsc *)",
-      "Bash(npm info *)"
+      "Bash(npm info *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
     ]
   }
 }
