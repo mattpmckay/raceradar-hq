@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Flag } from 'lucide-react'
+import { Radar } from 'lucide-react'
 
 export function Footer() {
   return (
@@ -8,11 +8,11 @@ export function Footer() {
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2 font-bold text-white">
-              <Flag className="h-5 w-5 text-brand-500" />
-              <span>RaceRadar</span>
+              <Radar className="h-5 w-5 text-brand-500" />
+              <span>RaceRadar HQ</span>
             </Link>
             <p className="mt-3 text-sm text-gray-400">
-              Motorsport intelligence for racers, teams, and fans.
+              Your guide to fitness races, obstacle runs, and endurance events across Australia.
             </p>
           </div>
 
@@ -44,7 +44,7 @@ export function Footer() {
         </div>
 
         <div className="mt-10 border-t border-surface-border pt-6 text-center text-xs text-gray-500">
-          © {new Date().getFullYear()} RaceRadar. All rights reserved.
+          © {new Date().getFullYear()} RaceRadar HQ. All rights reserved.
         </div>
       </div>
     </footer>

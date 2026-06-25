@@ -11,12 +11,13 @@ interface EventCardProps {
 }
 
 const disciplineColour: Record<string, 'brand' | 'success' | 'warning' | 'default'> = {
-  circuit:  'brand',
-  rally:    'success',
-  hillclimb:'warning',
-  karting:  'default',
-  drift:    'warning',
-  drag:     'danger' as 'default',
+  hyrox:        'brand',
+  spartan:      'warning',
+  ocr:          'success',
+  trail:        'success',
+  'tough-mudder': 'warning',
+  'fun-run':    'default',
+  endurance:    'brand',
 }
 
 export function EventCard({ event }: EventCardProps) {

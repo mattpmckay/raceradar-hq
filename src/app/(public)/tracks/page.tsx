@@ -6,8 +6,8 @@ import { Badge } from '@/components/ui/Badge'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Tracks',
-  description: 'Explore motorsport circuits and venues.',
+  title: 'Venues',
+  description: 'Explore event venues and locations for fitness races and endurance events across Australia.',
 }
 
 export default async function TracksPage() {
@@ -21,8 +21,8 @@ export default async function TracksPage() {
   return (
     <div className="container-page py-10">
       <div className="mb-8">
-        <h1 className="page-title">Tracks</h1>
-        <p className="mt-2 text-gray-400">Circuits and venues across Australia and beyond.</p>
+        <h1 className="page-title">Venues</h1>
+        <p className="mt-2 text-gray-400">Event venues and locations across Australia.</p>
       </div>
 
       {tracks && tracks.length > 0 ? (
@@ -59,8 +59,8 @@ export default async function TracksPage() {
       ) : (
         <EmptyState
           icon={<MapPin className="h-10 w-10" />}
-          title="No tracks listed yet"
-          description="Track listings are coming soon."
+          title="No venues listed yet"
+          description="Venue listings are coming soon."
         />
       )}
     </div>

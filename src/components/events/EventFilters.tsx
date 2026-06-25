@@ -6,20 +6,20 @@ import { Search } from 'lucide-react'
 import { Select } from '@/components/ui/Select'
 
 const DISCIPLINES = [
-  { value: 'circuit',   label: 'Circuit Racing' },
-  { value: 'rally',     label: 'Rally' },
-  { value: 'hillclimb', label: 'Hillclimb' },
-  { value: 'karting',   label: 'Karting' },
-  { value: 'drift',     label: 'Drift' },
-  { value: 'drag',      label: 'Drag Racing' },
-  { value: 'offroad',   label: 'Off-Road' },
+  { value: 'hyrox',    label: 'HYROX' },
+  { value: 'spartan',  label: 'Spartan Race' },
+  { value: 'ocr',      label: 'Obstacle Course' },
+  { value: 'trail',    label: 'Trail Run' },
+  { value: 'tough-mudder', label: 'Tough Mudder' },
+  { value: 'fun-run',  label: 'Fun Run' },
+  { value: 'endurance', label: 'Endurance' },
 ]
 
 const EVENT_TYPES = [
   { value: 'race',      label: 'Race' },
-  { value: 'track-day', label: 'Track Day' },
-  { value: 'test-day',  label: 'Test Day' },
-  { value: 'endurance', label: 'Endurance' },
+  { value: 'charity',   label: 'Charity Run' },
+  { value: 'festival',  label: 'Festival' },
+  { value: 'series',    label: 'Series Round' },
 ]
 
 export function EventFilters() {

@@ -6,8 +6,8 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Championships',
-  description: 'Explore motorsport championships and series.',
+  title: 'Series',
+  description: 'Explore endurance series, obstacle race programs, and multi-event fitness programs across Australia.',
 }
 
 export default async function ChampionshipsPage() {
@@ -21,8 +21,8 @@ export default async function ChampionshipsPage() {
   return (
     <div className="container-page py-10">
       <div className="mb-8">
-        <h1 className="page-title">Championships</h1>
-        <p className="mt-2 text-gray-400">Motorsport series and championships.</p>
+        <h1 className="page-title">Series</h1>
+        <p className="mt-2 text-gray-400">Endurance series, obstacle programs, and multi-event fitness programs.</p>
       </div>
 
       {championships && championships.length > 0 ? (
@@ -57,8 +57,8 @@ export default async function ChampionshipsPage() {
       ) : (
         <EmptyState
           icon={<Trophy className="h-10 w-10" />}
-          title="No championships listed yet"
-          description="Championship listings are coming soon."
+          title="No series listed yet"
+          description="Series listings are coming soon."
         />
       )}
     </div>

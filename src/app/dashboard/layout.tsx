@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { Flag, Heart, User, LogOut } from 'lucide-react'
+import { Radar, Heart, User, LogOut } from 'lucide-react'
 import { LogoutButton } from './LogoutButton'
 
 const navItems = [
@@ -21,8 +21,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <header className="sticky top-0 z-50 border-b border-surface-border bg-surface/95 backdrop-blur">
         <div className="container-page flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-bold text-white">
-            <Flag className="h-5 w-5 text-brand-500" />
-            <span>RaceRadar</span>
+            <Radar className="h-5 w-5 text-brand-500" />
+            <span>RaceRadar HQ</span>
           </Link>
           <div className="flex items-center gap-3">
             <span className="hidden text-sm text-gray-400 sm:block">{user.email}</span>

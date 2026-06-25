@@ -9,7 +9,7 @@ export default function LoginPage() {
     <div className="card space-y-6">
       <div className="text-center">
         <h1 className="text-2xl font-bold text-white">Welcome back</h1>
-        <p className="mt-1 text-sm text-gray-400">Log in to your RaceRadar account</p>
+        <p className="mt-1 text-sm text-gray-400">Log in to your RaceRadar HQ account</p>
       </div>
       <LoginForm />
       <p className="text-center text-sm text-gray-400">

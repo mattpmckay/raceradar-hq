@@ -8,7 +8,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Events',
-  description: 'Browse upcoming motorsport events, track days and race meetings.',
+  description: 'Browse upcoming HYROX, Spartan, Tough Mudder, obstacle races, trail runs and endurance events across Australia.',
 }
 
 interface PageProps {
@@ -42,7 +42,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
     <div className="container-page py-10">
       <div className="mb-8">
         <h1 className="page-title">Events</h1>
-        <p className="mt-2 text-gray-400">Upcoming motorsport events and track days.</p>
+        <p className="mt-2 text-gray-400">Upcoming fitness races, obstacle runs, and endurance events.</p>
       </div>
 
       <div className="mb-6">

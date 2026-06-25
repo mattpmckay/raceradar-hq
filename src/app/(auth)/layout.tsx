@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Flag } from 'lucide-react'
+import { Radar } from 'lucide-react'
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -7,8 +7,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="w-full max-w-sm">
         <div className="mb-8 flex justify-center">
           <Link href="/" className="flex items-center gap-2 font-bold text-white">
-            <Flag className="h-6 w-6 text-brand-500" />
-            <span className="text-xl">RaceRadar</span>
+            <Radar className="h-6 w-6 text-brand-500" />
+            <span className="text-xl">RaceRadar HQ</span>
           </Link>
         </div>
         {children}

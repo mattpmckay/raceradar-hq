@@ -5,8 +5,8 @@ import { EventCard } from '@/components/events/EventCard'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'RaceRadar — Motorsport Intelligence',
-  description: 'Discover race events, track days, championships and motorsport opportunities.',
+  title: 'RaceRadar HQ — Find Fitness Races & Endurance Events',
+  description: 'Discover HYROX, Spartan, Tough Mudder, obstacle races, trail runs, fun runs and endurance events across Australia. Built for athletes, clubs, and fitness enthusiasts.',
 }
 
 export default async function HomePage() {
@@ -29,19 +29,19 @@ export default async function HomePage() {
         <div className="container-page relative py-24 sm:py-32 lg:py-40">
           <div className="max-w-3xl">
             <h1 className="page-title">
-              Your motorsport radar,{' '}
-              <span className="text-brand-500">always on.</span>
+              Australia's home for{' '}
+              <span className="text-brand-500">endurance sport.</span>
             </h1>
             <p className="mt-6 text-lg text-gray-400 sm:text-xl">
-              Discover race events, track days, championships, and opportunities
-              across Australia and beyond.
+              Find HYROX, Spartan, Tough Mudder, obstacle races, trail runs, and fun runs near you.
+              Built for athletes, fitness clubs, and anyone who loves to push their limits.
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
               <Link href="/events" className="btn-primary text-base px-6 py-3">
-                Browse Events <ArrowRight className="h-4 w-4" />
+                Find Events <ArrowRight className="h-4 w-4" />
               </Link>
               <Link href="/tracks" className="btn-secondary text-base px-6 py-3">
-                Explore Tracks
+                Browse Venues
               </Link>
             </div>
           </div>
@@ -53,9 +53,9 @@ export default async function HomePage() {
         <div className="container-page py-12">
           <div className="grid grid-cols-3 gap-8 text-center">
             {[
-              { icon: Calendar, label: 'Upcoming Events', value: '200+' },
-              { icon: MapPin, label: 'Circuits & Venues', value: '80+' },
-              { icon: Trophy, label: 'Championships', value: '40+' },
+              { icon: Calendar, label: 'Events Listed', value: '200+' },
+              { icon: MapPin, label: 'Event Venues', value: '80+' },
+              { icon: Trophy, label: 'Active Series', value: '40+' },
             ].map(({ icon: Icon, label, value }) => (
               <div key={label}>
                 <Icon className="mx-auto h-6 w-6 text-brand-500 mb-2" />
@@ -95,12 +95,12 @@ export default async function HomePage() {
       {/* CTA */}
       <section className="container-page pb-20">
         <div className="card bg-gradient-to-r from-brand-900/40 to-surface-card text-center py-12 sm:py-16">
-          <h2 className="section-title">Never miss a race</h2>
+          <h2 className="section-title">Never miss an event</h2>
           <p className="mt-3 text-gray-400 max-w-md mx-auto">
-            Create a free account to save events, track championships and get personalised alerts.
+            Create a free account to save events, follow series, and get alerts tailored to your discipline and location.
           </p>
           <Link href="/signup" className="btn-primary mt-6 inline-flex text-base px-6 py-3">
-            Get started free
+            Get started — it's free
           </Link>
         </div>
       </section>

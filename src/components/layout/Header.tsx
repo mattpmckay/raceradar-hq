@@ -3,13 +3,13 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
-import { Menu, X, Flag } from 'lucide-react'
+import { Menu, X, Radar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navLinks = [
   { href: '/events', label: 'Events' },
-  { href: '/tracks', label: 'Tracks' },
-  { href: '/championships', label: 'Championships' },
+  { href: '/tracks', label: 'Venues' },
+  { href: '/championships', label: 'Series' },
 ]
 
 interface HeaderProps {
@@ -26,8 +26,8 @@ export function Header({ user }: HeaderProps) {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 font-bold text-white">
-            <Flag className="h-5 w-5 text-brand-500" />
-            <span className="text-lg">RaceRadar</span>
+            <Radar className="h-5 w-5 text-brand-500" />
+            <span className="text-lg">RaceRadar HQ</span>
           </Link>
 
           {/* Desktop nav */}

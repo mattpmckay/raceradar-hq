@@ -3,16 +3,16 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: {
-    default: 'RaceRadar — Motorsport Intelligence',
-    template: '%s | RaceRadar',
+    default: 'RaceRadar HQ — Find Fitness Races & Endurance Events',
+    template: '%s | RaceRadar HQ',
   },
   description:
-    'Discover race events, track days, championships and motorsport opportunities across Australia and beyond.',
+    'Discover HYROX, Spartan, Tough Mudder, obstacle races, trail runs and endurance events across Australia.',
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? 'https://raceradar.com.au',
   ),
   openGraph: {
-    siteName: 'RaceRadar',
+    siteName: 'RaceRadar HQ',
     type: 'website',
   },
 }
