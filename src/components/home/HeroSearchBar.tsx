@@ -98,9 +98,9 @@ export function HeroSearchBar() {
       {/* Trust indicators */}
       <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2">
         {[
-          '500+ upcoming events',
-          '12 countries',
-          '10,000+ athletes',
+          "APAC's most complete race calendar",
+          'Updated weekly',
+          'Free forever',
         ].map((item) => (
           <div key={item} className="flex items-center gap-2 text-sm text-ink-muted">
             <CheckIcon className="h-4 w-4 text-mint shrink-0" />

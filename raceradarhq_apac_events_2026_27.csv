@@ -1,0 +1,51 @@
+id,event_name,sport,city,country,start_date,end_date,venue,registration_url,format,status,source_verified
+1,BYD HYROX Sydney,HYROX,Sydney,Australia,2026-07-01,2026-07-05,Sydney Showground Olympic Park,https://hyrox.com/event/hyrox-sydney/,Singles/Doubles/Relay,upcoming,hyrox.com
+2,HYROX Brisbane (APAC Championship),HYROX,Brisbane,Australia,2026-04-09,2026-04-12,Brisbane Convention & Exhibition Centre,https://hyrox.com/event/hyrox-brisbane/,Singles/Doubles/Relay,completed,roxradar.com
+3,AirAsia HYROX Perth,HYROX,Perth,Australia,2026-08-21,2026-08-23,Perth Convention & Exhibition Centre,https://hyrox.com/event/hyrox-perth/,Singles/Doubles/Relay,upcoming,hyrox.com
+4,HYROX Melbourne,HYROX,Melbourne,Australia,TBC,TBC,Melbourne Convention & Exhibition Centre,https://hyrox.com/event/hyrox-melbourne/,Singles/Doubles/Relay,date_tbc,hyrox.com
+5,AirAsia HYROX Jakarta,HYROX,Jakarta,Indonesia,2026-06-27,2026-06-28,TBC,https://hyrox.com/event/hyrox-jakarta/,Singles/Doubles/Relay,completed,hyrox.com
+6,AirAsia HYROX Chiba,HYROX,Chiba,Japan,2026-08-06,2026-08-09,TBC,https://hyrox.com/event/hyrox-chiba/,Singles/Doubles/Relay,upcoming,hyrox.com
+7,BYD HYROX Bangkok,HYROX,Bangkok,Thailand,2026-08-13,2026-08-16,TBC,https://hyrox.com/event/hyrox-bangkok-2/,Singles/Doubles/Relay,upcoming,hyrox.com
+8,AIA HYROX Singapore,HYROX,Singapore,Singapore,2026-11-26,2026-11-29,TBC,https://hyrox.com/event/aia-hyrox-singapore/,Singles/Doubles/Relay,upcoming,hyrox.com
+9,AirAsia HYROX Seoul,HYROX,Seoul,South Korea,2026-11-14,2026-11-15,TBC,https://hyrox.com/event/hyrox-seoul/,Singles/Doubles/Relay,upcoming,hyrox.com
+10,TORRAS HYROX Hangzhou,HYROX,Hangzhou,China,2026-07-04,2026-07-05,TBC,https://hyrox.com/event/hyrox-hangzhou/,Singles/Doubles/Relay,upcoming,hyrox.com
+11,TORRAS HYROX Shenzhen,HYROX,Shenzhen,China,2026-08-15,2026-08-16,TBC,https://hyrox.com/event/hyrox-shenzhen/,Singles/Doubles/Relay,upcoming,hyrox.com
+12,HYROX Beijing,HYROX,Beijing,China,2026-09-12,2026-09-13,TBC,https://hyrox.com/event/hyrox-beijing-0912/,Singles/Doubles/Relay,upcoming,hyrox.com
+13,HYROX Shanghai,HYROX,Shanghai,China,2026-10-31,2026-11-01,TBC,https://hyrox.com/event/hyrox-shanghai-1031/,Singles/Doubles/Relay,upcoming,hyrox.com
+14,HYROX Guangzhou,HYROX,Guangzhou,China,2026-11-21,2026-11-22,TBC,https://hyrox.com/event/hyrox-guangzhou/,Singles/Doubles/Relay,upcoming,hyrox.com
+15,HYROX Sanya,HYROX,Sanya,China,2026-12-05,2026-12-06,TBC,https://hyrox.com/event/30454/,Singles/Doubles/Relay,upcoming,hyrox.com
+16,HYROX World Championships 2027,HYROX,Hong Kong,Hong Kong,2027-TBC,2027-TBC,AsiaWorld-Expo,https://hyrox.com/hyrox-world-championships/,Elite/Age Group,upcoming,hyrox.com/redbull.com
+17,2026 Central Coast Spartan Trifecta,Spartan Race,Glenworth Valley (Central Coast),Australia,2026-02-21,2026-02-21,Glenworth Valley,https://au.spartan.com/en/races/centralcoast,Sprint/Super/Beast,completed,au.spartan.com
+18,2026 Spartan Race Ivory's Rock Brisbane,Spartan Race,Ipswich,Australia,2026-05-23,2026-05-24,Ivory's Rock,https://au.spartan.com/en/races/ivorysrock2026,Sprint/Super/Beast,completed,au.spartan.com
+19,2026 Melbourne Spartan Event Weekend,Spartan Race,Werribee (Melbourne),Australia,2026-08-08,2026-08-09,Werribee Racecourse,https://au.spartan.com/en/races/melbourne2026,Sprint/Super,upcoming,au.spartan.com
+20,2026 Wollongong Spartan Stadion,Spartan Race,Wollongong,Australia,2026-10-10,2026-10-10,TBC,https://au.spartan.com/en/race/find-race,Stadion,upcoming,au.spartan.com
+21,2026 Lakes Entrance Spartan Ultra Trifecta,Spartan Race,Lakes Entrance,Australia,2026-11-21,2026-11-22,TBC,https://au.spartan.com/en/races/lakes-entrance,Sprint/Super/Beast/Ultra,upcoming,au.spartan.com
+22,Spartan Race Mt Fuji Susono Japan,Spartan Race,Susono (Mt Fuji),Japan,2026-07-25,2026-07-25,Mt Fuji Susono,https://jp.spartan.com/en/race/find-race,Sprint/Super,upcoming,jp.spartan.com
+23,Spartan APAC Championship Chongli,Spartan Race,Chongli,China,2026-08-15,2026-08-16,Genting Snow Park,https://www.spartan.com/en/race/detail/10133/overview,Sprint/Super/Beast/Ultra,upcoming,spartan.com
+24,IRONMAN New Zealand (Taupo),Ironman,Taupo,New Zealand,2026-03-07,2026-03-07,Lake Taupo,https://www.ironman.com/im-new-zealand,Full Distance,completed,triathlete.com
+25,IRONMAN 70.3 Taupo,Ironman 70.3,Taupo,New Zealand,2026-03-07,2026-03-07,Lake Taupo,https://www.ironman.com/im703-taupo,Half Distance,completed,trimotivate.com.au
+26,IRONMAN 70.3 Geelong,Ironman 70.3,Geelong,Australia,2026-03-22,2026-03-22,Eastern Beach,https://www.ironman.com/im703-geelong,Half Distance,completed,triathlete.com
+27,IRONMAN 70.3 Western Sydney,Ironman 70.3,Western Sydney,Australia,2026-05-03,2026-05-03,Sydney International Regatta Centre,https://www.ironman.com/im703-western-sydney,Half Distance,completed,trimotivate.com.au
+28,IRONMAN Cairns (Full),Ironman,Cairns,Australia,2026-06-14,2026-06-14,Cairns QLD,https://www.ironman.com/im-cairns,Full Distance,completed,gowod.app
+29,IRONMAN 70.3 Cairns,Ironman 70.3,Cairns,Australia,2026-06-14,2026-06-14,Cairns QLD,https://www.ironman.com/im703-cairns,Half Distance,completed,trimotivate.com.au
+30,IRONMAN 70.3 Sunshine Coast,Ironman 70.3,Mooloolaba,Australia,2026-09-13,2026-09-13,Mooloolaba QLD,https://www.ironman.com/im703-sunshine-coast,Half Distance,upcoming,trimotivate.com.au
+31,IRONMAN Australia Port Macquarie (Full),Ironman,Port Macquarie,Australia,2026-10-18,2026-10-18,Port Macquarie NSW,https://www.ironman.com/im-australia,Full Distance,upcoming,trimotivate.com.au
+32,IRONMAN 70.3 Port Macquarie,Ironman 70.3,Port Macquarie,Australia,2026-10-18,2026-10-18,Port Macquarie NSW,https://www.ironman.com/im703-port-macquarie,Half Distance,upcoming,trimotivate.com.au
+33,IRONMAN 70.3 St Kilda Melbourne,Ironman 70.3,St Kilda (Melbourne),Australia,2026-11-08,2026-11-08,St Kilda VIC,https://www.ironman.com/im703-melbourne,Half Distance,upcoming,trimotivate.com.au
+34,IRONMAN Western Australia Busselton (Full),Ironman,Busselton,Australia,2026-12-06,2026-12-06,Busselton WA,https://www.ironman.com/im-western-australia,Full Distance,upcoming,gowod.app
+35,IRONMAN 70.3 Busselton,Ironman 70.3,Busselton,Australia,2026-12-06,2026-12-06,Busselton WA,https://www.ironman.com/im703-busselton,Half Distance,upcoming,trimotivate.com.au
+36,IRONMAN 70.3 Lapu Lapu Philippines,Ironman 70.3,Lapu-Lapu City (Cebu),Philippines,2026-TBC,2026-TBC,Cebu Philippines,https://www.ironman.com/im703-lapu-lapu,Half Distance,upcoming,triathlete.com
+37,IRONMAN Vietnam Da Nang,Ironman,Da Nang,Vietnam,2026-TBC,2026-TBC,Da Nang,https://www.ironman.com/im-vietnam,Full Distance,upcoming,gowod.app
+38,TCS Sydney Marathon,Marathon,Sydney,Australia,2026-08-30,2026-08-30,Sydney Harbour Bridge to Opera House,https://sydneymarathon.com,Marathon/Half/10K,upcoming,fatmarathoner.com
+39,ASICS Gold Coast Marathon,Marathon,Gold Coast,Australia,2026-07-05,2026-07-05,Broadwater Parklands,https://goldcoastmarathon.com.au,Marathon,upcoming,goldcoastmarathon.com.au
+40,ASICS Gold Coast Half Marathon,Marathon,Gold Coast,Australia,2026-07-04,2026-07-04,Broadwater Parklands,https://goldcoastmarathon.com.au/enter/,Half Marathon,upcoming,goldcoastmarathon.com.au
+41,Nike Melbourne Marathon Festival,Marathon,Melbourne,Australia,2026-10-11,2026-10-11,Batman Avenue to MCG,https://melbournemarathon.com.au,Marathon/Half/10K/5K,upcoming,melbournemarathon.com.au
+42,Seoul Marathon (96th Dong-A),Marathon,Seoul,South Korea,2026-03-15,2026-03-15,Gwanghwamun Square,https://en.seoul-marathon.com,Marathon,completed,gomarathon.run
+43,Tokyo Marathon 2027,Marathon,Tokyo,Japan,2027-03-07,2027-03-07,Shinjuku to Tokyo Big Sight,https://www.marathon.tokyo/en,Marathon,upcoming,marathon.tokyo
+44,Standard Chartered Singapore Marathon,Marathon,Singapore,Singapore,2026-12-06,2026-12-06,Marina Bay,https://singaporemarathon.com,Marathon/Half/10K,upcoming,fatmarathoner.com
+45,HOKA Ultra-Trail Australia by UTMB (UTA),Trail Running,Katoomba (Blue Mountains),Australia,2026-05-14,2026-05-17,Scenic World Katoomba,https://uta.utmb.world,11K/22K/50K/100K/100M,completed,uta.utmb.world
+46,TransLantau by UTMB,Trail Running,Lantau Island,Hong Kong,2026-11-13,2026-11-15,Lantau Island,https://utmb.world,15K/25K/50K/100K,upcoming,actionpanda.hk
+47,HOKA Chiang Mai Thailand by UTMB (Asia Major),Trail Running,Chiang Mai,Thailand,2026-TBC,2026-TBC,Chiang Mai,https://utmb.world/utmb-world-series-events,Various,upcoming,utmb.world
+48,Spartan Race Thailand (Bangkok),Spartan Race,Bangkok,Thailand,2026-TBC,2026-TBC,TBC,https://th.spartan.com,Sprint/Super,upcoming,paragonhall.com
+49,DEKA FIT Melbourne (Shepparton),Deka Fit,Shepparton,Australia,2026-08-01,2026-08-02,TBC,https://au.spartan.com/en/deka,DEKA FIT/MILE/STRONG,upcoming,tickets-audk.spartan.com
+50,DEKA Bangkok,Deka Fit,Bangkok,Thailand,2026-10-31,2026-11-01,Paragon Hall,https://th.spartan.com,DEKA FIT,upcoming,paragonhall.com

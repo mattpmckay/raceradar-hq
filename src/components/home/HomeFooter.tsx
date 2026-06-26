@@ -11,14 +11,9 @@ const FOOTER_LINKS = {
     { label: 'HYROX',         href: '/sports/hyrox' },
     { label: 'Spartan Race',  href: '/sports/spartan' },
     { label: 'Ironman',       href: '/sports/ironman' },
-    { label: 'Triathlon',     href: '/sports/triathlon' },
+    { label: 'Marathon',      href: '/sports/marathon' },
     { label: 'Trail Running', href: '/sports/trail-running' },
-    { label: 'CrossFit',      href: '/sports/crossfit' },
-  ],
-  Account: [
-    { label: 'Log in',    href: '/login' },
-    { label: 'Sign up',   href: '/signup' },
-    { label: 'Dashboard', href: '/dashboard' },
+    { label: 'Deka Fit',      href: '/sports/deka' },
   ],
 }
 
@@ -28,11 +23,11 @@ export function HomeFooter() {
       <div className="container-page py-16">
 
         {/* Main grid */}
-        <div className="grid grid-cols-2 gap-10 md:grid-cols-4 lg:gap-16">
+        <div className="grid grid-cols-2 gap-10 md:grid-cols-3 lg:gap-16">
 
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="flex items-center gap-2.5 group">
+            <Link href="/" className="flex items-center gap-2.5">
               <RadarIcon className="h-7 w-7 text-mint" />
               <span className="font-heading text-[17px] font-bold tracking-tight text-ink">
                 RaceRadar <span className="text-mint">HQ</span>
@@ -41,18 +36,6 @@ export function HomeFooter() {
             <p className="mt-4 text-sm leading-relaxed text-ink-muted">
               The home of fitness racing across Asia Pacific. Discover, plan and travel to every major event.
             </p>
-            {/* Social */}
-            <div className="mt-6 flex items-center gap-3">
-              <SocialLink href="https://instagram.com" label="Instagram">
-                <InstagramIcon />
-              </SocialLink>
-              <SocialLink href="https://strava.com" label="Strava">
-                <StravaIcon />
-              </SocialLink>
-              <SocialLink href="https://youtube.com" label="YouTube">
-                <YouTubeIcon />
-              </SocialLink>
-            </div>
           </div>
 
           {/* Nav columns */}
@@ -84,9 +67,9 @@ export function HomeFooter() {
           </p>
           <div className="flex items-center gap-5">
             {[
-              { label: 'Privacy Policy', href: '/privacy' },
+              { label: 'Privacy Policy',   href: '/privacy' },
               { label: 'Terms of Service', href: '/terms' },
-              { label: 'Contact', href: '/contact' },
+              { label: 'Contact',          href: '/contact' },
             ].map((link) => (
               <Link
                 key={link.href}
@@ -103,28 +86,6 @@ export function HomeFooter() {
   )
 }
 
-function SocialLink({
-  href,
-  label,
-  children,
-}: {
-  href: string
-  label: string
-  children: React.ReactNode
-}) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={label}
-      className="flex h-9 w-9 items-center justify-center rounded-lg border border-wire text-ink-muted transition-all duration-200 hover:border-wire-bright hover:text-ink hover:bg-panel"
-    >
-      {children}
-    </a>
-  )
-}
-
 function RadarIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 28 28" fill="none" aria-hidden className={className}>
@@ -133,34 +94,6 @@ function RadarIcon({ className }: { className?: string }) {
       <circle cx="14" cy="14" r="3"   stroke="currentColor" strokeWidth="1.5" opacity="0.75" />
       <circle cx="14" cy="14" r="1.5" fill="currentColor" />
       <line x1="14" y1="14" x2="22.5" y2="6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.9" />
-    </svg>
-  )
-}
-
-function InstagramIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="12" cy="12" r="4.5" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" />
-    </svg>
-  )
-}
-
-function StravaIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M10 19l4-8 4 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M14 11l-4-8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  )
-}
-
-function YouTubeIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect x="2" y="5" width="20" height="14" rx="3" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M10 9l6 3-6 3V9z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
     </svg>
   )
 }

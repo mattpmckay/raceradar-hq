@@ -19,18 +19,26 @@ export default async function EventsPage({ searchParams }: PageProps) {
   const params = await searchParams
   const supabase = await createClient()
 
+  const today = new Date().toISOString().split('T')[0]
+
   let query = supabase
     .from('events')
     .select('*')
     .eq('is_published', true)
-    .gte('start_date', new Date().toISOString())
+    .gte('start_date', today)
+    .lt('start_date', '2099-01-01')
     .order('start_date', { ascending: true })
 
   if (params.q) {
     query = query.ilike('title', `%${params.q}%`)
   }
   if (params.discipline) {
-    query = query.eq('discipline', params.discipline)
+    // 'Ironman' filter matches both 'Ironman' and 'Ironman 70.3'
+    if (params.discipline === 'Ironman') {
+      query = query.ilike('discipline', 'Ironman%')
+    } else {
+      query = query.eq('discipline', params.discipline)
+    }
   }
   if (params.type) {
     query = query.eq('event_type', params.type)

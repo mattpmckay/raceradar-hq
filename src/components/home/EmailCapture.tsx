@@ -11,8 +11,10 @@ export function EmailCapture() {
     e.preventDefault()
     if (!email) return
     setLoading(true)
-    // TODO: wire up to email provider (e.g. Loops, Mailchimp, Resend)
-    await new Promise((r) => setTimeout(r, 600))
+    // TODO: connect Beehiiv — POST to /api/subscribe with email, forward to
+    // https://api.beehiiv.com/v2/publications/{pub_id}/subscriptions
+    // Set BEEHIIV_API_KEY + BEEHIIV_PUB_ID in .env.local and Vercel env vars.
+    await new Promise((r) => setTimeout(r, 400))
     setSubmitted(true)
     setLoading(false)
   }
@@ -54,8 +56,8 @@ export function EmailCapture() {
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-mint/10">
                 <CheckIcon className="h-6 w-6 text-mint" />
               </div>
-              <p className="font-semibold text-ink">You&apos;re on the list!</p>
-              <p className="text-sm text-ink-muted">Check your inbox — the calendar is on its way.</p>
+              <p className="font-semibold text-ink">Got it — you&apos;re on the list!</p>
+              <p className="text-sm text-ink-muted">We&apos;ll be in touch when the 2026 calendar is ready.</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="mt-8">
@@ -78,7 +80,7 @@ export function EmailCapture() {
                 </button>
               </div>
               <p className="mt-4 text-xs text-ink-muted">
-                Join 500+ competitive athletes across Asia Pacific. No spam — ever.
+                Athletes across Asia Pacific. No spam — ever.
               </p>
             </form>
           )}

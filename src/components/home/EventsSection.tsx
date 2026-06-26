@@ -5,8 +5,19 @@ import Link from 'next/link'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface Event {
+export type SupabaseEvent = {
   id: string
+  title: string
+  slug: string
+  discipline: string | null
+  start_date: string
+  city: string | null
+  country: string | null
+}
+
+type Event = {
+  id: string
+  slug: string
   name: string
   sport: string
   date: string
@@ -16,99 +27,76 @@ interface Event {
   flag: string
 }
 
-// ─── Placeholder data ─────────────────────────────────────────────────────────
+// ─── Data maps ────────────────────────────────────────────────────────────────
 
-const EVENTS: Event[] = [
-  {
-    id: '1',
-    name: 'HYROX World Series Sydney',
-    sport: 'HYROX',
-    date: '22',
-    month: 'Feb 2026',
-    city: 'Sydney',
-    country: 'Australia',
-    flag: '🇦🇺',
-  },
-  {
-    id: '2',
-    name: 'Spartan Race Melbourne Sprint',
-    sport: 'Spartan',
-    date: '14',
-    month: 'Mar 2026',
-    city: 'Melbourne',
-    country: 'Australia',
-    flag: '🇦🇺',
-  },
-  {
-    id: '3',
-    name: 'Ironman 70.3 Auckland',
-    sport: 'Ironman',
-    date: '05',
-    month: 'Apr 2026',
-    city: 'Auckland',
-    country: 'New Zealand',
-    flag: '🇳🇿',
-  },
-  {
-    id: '4',
-    name: 'HYROX Singapore',
-    sport: 'HYROX',
-    date: '26',
-    month: 'Apr 2026',
-    city: 'Singapore',
-    country: 'Singapore',
-    flag: '🇸🇬',
-  },
-  {
-    id: '5',
-    name: 'Spartan Ultra Hokkaido',
-    sport: 'Spartan',
-    date: '21',
-    month: 'Jun 2026',
-    city: 'Hokkaido',
-    country: 'Japan',
-    flag: '🇯🇵',
-  },
-  {
-    id: '6',
-    name: 'Ironman Asia-Pacific Championship',
-    sport: 'Ironman',
-    date: '18',
-    month: 'Jul 2026',
-    city: 'Brisbane',
-    country: 'Australia',
-    flag: '🇦🇺',
-  },
-]
+const COUNTRY_FLAGS: Record<string, string> = {
+  'Australia':    '🇦🇺',
+  'New Zealand':  '🇳🇿',
+  'Singapore':    '🇸🇬',
+  'Japan':        '🇯🇵',
+  'South Korea':  '🇰🇷',
+  'Thailand':     '🇹🇭',
+  'Malaysia':     '🇲🇾',
+  'Philippines':  '🇵🇭',
+  'Indonesia':    '🇮🇩',
+  'Vietnam':      '🇻🇳',
+  'China':        '🇨🇳',
+  'Hong Kong':    '🇭🇰',
+  'Taiwan':       '🇹🇼',
+  'India':        '🇮🇳',
+}
 
-const SPORT_FILTERS = [
-  'All', 'HYROX', 'Spartan', 'Ironman', 'Triathlon',
-  'Deka', 'CrossFit', 'OCR', 'Trail Running', 'Powerlifting',
-]
+const DISCIPLINE_MAP: Record<string, string> = {
+  'HYROX':         'HYROX',
+  'Spartan Race':  'Spartan',
+  'Ironman':       'Ironman',
+  'Ironman 70.3':  'Ironman',
+  'Marathon':      'Marathon',
+  'Trail Running': 'Trail Running',
+  'Deka Fit':      'Deka',
+}
 
-// ─── Sport badge styles ───────────────────────────────────────────────────────
+function mapDiscipline(discipline: string): string {
+  return DISCIPLINE_MAP[discipline] ?? discipline
+}
+
+function toDisplayEvent(e: SupabaseEvent): Event {
+  const d = new Date(e.start_date)
+  return {
+    id:      e.id,
+    slug:    e.slug,
+    name:    e.title,
+    sport:   mapDiscipline(e.discipline ?? ''),
+    date:    String(d.getUTCDate()).padStart(2, '0'),
+    month:   d.toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' }),
+    city:    e.city    ?? '',
+    country: e.country ?? '',
+    flag:    COUNTRY_FLAGS[e.country ?? ''] ?? '',
+  }
+}
+
+// ─── Sport config ─────────────────────────────────────────────────────────────
+
+const SPORT_FILTERS = ['All', 'HYROX', 'Spartan', 'Ironman', 'Marathon', 'Trail Running', 'Deka']
 
 const SPORT_STYLES: Record<string, { bg: string; text: string }> = {
   HYROX:           { bg: 'rgba(0,217,166,0.12)',   text: '#00D9A6' },
   Spartan:         { bg: 'rgba(255,77,0,0.12)',     text: '#FF6B35' },
   Ironman:         { bg: 'rgba(239,68,68,0.12)',    text: '#F87171' },
-  Triathlon:       { bg: 'rgba(96,165,250,0.12)',   text: '#60A5FA' },
-  Deka:            { bg: 'rgba(167,139,250,0.12)',  text: '#A78BFA' },
-  CrossFit:        { bg: 'rgba(251,191,36,0.12)',   text: '#FBB724' },
-  OCR:             { bg: 'rgba(34,197,94,0.12)',    text: '#4ADE80' },
+  Marathon:        { bg: 'rgba(96,165,250,0.12)',   text: '#60A5FA' },
   'Trail Running': { bg: 'rgba(16,185,129,0.12)',   text: '#34D399' },
-  Powerlifting:    { bg: 'rgba(236,72,153,0.12)',   text: '#F472B6' },
+  Deka:            { bg: 'rgba(167,139,250,0.12)',  text: '#A78BFA' },
 }
 
 const defaultStyle = { bg: 'rgba(107,122,141,0.12)', text: '#6B7A8D' }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function EventsSection() {
+export function EventsSection({ initialEvents = [] }: { initialEvents?: SupabaseEvent[] }) {
   const [active, setActive] = useState('All')
 
-  const filtered =
-    active === 'All' ? EVENTS : EVENTS.filter((e) => e.sport === active)
+  const events   = initialEvents.map(toDisplayEvent)
+  const filtered = active === 'All' ? events : events.filter((e) => e.sport === active)
 
   return (
     <section className="relative pb-24 pt-4">
@@ -150,7 +138,6 @@ export function EventsSection() {
               </button>
             ))}
           </div>
-          {/* Edge fade for scroll affordance */}
           <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-canvas to-transparent sm:hidden" />
         </div>
 
@@ -163,13 +150,19 @@ export function EventsSection() {
           </div>
         ) : (
           <div className="rounded-2xl border border-wire bg-panel py-16 text-center">
-            <p className="text-ink-muted">No events found for this sport yet.</p>
-            <button
-              onClick={() => setActive('All')}
-              className="mt-4 text-sm font-medium text-mint hover:underline"
-            >
-              View all events
-            </button>
+            <p className="text-ink-muted">
+              {events.length === 0
+                ? 'No upcoming events found. Check back soon!'
+                : 'No events found for this sport yet.'}
+            </p>
+            {events.length > 0 && (
+              <button
+                onClick={() => setActive('All')}
+                className="mt-4 text-sm font-medium text-mint hover:underline"
+              >
+                View all events
+              </button>
+            )}
           </div>
         )}
 
@@ -194,7 +187,7 @@ function EventCard({ event }: { event: Event }) {
 
   return (
     <Link
-      href={`/events/${event.id}`}
+      href={`/events/${event.slug}`}
       className="group relative flex flex-col gap-5 overflow-hidden rounded-2xl border border-wire bg-panel p-6 transition-all duration-300 hover:border-wire-bright hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30"
     >
       {/* Top row: badge + date */}
@@ -235,12 +228,7 @@ function EventCard({ event }: { event: Event }) {
         <span className="text-sm font-medium text-ink-muted transition-colors group-hover:text-ink">
           View Event
         </span>
-        <span
-          className="flex h-7 w-7 items-center justify-center rounded-full border border-wire transition-all duration-200 group-hover:border-transparent group-hover:text-canvas"
-          style={{
-            background: 'transparent',
-          }}
-        >
+        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-wire transition-all duration-200 group-hover:border-transparent">
           <ArrowRightIcon
             className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
             style={{ color: style.text }}
@@ -248,7 +236,7 @@ function EventCard({ event }: { event: Event }) {
         </span>
       </div>
 
-      {/* Subtle top accent line */}
+      {/* Top accent line */}
       <div
         className="absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{ background: `linear-gradient(90deg, transparent, ${style.text}, transparent)` }}
