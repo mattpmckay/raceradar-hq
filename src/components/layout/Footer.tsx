@@ -12,7 +12,7 @@ export function Footer() {
               <span>RaceRadar HQ</span>
             </Link>
             <p className="mt-3 text-sm text-gray-400">
-              Your guide to fitness races, obstacle runs, and endurance events across Australia.
+              Your guide to fitness races, obstacle runs, and endurance events across Asia Pacific.
             </p>
           </div>
 
