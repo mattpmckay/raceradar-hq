@@ -3,14 +3,27 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
+// Values must match exact discipline strings stored in the DB
 const SPORTS = [
-  'All Sports', 'HYROX', 'Spartan', 'Ironman', 'Triathlon',
-  'Deka', 'CrossFit', 'OCR', 'Trail Running', 'Powerlifting',
+  'HYROX',
+  'Spartan Race',
+  'Ironman',
+  'Ironman 70.3',
+  'Marathon',
+  'Trail Running',
+  'Deka Fit',
 ]
 
 const COUNTRIES = [
-  'All Countries', 'Australia', 'New Zealand', 'Singapore',
-  'Japan', 'South Korea', 'Thailand', 'Hong Kong',
+  'Australia',
+  'New Zealand',
+  'Singapore',
+  'Japan',
+  'South Korea',
+  'Thailand',
+  'Hong Kong',
+  'China',
+  'Indonesia',
 ]
 
 export function HeroSearchBar() {
@@ -21,19 +34,14 @@ export function HeroSearchBar() {
 
   const handleSearch = () => {
     const params = new URLSearchParams()
-    if (sport   && sport   !== 'All Sports')   params.set('discipline', sport)
-    if (country && country !== 'All Countries') params.set('country', country)
-    if (query)                                  params.set('q', query)
+    if (sport)   params.set('discipline', sport)
+    if (country) params.set('country',    country)
+    if (query)   params.set('q',          query)
     router.push(`/events${params.size ? `?${params}` : ''}`)
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleSearch()
   }
 
   return (
     <div className="mt-10 w-full max-w-3xl">
-      {/* Search container */}
       <div className="flex flex-col gap-2 rounded-2xl border border-wire bg-panel p-2 sm:flex-row sm:items-center sm:gap-0 sm:divide-x sm:divide-wire">
 
         {/* Sport select */}
@@ -77,7 +85,7 @@ export function HeroSearchBar() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             placeholder="Event name or keyword…"
             className="w-full bg-transparent py-3 text-sm text-ink placeholder:text-ink-muted focus:outline-none"
             aria-label="Search events"
@@ -90,23 +98,9 @@ export function HeroSearchBar() {
             onClick={handleSearch}
             className="w-full sm:w-auto rounded-xl bg-mint px-6 py-3 text-sm font-semibold text-canvas transition-all duration-200 hover:bg-mint-300 hover:shadow-lg hover:shadow-mint/20 hover:-translate-y-px active:translate-y-0"
           >
-            Browse Events
+            Find Events
           </button>
         </div>
-      </div>
-
-      {/* Trust indicators */}
-      <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2">
-        {[
-          "APAC's most complete race calendar",
-          'Updated weekly',
-          'Free forever',
-        ].map((item) => (
-          <div key={item} className="flex items-center gap-2 text-sm text-ink-muted">
-            <CheckIcon className="h-4 w-4 text-mint shrink-0" />
-            <span>{item}</span>
-          </div>
-        ))}
       </div>
     </div>
   )
@@ -117,15 +111,6 @@ function SearchIcon({ className }: { className?: string }) {
     <svg viewBox="0 0 20 20" fill="none" aria-hidden className={className}>
       <circle cx="9" cy="9" r="5.5" stroke="currentColor" strokeWidth="1.5" />
       <path d="M13.5 13.5l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  )
-}
-
-function CheckIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 16 16" fill="none" aria-hidden className={className}>
-      <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.2" opacity="0.3" />
-      <path d="M5 8l2 2 4-4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }

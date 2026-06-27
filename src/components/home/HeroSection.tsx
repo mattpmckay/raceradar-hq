@@ -1,6 +1,25 @@
+import { createClient } from '@/lib/supabase/server'
 import { HeroSearchBar } from './HeroSearchBar'
+import { HeroDisciplinePills } from './HeroDisciplinePills'
 
-export function HeroSection() {
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export async function HeroSection() {
+  // Fetch live stats — fast, single read of published upcoming events
+  const supabase = await createClient()
+  const today = new Date().toISOString().split('T')[0]
+
+  const { data: rows } = await supabase
+    .from('events')
+    .select('country, discipline')
+    .eq('is_published', true)
+    .gte('start_date', today)
+    .lt('start_date', '2099-01-01')
+
+  const eventCount      = rows?.length ?? 0
+  const countryCount    = new Set(rows?.map((r) => r.country).filter(Boolean)).size
+  const disciplineCount = new Set(rows?.map((r) => r.discipline).filter(Boolean)).size
+
   return (
     <section className="relative flex min-h-screen items-center overflow-hidden">
 
@@ -23,14 +42,23 @@ export function HeroSection() {
         }}
       />
 
+      {/* Fire radial glow — bottom-right accent */}
+      <div
+        className="absolute bottom-0 right-0 h-[480px] w-[480px] rounded-full opacity-60"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(255,77,0,0.05) 0%, transparent 70%)',
+        }}
+      />
+
       {/* Radar sweep */}
       <RadarBackground />
 
       {/* Content */}
-      <div className="container-page relative z-10 pb-20 pt-36">
+      <div className="container-page relative z-10 pb-24 pt-36">
         <div className="max-w-4xl">
 
-          {/* Sport labels — above headline */}
+          {/* Sport labels */}
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-ink-muted animate-fade-in">
             HYROX &nbsp;·&nbsp; Spartan &nbsp;·&nbsp; Ironman &nbsp;·&nbsp; Triathlon &nbsp;·&nbsp; OCR &nbsp;·&nbsp; Trail
           </p>
@@ -45,19 +73,53 @@ export function HeroSection() {
 
           {/* Subheading */}
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink-muted sm:text-xl animate-fade-up [animation-delay:150ms]">
-            One place to discover, compare, plan and travel to every race — from your first HYROX to your next Ironman.
+            One platform to discover, compare and plan every race — from your first HYROX to your next Ironman.
           </p>
 
-          {/* Search bar (client island) */}
-          <div className="animate-fade-up [animation-delay:300ms]">
+          {/* Live stats */}
+          <div className="mt-10 flex flex-wrap items-end gap-x-10 gap-y-4 animate-fade-up [animation-delay:250ms]">
+            <StatItem value={eventCount}      label="upcoming events" />
+            <Divider />
+            <StatItem value={countryCount}    label="countries" />
+            <Divider />
+            <StatItem value={disciplineCount} label="disciplines" />
+          </div>
+
+          {/* Search bar */}
+          <div className="animate-fade-up [animation-delay:350ms]">
             <HeroSearchBar />
           </div>
+
+          {/* Discipline quick-links */}
+          <div className="animate-fade-up [animation-delay:450ms]">
+            <HeroDisciplinePills />
+          </div>
+
         </div>
       </div>
 
       {/* Bottom fade */}
-      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-canvas to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-canvas to-transparent" />
     </section>
+  )
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function StatItem({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="font-heading text-4xl font-bold leading-none text-ink">
+        {value > 0 ? value : '—'}
+      </span>
+      <span className="text-xs uppercase tracking-widest text-ink-muted">{label}</span>
+    </div>
+  )
+}
+
+function Divider() {
+  return (
+    <div className="hidden h-10 w-px bg-wire sm:block" />
   )
 }
 
@@ -67,7 +129,6 @@ function RadarBackground() {
       className="pointer-events-none absolute right-0 top-0 flex h-full w-full items-center justify-end overflow-hidden opacity-[0.22]"
       aria-hidden
     >
-      {/* Outer positioning: offset to the right so radar feels like it extends off screen */}
       <div className="relative mr-[-12%] h-[700px] w-[700px] shrink-0">
 
         {/* Concentric rings */}
@@ -76,10 +137,10 @@ function RadarBackground() {
             key={pct}
             className="absolute rounded-full border border-mint"
             style={{
-              width:  `${pct}%`,
-              height: `${pct}%`,
-              top:    '50%',
-              left:   '50%',
+              width:     `${pct}%`,
+              height:    `${pct}%`,
+              top:       '50%',
+              left:      '50%',
               transform: 'translate(-50%, -50%)',
             }}
           />
