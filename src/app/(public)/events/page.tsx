@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 }
 
 interface PageProps {
-  searchParams: Promise<{ q?: string; discipline?: string; type?: string }>
+  searchParams: Promise<{ q?: string; discipline?: string; type?: string; country?: string }>
 }
 
 export default async function EventsPage({ searchParams }: PageProps) {
@@ -42,6 +42,9 @@ export default async function EventsPage({ searchParams }: PageProps) {
   }
   if (params.type) {
     query = query.eq('event_type', params.type)
+  }
+  if (params.country) {
+    query = query.eq('country', params.country)
   }
 
   const { data: events, error } = await query.limit(48)
