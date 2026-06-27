@@ -55,7 +55,7 @@ export async function HeroSection() {
       <RadarBackground />
 
       {/* Content */}
-      <div className="container-page relative z-10 pb-24 pt-36">
+      <div className="container-page relative z-10 pb-24 pt-10">
         <div className="max-w-4xl">
 
           {/* Sport labels */}

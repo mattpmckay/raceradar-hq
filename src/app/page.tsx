@@ -1,6 +1,6 @@
 import { Suspense }       from 'react'
 import type { Metadata }  from 'next'
-import { Nav }                   from '@/components/home/Nav'
+import { Header }                from '@/components/layout/Header'
 import { HeroSection }           from '@/components/home/HeroSection'
 import { EventsSectionServer }   from '@/components/home/EventsSectionServer'
 import { EventsSectionSkeleton } from '@/components/home/EventsSectionSkeleton'
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-canvas text-ink font-body">
-      <Nav />
+      <Header />
       <main>
         <HeroSection />
         <Suspense fallback={<EventsSectionSkeleton />}>
