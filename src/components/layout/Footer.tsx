@@ -19,18 +19,10 @@ export function Footer() {
           <div>
             <h3 className="text-sm font-semibold text-white">Discover</h3>
             <ul className="mt-3 space-y-2 text-sm text-gray-400">
-              <li><Link href="/events" className="hover:text-white transition-colors">Events</Link></li>
-              <li><Link href="/tracks" className="hover:text-white transition-colors">Tracks</Link></li>
-              <li><Link href="/championships" className="hover:text-white transition-colors">Championships</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-semibold text-white">Account</h3>
-            <ul className="mt-3 space-y-2 text-sm text-gray-400">
-              <li><Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>
-              <li><Link href="/login" className="hover:text-white transition-colors">Log in</Link></li>
-              <li><Link href="/signup" className="hover:text-white transition-colors">Sign up</Link></li>
+              <li><Link href="/events"    className="hover:text-white transition-colors">Events</Link></li>
+              <li><Link href="/sports"    className="hover:text-white transition-colors">Sports</Link></li>
+              <li><Link href="/locations" className="hover:text-white transition-colors">Locations</Link></li>
+              <li><Link href="/guides"    className="hover:text-white transition-colors">Race Guides</Link></li>
             </ul>
           </div>
 
