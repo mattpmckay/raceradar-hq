@@ -84,7 +84,7 @@ export function RaceGuides() {
 function GuideCard({ guide }: { guide: Guide }) {
   return (
     <Link
-      href={`/guides/${guide.id}`}
+      href="/guides"
       className="group flex flex-col overflow-hidden rounded-2xl border border-wire bg-panel transition-all duration-300 hover:border-wire-bright hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30"
     >
       {/* Image placeholder */}

@@ -12,10 +12,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ])
 
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: base, changeFrequency: 'daily', priority: 1 },
-    { url: `${base}/events`, changeFrequency: 'daily', priority: 0.9 },
-    { url: `${base}/tracks`, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${base}/championships`, changeFrequency: 'weekly', priority: 0.8 },
+    { url: base,                        changeFrequency: 'daily',   priority: 1.0 },
+    { url: `${base}/events`,            changeFrequency: 'daily',   priority: 0.9 },
+    { url: `${base}/sports`,            changeFrequency: 'weekly',  priority: 0.8 },
+    { url: `${base}/locations`,         changeFrequency: 'weekly',  priority: 0.8 },
+    { url: `${base}/guides`,            changeFrequency: 'weekly',  priority: 0.8 },
+    { url: `${base}/tracks`,            changeFrequency: 'weekly',  priority: 0.7 },
+    { url: `${base}/championships`,     changeFrequency: 'weekly',  priority: 0.7 },
+    { url: `${base}/about`,             changeFrequency: 'monthly', priority: 0.4 },
+    { url: `${base}/contact`,           changeFrequency: 'monthly', priority: 0.3 },
   ]
 
   const eventRoutes: MetadataRoute.Sitemap = (events ?? []).map((e) => ({

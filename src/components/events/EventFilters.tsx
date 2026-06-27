@@ -1,26 +1,26 @@
 'use client'
 
+import { useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback } from 'react'
-import { Search } from 'lucide-react'
-import { Select } from '@/components/ui/Select'
+import { Search, X } from 'lucide-react'
 
-const DISCIPLINES = [
-  { value: 'HYROX',         label: 'HYROX' },
-  { value: 'Spartan Race',  label: 'Spartan Race' },
-  { value: 'Ironman',       label: 'Ironman' },
-  { value: 'Marathon',      label: 'Marathon' },
-  { value: 'Trail Running', label: 'Trail Running' },
-  { value: 'Deka Fit',      label: 'Deka Fit' },
-]
-
-const EVENT_TYPES = [
-  { value: 'race', label: 'Race' },
+const COUNTRIES = [
+  'Australia',
+  'New Zealand',
+  'Singapore',
+  'Japan',
+  'South Korea',
+  'Thailand',
+  'Hong Kong',
+  'China',
+  'Indonesia',
 ]
 
 export function EventFilters() {
-  const router = useRouter()
+  const router      = useRouter()
   const searchParams = useSearchParams()
+
+  const [searchVal, setSearchVal] = useState(searchParams.get('q') ?? '')
 
   const updateParam = useCallback(
     (key: string, value: string) => {
@@ -36,33 +36,108 @@ export function EventFilters() {
     [router, searchParams],
   )
 
+  const clearAll = useCallback(() => {
+    const discipline = searchParams.get('discipline')
+    const params = new URLSearchParams()
+    if (discipline) params.set('discipline', discipline)
+    router.push(`/events${params.size ? `?${params}` : ''}`)
+  }, [router, searchParams])
+
+  function commitSearch() {
+    updateParam('q', searchVal.trim())
+  }
+
+  // Active secondary filters (discipline chip is not shown — cleared via "All Events" pill)
+  const activeCountry = searchParams.get('country') ?? ''
+  const activeQ       = searchParams.get('q') ?? ''
+  const hasActiveFilters = !!(activeCountry || activeQ)
+
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-      <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-        <input
-          className="input pl-9"
-          placeholder="Search events..."
-          defaultValue={searchParams.get('q') ?? ''}
-          onChange={(e) => updateParam('q', e.target.value)}
-        />
+    <div>
+      {/* Filter bar */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+
+        {/* Search input */}
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
+          <input
+            type="search"
+            value={searchVal}
+            onChange={(e) => setSearchVal(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && commitSearch()}
+            onBlur={commitSearch}
+            placeholder="Search events…"
+            className="w-full rounded-xl border border-wire bg-panel pl-10 pr-4 py-2.5 text-sm text-ink placeholder:text-ink-muted focus:border-mint/50 focus:outline-none focus:ring-1 focus:ring-mint/20 transition-colors"
+          />
+        </div>
+
+        {/* Country dropdown */}
+        <div className="relative">
+          <select
+            value={activeCountry}
+            onChange={(e) => updateParam('country', e.target.value)}
+            className="w-full sm:w-48 cursor-pointer appearance-none rounded-xl border border-wire bg-panel px-4 py-2.5 pr-9 text-sm text-ink-muted focus:border-mint/50 focus:outline-none focus:ring-1 focus:ring-mint/20 transition-colors [&:not([value=''])]:text-ink"
+            style={{ color: activeCountry ? undefined : undefined }}
+            aria-label="Filter by country"
+          >
+            <option value="">All countries</option>
+            {COUNTRIES.map((c) => (
+              <option key={c} value={c} className="bg-panel text-ink">
+                {c}
+              </option>
+            ))}
+          </select>
+          {/* Custom chevron */}
+          <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted">
+            <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" aria-hidden>
+              <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+        </div>
+
       </div>
 
-      <Select
-        options={DISCIPLINES}
-        placeholder="All disciplines"
-        value={searchParams.get('discipline') ?? ''}
-        onChange={(e) => updateParam('discipline', e.target.value)}
-        className="sm:w-48"
-      />
-
-      <Select
-        options={EVENT_TYPES}
-        placeholder="All types"
-        value={searchParams.get('type') ?? ''}
-        onChange={(e) => updateParam('type', e.target.value)}
-        className="sm:w-40"
-      />
+      {/* Active filter chips */}
+      {hasActiveFilters && (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          {activeQ && (
+            <FilterChip
+              label={`"${activeQ}"`}
+              onRemove={() => {
+                setSearchVal('')
+                updateParam('q', '')
+              }}
+            />
+          )}
+          {activeCountry && (
+            <FilterChip
+              label={activeCountry}
+              onRemove={() => updateParam('country', '')}
+            />
+          )}
+          <button
+            onClick={clearAll}
+            className="text-xs text-ink-muted underline underline-offset-2 hover:text-ink transition-colors"
+          >
+            Clear all
+          </button>
+        </div>
+      )}
     </div>
+  )
+}
+
+function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-wire/70 bg-panel px-3 py-1 text-xs text-ink-muted">
+      {label}
+      <button
+        onClick={onRemove}
+        className="-mr-0.5 ml-0.5 rounded-full p-0.5 hover:bg-wire/60 hover:text-ink transition-colors"
+        aria-label={`Remove filter ${label}`}
+      >
+        <X className="h-3 w-3" />
+      </button>
+    </span>
   )
 }

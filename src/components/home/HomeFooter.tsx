@@ -8,12 +8,12 @@ const FOOTER_LINKS = {
     { label: 'Race Guides', href: '/guides' },
   ],
   Sports: [
-    { label: 'HYROX',         href: '/sports/hyrox' },
-    { label: 'Spartan Race',  href: '/sports/spartan' },
-    { label: 'Ironman',       href: '/sports/ironman' },
-    { label: 'Marathon',      href: '/sports/marathon' },
-    { label: 'Trail Running', href: '/sports/trail-running' },
-    { label: 'Deka Fit',      href: '/sports/deka' },
+    { label: 'HYROX',         href: '/events?discipline=HYROX' },
+    { label: 'Spartan Race',  href: '/events?discipline=Spartan+Race' },
+    { label: 'Ironman',       href: '/events?discipline=Ironman' },
+    { label: 'Marathon',      href: '/events?discipline=Marathon' },
+    { label: 'Trail Running', href: '/events?discipline=Trail+Running' },
+    { label: 'Deka Fit',      href: '/events?discipline=Deka+Fit' },
   ],
 }
 

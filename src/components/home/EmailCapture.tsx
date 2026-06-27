@@ -6,17 +6,35 @@ export function EmailCapture() {
   const [email,     setEmail]     = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [loading,   setLoading]   = useState(false)
+  const [error,     setError]     = useState('')
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!email) return
+    setError('')
     setLoading(true)
-    // TODO: connect Beehiiv — POST to /api/subscribe with email, forward to
-    // https://api.beehiiv.com/v2/publications/{pub_id}/subscriptions
-    // Set BEEHIIV_API_KEY + BEEHIIV_PUB_ID in .env.local and Vercel env vars.
-    await new Promise((r) => setTimeout(r, 400))
-    setSubmitted(true)
-    setLoading(false)
+
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+
+      if (res.ok) {
+        setSubmitted(true)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setError(
+          (data as { error?: string }).error ??
+            'Something went wrong. Please try again.',
+        )
+      }
+    } catch {
+      setError('Network error. Please check your connection and try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -66,10 +84,11 @@ export function EmailCapture() {
                   type="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => { setEmail(e.target.value); setError('') }}
                   placeholder="your@email.com"
                   className="flex-1 rounded-xl border border-wire bg-panel px-4 py-3.5 text-sm text-ink placeholder:text-ink-muted focus:border-mint focus:outline-none focus:ring-1 focus:ring-mint transition-colors"
                   aria-label="Email address"
+                  aria-describedby={error ? 'subscribe-error' : undefined}
                 />
                 <button
                   type="submit"
@@ -79,6 +98,11 @@ export function EmailCapture() {
                   {loading ? 'Sending…' : 'Get Calendar'}
                 </button>
               </div>
+              {error && (
+                <p id="subscribe-error" className="mt-3 text-sm text-red-400" role="alert">
+                  {error}
+                </p>
+              )}
               <p className="mt-4 text-xs text-ink-muted">
                 Athletes across Asia Pacific. No spam — ever.
               </p>

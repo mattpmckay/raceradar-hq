@@ -6,6 +6,66 @@ import { Badge } from '@/components/ui/Badge'
 import { formatDate } from '@/lib/utils'
 import type { Metadata } from 'next'
 
+// ─── Schema helpers ───────────────────────────────────────────────────────────
+
+const COUNTRY_CODES: Record<string, string> = {
+  'Australia':   'AU',
+  'New Zealand': 'NZ',
+  'Singapore':   'SG',
+  'Japan':       'JP',
+  'South Korea': 'KR',
+  'Thailand':    'TH',
+  'Indonesia':   'ID',
+  'Hong Kong':   'HK',
+  'China':       'CN',
+}
+
+function buildEventSchema(event: {
+  title: string
+  slug: string
+  discipline: string
+  city: string | null
+  country: string | null
+  start_date: string
+  end_date: string | null
+  website_url: string | null
+  organiser: string | null
+  description: string | null
+}) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://raceradar.com.au'
+  const venueName = event.description?.match(/^Venue:\s*(.+)/i)?.[1]?.trim()
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'SportsEvent',
+    name: event.title,
+    url: `${siteUrl}/events/${event.slug}`,
+    startDate: event.start_date,
+    ...(event.end_date ? { endDate: event.end_date } : {}),
+    eventStatus: 'https://schema.org/EventScheduled',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    sport: event.discipline,
+    location: {
+      '@type': 'Place',
+      ...(venueName ? { name: venueName } : {}),
+      address: {
+        '@type': 'PostalAddress',
+        ...(event.city    ? { addressLocality: event.city }                                  : {}),
+        ...(event.country ? { addressCountry: COUNTRY_CODES[event.country] ?? event.country } : {}),
+      },
+    },
+    ...(event.organiser || event.discipline
+      ? {
+          organizer: {
+            '@type': 'Organization',
+            name: event.organiser ?? event.discipline,
+          },
+        }
+      : {}),
+    ...(event.website_url ? { sameAs: event.website_url } : {}),
+  }
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface PageProps {
@@ -124,7 +184,7 @@ export default async function EventDetailPage({ params }: PageProps) {
       .single(),
     supabase
       .from('events')
-      .select('title, slug, city, country, start_date')
+      .select('title, slug, city, country, start_date, discipline')
       .eq('is_published', true)
       .neq('slug', slug)
       .order('start_date', { ascending: true })
@@ -140,8 +200,14 @@ export default async function EventDetailPage({ params }: PageProps) {
 
   const venue = extractVenue(event.description)
   const location = [event.city, event.region, event.country].filter(Boolean).join(', ')
+  const eventSchema = buildEventSchema(event)
 
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
+      />
     <div className="container-page py-10">
       <Link href="/events" className="btn-ghost mb-6 inline-flex px-0 text-gray-400">
         <ArrowLeft className="h-4 w-4" /> Back to Events
@@ -309,6 +375,7 @@ export default async function EventDetailPage({ params }: PageProps) {
         </aside>
       </div>
     </div>
+    </>
   )
 }
 

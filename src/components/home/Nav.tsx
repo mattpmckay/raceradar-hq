@@ -63,6 +63,7 @@ export function Nav() {
           <Link
             href="/calendar"
             className="hidden md:inline-flex items-center gap-2 rounded-full bg-fire px-5 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-fire-600 hover:-translate-y-px hover:shadow-lg hover:shadow-fire/25"
+            prefetch={false}
           >
             Get Free Events Calendar
           </Link>
