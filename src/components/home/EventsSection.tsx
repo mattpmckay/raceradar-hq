@@ -92,7 +92,13 @@ const defaultStyle = { bg: 'rgba(107,122,141,0.12)', text: '#6B7A8D' }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function EventsSection({ initialEvents = [] }: { initialEvents?: SupabaseEvent[] }) {
+export function EventsSection({
+  initialEvents = [],
+  error,
+}: {
+  initialEvents?: SupabaseEvent[]
+  error?: string
+}) {
   const [active, setActive] = useState('All')
 
   const events   = initialEvents.map(toDisplayEvent)
@@ -121,49 +127,60 @@ export function EventsSection({ initialEvents = [] }: { initialEvents?: Supabase
           </Link>
         </div>
 
-        {/* Filter strip */}
-        <div className="relative mb-10 -mx-4 px-4 sm:mx-0 sm:px-0">
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            {SPORT_FILTERS.map((sport) => (
-              <button
-                key={sport}
-                onClick={() => setActive(sport)}
-                className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
-                  active === sport
-                    ? 'bg-mint text-canvas shadow-md shadow-mint/20'
-                    : 'border border-wire bg-panel text-ink-muted hover:border-wire-bright hover:text-ink'
-                }`}
-              >
-                {sport}
-              </button>
-            ))}
-          </div>
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-canvas to-transparent sm:hidden" />
-        </div>
-
-        {/* Events grid */}
-        {filtered.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
+        {/* Error state */}
+        {error ? (
+          <div className="rounded-2xl border border-red-900/40 bg-red-950/20 px-6 py-12 text-center">
+            <p className="text-sm font-medium text-red-400">
+              Failed to load events. Please try refreshing the page.
+            </p>
           </div>
         ) : (
-          <div className="rounded-2xl border border-wire bg-panel py-16 text-center">
-            <p className="text-ink-muted">
-              {events.length === 0
-                ? 'No upcoming events found. Check back soon!'
-                : 'No events found for this sport yet.'}
-            </p>
-            {events.length > 0 && (
-              <button
-                onClick={() => setActive('All')}
-                className="mt-4 text-sm font-medium text-mint hover:underline"
-              >
-                View all events
-              </button>
+          <>
+            {/* Filter strip */}
+            <div className="relative mb-10 -mx-4 px-4 sm:mx-0 sm:px-0">
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                {SPORT_FILTERS.map((sport) => (
+                  <button
+                    key={sport}
+                    onClick={() => setActive(sport)}
+                    className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                      active === sport
+                        ? 'bg-mint text-canvas shadow-md shadow-mint/20'
+                        : 'border border-wire bg-panel text-ink-muted hover:border-wire-bright hover:text-ink'
+                    }`}
+                  >
+                    {sport}
+                  </button>
+                ))}
+              </div>
+              <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-canvas to-transparent sm:hidden" />
+            </div>
+
+            {/* Events grid */}
+            {filtered.length > 0 ? (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {filtered.map((event) => (
+                  <EventCard key={event.id} event={event} />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-wire bg-panel py-16 text-center">
+                <p className="text-ink-muted">
+                  {events.length === 0
+                    ? 'No upcoming events found. Check back soon!'
+                    : 'No events found for this sport yet.'}
+                </p>
+                {events.length > 0 && (
+                  <button
+                    onClick={() => setActive('All')}
+                    className="mt-4 text-sm font-medium text-mint hover:underline"
+                  >
+                    View all events
+                  </button>
+                )}
+              </div>
             )}
-          </div>
+          </>
         )}
 
         {/* Mobile "view all" */}

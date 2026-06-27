@@ -7,16 +7,13 @@ import { Menu, X, Radar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navLinks = [
-  { href: '/events', label: 'Events' },
-  { href: '/tracks', label: 'Venues' },
-  { href: '/championships', label: 'Series' },
+  { href: '/events',    label: 'Events' },
+  { href: '/sports',    label: 'Sports' },
+  { href: '/locations', label: 'Locations' },
+  { href: '/guides',    label: 'Race Guides' },
 ]
 
-interface HeaderProps {
-  user?: { email?: string } | null
-}
-
-export function Header({ user }: HeaderProps) {
+export function Header() {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -48,26 +45,6 @@ export function Header({ user }: HeaderProps) {
             ))}
           </nav>
 
-          {/* Desktop auth */}
-          <div className="hidden md:flex items-center gap-3">
-            {user ? (
-              <>
-                <Link href="/dashboard" className="btn-ghost text-sm">
-                  My Account
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link href="/login" className="btn-ghost text-sm">
-                  Log in
-                </Link>
-                <Link href="/signup" className="btn-primary text-sm">
-                  Sign up
-                </Link>
-              </>
-            )}
-          </div>
-
           {/* Mobile menu toggle */}
           <button
             className="md:hidden rounded-lg p-2 text-gray-400 hover:bg-surface-card hover:text-white"
@@ -98,22 +75,6 @@ export function Header({ user }: HeaderProps) {
                 {link.label}
               </Link>
             ))}
-            <div className="pt-3 border-t border-surface-border flex flex-col gap-2">
-              {user ? (
-                <Link href="/dashboard" className="btn-secondary w-full justify-center" onClick={() => setMobileOpen(false)}>
-                  My Account
-                </Link>
-              ) : (
-                <>
-                  <Link href="/login" className="btn-secondary w-full justify-center" onClick={() => setMobileOpen(false)}>
-                    Log in
-                  </Link>
-                  <Link href="/signup" className="btn-primary w-full justify-center" onClick={() => setMobileOpen(false)}>
-                    Sign up
-                  </Link>
-                </>
-              )}
-            </div>
           </div>
         </div>
       )}

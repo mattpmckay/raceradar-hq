@@ -11,13 +11,13 @@ interface EventCardProps {
 }
 
 const disciplineColour: Record<string, 'brand' | 'success' | 'warning' | 'default'> = {
-  hyrox:        'brand',
-  spartan:      'warning',
-  ocr:          'success',
-  trail:        'success',
-  'tough-mudder': 'warning',
-  'fun-run':    'default',
-  endurance:    'brand',
+  'HYROX':         'brand',
+  'Spartan Race':  'warning',
+  'Ironman':       'brand',
+  'Ironman 70.3':  'brand',
+  'Marathon':      'success',
+  'Trail Running': 'success',
+  'Deka Fit':      'warning',
 }
 
 export function EventCard({ event }: EventCardProps) {

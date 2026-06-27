@@ -44,7 +44,11 @@ export default async function EventsPage({ searchParams }: PageProps) {
     query = query.eq('event_type', params.type)
   }
 
-  const { data: events } = await query.limit(48)
+  const { data: events, error } = await query.limit(48)
+
+  if (error) {
+    console.error('[EventsPage] Supabase error:', error.code, error.message)
+  }
 
   return (
     <div className="container-page py-10">
@@ -54,12 +58,18 @@ export default async function EventsPage({ searchParams }: PageProps) {
       </div>
 
       <div className="mb-6">
-        <Suspense>
+        <Suspense fallback={null}>
           <EventFilters />
         </Suspense>
       </div>
 
-      {events && events.length > 0 ? (
+      {error ? (
+        <EmptyState
+          icon={<Calendar className="h-10 w-10" />}
+          title="Failed to load events"
+          description="Could not connect to the database. Please try refreshing the page."
+        />
+      ) : events && events.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {events.map((event) => (
             <EventCard key={event.id} event={event} />

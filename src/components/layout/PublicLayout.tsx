@@ -1,14 +1,10 @@
 import { Header } from './Header'
 import { Footer } from './Footer'
-import { createClient } from '@/lib/supabase/server'
 
-export async function PublicLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
+export function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
-      <Header user={user} />
+      <Header />
       <main className="flex-1">{children}</main>
       <Footer />
     </div>
