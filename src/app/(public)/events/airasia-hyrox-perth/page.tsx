@@ -123,7 +123,32 @@ export default async function HYROXPerthPage() {
     .eq('is_published', true)
     .single()
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://raceradar.com.au'
+  const eventSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'SportsEvent',
+    name: 'AirAsia HYROX Perth',
+    url: `${siteUrl}/events/airasia-hyrox-perth`,
+    startDate: '2026-08-21',
+    endDate: '2026-08-23',
+    eventStatus: 'https://schema.org/EventScheduled',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    sport: 'HYROX',
+    location: {
+      '@type': 'Place',
+      name: 'Perth Convention & Exhibition Centre',
+      address: { '@type': 'PostalAddress', addressLocality: 'Perth', addressCountry: 'AU' },
+    },
+    organizer: { '@type': 'Organization', name: 'HYROX' },
+    sameAs: 'https://hyrox.com/event/hyrox-perth/',
+  }
+
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
+      />
     <div className="container-page py-10">
       <Link href="/events" className="btn-ghost mb-6 inline-flex px-0 text-gray-400">
         <ArrowLeft className="h-4 w-4" /> Back to Events
@@ -506,6 +531,7 @@ export default async function HYROXPerthPage() {
         </aside>
       </div>
     </div>
+    </>
   )
 }
 

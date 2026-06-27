@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Sports — Fitness Races & Endurance Events | RaceRadar HQ',
+  title: { absolute: 'Sports — Fitness Races & Endurance Events | RaceRadar HQ' },
   description:
     'Explore every sport on RaceRadar HQ: HYROX, Spartan Race, IRONMAN, Ironman 70.3, Marathon, Trail Running and Deka Fit. Find upcoming events across Asia Pacific.',
   openGraph: {

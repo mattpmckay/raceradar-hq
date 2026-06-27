@@ -6,7 +6,7 @@ import { formatDate } from '@/lib/utils'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Race Guides — Training, Tips & Event Guides | RaceRadar HQ',
+  title: { absolute: 'Race Guides — Training, Tips & Event Guides | RaceRadar HQ' },
   description:
     'Free race guides for HYROX, Spartan Race, Ironman, Marathon and trail running. Event-specific race guides, training plans, discipline explainers and race day tips across Asia Pacific.',
   openGraph: {

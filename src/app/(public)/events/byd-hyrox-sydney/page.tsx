@@ -123,7 +123,32 @@ export default async function HYROXSydneyPage() {
     .eq('is_published', true)
     .single()
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://raceradar.com.au'
+  const eventSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'SportsEvent',
+    name: 'BYD HYROX Sydney',
+    url: `${siteUrl}/events/byd-hyrox-sydney`,
+    startDate: '2026-07-01',
+    endDate: '2026-07-05',
+    eventStatus: 'https://schema.org/EventScheduled',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    sport: 'HYROX',
+    location: {
+      '@type': 'Place',
+      name: 'Sydney Showground Olympic Park',
+      address: { '@type': 'PostalAddress', addressLocality: 'Sydney', addressCountry: 'AU' },
+    },
+    organizer: { '@type': 'Organization', name: 'HYROX' },
+    sameAs: 'https://hyrox.com/event/hyrox-sydney/',
+  }
+
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
+      />
     <div className="container-page py-10">
       <Link href="/events" className="btn-ghost mb-6 inline-flex px-0 text-gray-400">
         <ArrowLeft className="h-4 w-4" /> Back to Events
@@ -484,6 +509,7 @@ export default async function HYROXSydneyPage() {
         </aside>
       </div>
     </div>
+    </>
   )
 }
 

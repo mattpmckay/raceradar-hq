@@ -28,7 +28,7 @@ export async function generateMetadata({
     ? `Find upcoming ${params.discipline} events${params.country ? ` in ${params.country}` : ' across Asia Pacific'} — race dates, categories, entry fees and venue guides.`
     : 'Browse upcoming HYROX, Spartan Race, Ironman, Marathon, Trail Running and Deka Fit events across Asia Pacific. Find your next race.'
 
-  return { title, description }
+  return { title: { absolute: title }, description }
 }
 
 // ─── Discipline pills (server-rendered) ───────────────────────────────────────
