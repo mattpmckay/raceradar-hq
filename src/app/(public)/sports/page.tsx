@@ -53,6 +53,32 @@ const SPORTS: SportDef[] = [
     accent: 'brand',
   },
   {
+    discipline: 'CrossFit',
+    slug: 'CrossFit',
+    label: 'CrossFit',
+    tagline: 'Constantly varied functional fitness competition',
+    description:
+      'CrossFit events test athletes across weightlifting, gymnastics and metabolic conditioning in constantly varied workouts scored for time or load. The CrossFit Open — the world\'s largest online qualifier — runs annually and feeds into Sanctional events and the CrossFit Games. Local throwdowns and team competitions run throughout the year.',
+    format: 'WODs + Barbell',
+    distance: 'Varied',
+    whoFor: 'CrossFit athletes',
+    icon: <Flame className="h-6 w-6" />,
+    accent: 'brand',
+  },
+  {
+    discipline: 'Deka Fit',
+    slug: 'Deka Fit',
+    label: 'Deka Fit',
+    tagline: '10 stations. 5 km. No excuses.',
+    description:
+      'Deka Fit extends the HYROX concept to 10 × 500 m runs paired with 10 workout stations — adding Box Jumps and Battle Ropes to the classic lineup. Held indoors with a fully standardised global format, all results feed directly into the Deka global ranking.',
+    format: 'Run + Lift × 10',
+    distance: '5 km total running',
+    whoFor: 'Gym-based athletes, HYROX fans',
+    icon: <Zap className="h-6 w-6" />,
+    accent: 'warning',
+  },
+  {
     discipline: 'Spartan Race',
     slug: 'Spartan Race',
     label: 'Spartan Race',
@@ -142,32 +168,6 @@ const SPORTS: SportDef[] = [
     whoFor: 'Road runners and mountain athletes',
     icon: <Mountain className="h-6 w-6" />,
     accent: 'success',
-  },
-  {
-    discipline: 'Deka Fit',
-    slug: 'Deka Fit',
-    label: 'Deka Fit',
-    tagline: '10 stations. 5 km. No excuses.',
-    description:
-      'Deka Fit extends the HYROX concept to 10 × 500 m runs paired with 10 workout stations — adding Box Jumps and Battle Ropes to the classic lineup. Held indoors with a fully standardised global format, all results feed directly into the Deka global ranking.',
-    format: 'Run + Lift × 10',
-    distance: '5 km total running',
-    whoFor: 'Gym-based athletes, HYROX fans',
-    icon: <Zap className="h-6 w-6" />,
-    accent: 'warning',
-  },
-  {
-    discipline: 'CrossFit',
-    slug: 'CrossFit',
-    label: 'CrossFit',
-    tagline: 'Constantly varied functional fitness competition',
-    description:
-      'CrossFit events test athletes across weightlifting, gymnastics and metabolic conditioning in constantly varied workouts scored for time or load. The CrossFit Open — the world\'s largest online qualifier — runs annually and feeds into Sanctional events and the CrossFit Games. Local throwdowns and team competitions run throughout the year.',
-    format: 'WODs + Barbell',
-    distance: 'Varied',
-    whoFor: 'CrossFit athletes',
-    icon: <Flame className="h-6 w-6" />,
-    accent: 'brand',
   },
 ]
 

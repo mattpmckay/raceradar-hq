@@ -36,14 +36,14 @@ export async function generateMetadata({
 const DISCIPLINES = [
   { label: 'All Events',   value: '' },
   { label: 'HYROX',        value: 'HYROX' },
+  { label: 'CrossFit',     value: 'CrossFit' },
+  { label: 'Deka Fit',     value: 'Deka Fit' },
   { label: 'Spartan Race', value: 'Spartan Race' },
   { label: 'Tough Mudder', value: 'Tough Mudder' },
   { label: 'Ironman',      value: 'Ironman' },
   { label: 'Marathon',     value: 'Marathon' },
   { label: 'Road Racing',  value: 'Road Racing' },
   { label: 'Trail Running',value: 'Trail Running' },
-  { label: 'Deka Fit',     value: 'Deka Fit' },
-  { label: 'CrossFit',     value: 'CrossFit' },
 ]
 
 const DISCIPLINE_COLORS: Record<string, string> = {

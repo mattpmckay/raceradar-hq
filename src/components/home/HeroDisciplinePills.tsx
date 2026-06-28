@@ -4,6 +4,8 @@ import Link from 'next/link'
 
 const DISCIPLINE_PILLS = [
   { label: 'HYROX',         href: '/events?discipline=HYROX',         color: '#00D9A6' },
+  { label: 'CrossFit',      href: '/events?discipline=CrossFit',      color: '#EF4444' },
+  { label: 'Deka Fit',      href: '/events?discipline=Deka+Fit',      color: '#A78BFA' },
   { label: 'Spartan Race',  href: '/events?discipline=Spartan+Race',  color: '#FF6B35' },
   { label: 'Tough Mudder',  href: '/events?discipline=Tough+Mudder',  color: '#F59E0B' },
   { label: 'Ironman',       href: '/events?discipline=Ironman',       color: '#F87171' },
@@ -11,8 +13,6 @@ const DISCIPLINE_PILLS = [
   { label: 'Marathon',      href: '/events?discipline=Marathon',      color: '#60A5FA' },
   { label: 'Road Racing',   href: '/events?discipline=Road+Racing',   color: '#94A3B8' },
   { label: 'Trail Running', href: '/events?discipline=Trail+Running', color: '#34D399' },
-  { label: 'Deka Fit',      href: '/events?discipline=Deka+Fit',      color: '#A78BFA' },
-  { label: 'CrossFit',      href: '/events?discipline=CrossFit',      color: '#EF4444' },
 ]
 
 export function HeroDisciplinePills() {
