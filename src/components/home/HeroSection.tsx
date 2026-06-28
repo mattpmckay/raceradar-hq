@@ -60,7 +60,7 @@ export async function HeroSection() {
 
           {/* Sport labels */}
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-ink-muted animate-fade-in">
-            HYROX &nbsp;·&nbsp; Spartan &nbsp;·&nbsp; Ironman &nbsp;·&nbsp; Triathlon &nbsp;·&nbsp; OCR &nbsp;·&nbsp; Trail
+            HYROX &nbsp;·&nbsp; CrossFit &nbsp;·&nbsp; Spartan &nbsp;·&nbsp; Ironman &nbsp;·&nbsp; Triathlon &nbsp;·&nbsp; OCR &nbsp;·&nbsp; Trail
           </p>
 
           {/* Headline */}
