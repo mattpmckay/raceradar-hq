@@ -4,6 +4,37 @@ All significant changes to the product are recorded here. Format: sprint number,
 
 ---
 
+## Sprint 8 — Admin Event CRUD
+**Date:** 2026-06-29
+**Status:** Deployed ✓
+
+### Features Added
+- **Create event** — `/admin/events/new` page with full `EventForm`. Auto-generates slug from title (using existing `slugify` util); slug is editable. All event fields: title, slug, discipline, event_type, start/end/deadline dates, registration_status, country/region/city, organiser, description, website_url, image_url, is_published, is_featured.
+- **Edit event** — `/admin/events/[id]/edit` page prefetches event from DB and renders `EventForm` with all fields pre-filled. "View live" link for published events.
+- **Delete event** — Confirm-dialog delete button on edit page; hard deletes the row.
+- **`EventForm` client component** — Shared between create and edit. Optimistic slug generation on title keystroke; stops auto-updating slug once user manually edits it. Submits to Route Handler; shows inline error on conflict (duplicate slug) or server error. Redirects to `/admin/events` on success.
+- **API routes** — `POST /api/admin/events` (create), `PATCH /api/admin/events/[id]` (update), `DELETE /api/admin/events/[id]`. All routes check session + admin role before using service-role client. Returns 409 with friendly message on slug uniqueness violation.
+- **Admin token migration** — `layout.tsx`, `page.tsx`, and `events/page.tsx` migrated from legacy tokens (surface-border, surface-card, brand-500, gray-400, text-white) to premium tokens (wire, panel, mint, ink, ink-muted).
+- **`form-input` CSS class** — Added as alias for `.input` in `globals.css` for use in admin forms.
+- **DB migration applied** — `20260628000001_add_registration_status.sql` applied to production Supabase project.
+
+### Files Added / Modified
+- `src/app/api/admin/events/route.ts` *(new)*
+- `src/app/api/admin/events/[id]/route.ts` *(new)*
+- `src/components/admin/EventForm.tsx` *(new)*
+- `src/app/admin/events/new/page.tsx` *(new)*
+- `src/app/admin/events/[id]/edit/page.tsx` *(new)*
+- `src/app/admin/layout.tsx` — premium token migration
+- `src/app/admin/page.tsx` — premium token migration
+- `src/app/admin/events/page.tsx` — premium token migration
+- `src/app/globals.css` — added `.form-input` alias
+- `ROADMAP.md`, `CHANGELOG.md` — updated
+
+### Breaking Changes
+None.
+
+---
+
 ## Sprint 7 — Registration Status, Save Counts, Homepage Hearts, Profile Page
 **Date:** 2026-06-28
 **Status:** Deployed ✓

@@ -59,7 +59,8 @@
     @apply inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-ink-muted transition-colors hover:bg-panel hover:text-ink disabled:opacity-50;
   }
 
-  .input {
+  .input,
+  .form-input {
     @apply block w-full rounded-lg border border-wire bg-panel px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-muted focus:border-mint/60 focus:outline-none focus:ring-1 focus:ring-mint/20 transition-colors;
   }
 

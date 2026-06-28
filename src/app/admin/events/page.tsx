@@ -18,14 +18,14 @@ export default async function AdminEventsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Events</h1>
+        <h1 className="text-2xl font-bold text-ink">Events</h1>
         <Link href="/admin/events/new" className="btn-primary text-sm">+ New Event</Link>
       </div>
 
       <div className="card p-0 overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-surface-border text-left text-xs text-gray-400">
+            <tr className="border-b border-wire text-left text-xs text-ink-muted">
               <th className="px-4 py-3 font-medium">Title</th>
               <th className="px-4 py-3 font-medium">Date</th>
               <th className="px-4 py-3 font-medium">Discipline</th>
@@ -33,11 +33,11 @@ export default async function AdminEventsPage() {
               <th className="px-4 py-3 font-medium"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-surface-border">
+          <tbody className="divide-y divide-wire">
             {events?.map((event) => (
-              <tr key={event.id} className="hover:bg-surface-muted/30 transition-colors">
-                <td className="px-4 py-3 font-medium text-white">{event.title}</td>
-                <td className="px-4 py-3 text-gray-400">{formatDateShort(event.start_date)}</td>
+              <tr key={event.id} className="hover:bg-panel-raised/50 transition-colors">
+                <td className="px-4 py-3 font-medium text-ink">{event.title}</td>
+                <td className="px-4 py-3 text-ink-muted">{formatDateShort(event.start_date)}</td>
                 <td className="px-4 py-3">
                   <Badge variant="brand">{event.discipline}</Badge>
                 </td>
@@ -49,7 +49,7 @@ export default async function AdminEventsPage() {
                 <td className="px-4 py-3">
                   <Link
                     href={`/admin/events/${event.id}/edit`}
-                    className="btn-ghost p-1.5 text-gray-400 hover:text-white"
+                    className="btn-ghost p-1.5 text-ink-muted hover:text-ink"
                   >
                     <Pencil className="h-4 w-4" />
                   </Link>
@@ -59,7 +59,7 @@ export default async function AdminEventsPage() {
           </tbody>
         </table>
         {(!events || events.length === 0) && (
-          <p className="px-4 py-8 text-center text-sm text-gray-400">No events yet.</p>
+          <p className="px-4 py-8 text-center text-sm text-ink-muted">No events yet.</p>
         )}
       </div>
     </div>

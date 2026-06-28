@@ -79,24 +79,27 @@ Toggle API at `POST /api/favourites`. SaveButton client component with optimisti
 
 ## Completed Sprints (continued)
 
+### Sprint 8 — Admin Event CRUD (2026-06-29)
+EventForm client component (create + edit + delete). `POST /api/admin/events` and `PATCH|DELETE /api/admin/events/[id]` Route Handlers with admin role guard and service-role client. `/admin/events/new` and `/admin/events/[id]/edit` pages. Full admin token migration (surface-* → premium). Migration `20260628000001_add_registration_status.sql` applied to production.
+
 ### Sprint 7 — Registration Status, Save Counts, Homepage Hearts, Profile (2026-06-28)
 Registration status badge on event detail sidebar (open/closing_soon/sold_out/coming_soon). Save count via SECURITY DEFINER RPC bypassing RLS. Homepage EventCards now have HeartButton with server-prefetched saved state. Profile page at /dashboard/profile with username/display name editing. Dashboard layout fully migrated to premium tokens.
 
 ## Current Sprint
 
-### Sprint 8 — TBD
-To be defined. Leading candidates are listed under Next Planned Sprint below.
+### Sprint 8 — Admin Event CRUD (2026-06-29)
+Full create/edit/delete for events in the admin dashboard. EventForm shared client component with auto-slug, all event fields, registration_status select. API routes at `POST /api/admin/events` and `PATCH|DELETE /api/admin/events/[id]`. Admin layout + pages migrated to premium tokens.
 
 ---
 
 ## Next Planned Sprint
 
-### Sprint 8 — TBD
-To be defined. Leading candidates:
+### Sprint 9 — TBD
+Leading candidates:
 - Events listing pagination / "Load more" (currently capped at 48)
-- Admin event CRUD (create/edit form for events with registration_status field)
 - Email notifications for saved events approaching registration deadline
 - Track/circuit directory pages with content
+- Sort toggle on events page (Soonest first / Furthest out)
 
 ---
 
@@ -106,8 +109,9 @@ Items approved for the product but not yet scheduled into a sprint.
 
 | Priority | Feature | Notes |
 |---|---|---|
+| High | Forgot Password flow | Forgot password link on login page → reset request page → Supabase reset email → reset password page. Must work in production (Supabase site URL + email template configured). Friendly success/error states throughout. |
 | High | Events pagination / Load More | 48-event cap is fine now, will hit limits as DB grows |
-| High | Admin event CRUD improvements | Currently read-only stubs; needs create/edit form with registration_status field |
+| Medium | Admin track / championship CRUD | Admin event CRUD done; tracks and championships still read-only |
 | Medium | Avatar upload on profile | Requires Supabase Storage bucket setup |
 | Medium | Track / circuit directory pages | `/tracks/[slug]` template exists, needs content |
 | Medium | Championship / series pages | `/championships/[slug]` template exists, needs content |

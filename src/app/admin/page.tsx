@@ -26,24 +26,24 @@ export default async function AdminPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-white">Admin Overview</h1>
+      <h1 className="text-2xl font-bold text-ink">Admin Overview</h1>
 
       <div className="grid gap-4 sm:grid-cols-3">
         {stats.map(({ icon: Icon, label, value, href }) => (
           <Link
             key={label}
             href={href}
-            className="card hover:border-brand-500/50 transition-colors"
+            className="card hover:border-mint/30 transition-colors"
           >
-            <Icon className="h-5 w-5 text-brand-500 mb-3" />
-            <div className="text-3xl font-bold text-white">{value}</div>
-            <div className="text-sm text-gray-400">{label}</div>
+            <Icon className="h-5 w-5 text-mint mb-3" />
+            <div className="text-3xl font-bold text-ink">{value}</div>
+            <div className="text-sm text-ink-muted">{label}</div>
           </Link>
         ))}
       </div>
 
       <div className="card">
-        <h2 className="font-semibold text-white mb-4">Quick Actions</h2>
+        <h2 className="font-semibold text-ink mb-4">Quick Actions</h2>
         <div className="flex flex-wrap gap-3">
           <Link href="/admin/events/new" className="btn-primary text-sm">+ New Event</Link>
           <Link href="/admin/tracks/new" className="btn-secondary text-sm">+ New Track</Link>
