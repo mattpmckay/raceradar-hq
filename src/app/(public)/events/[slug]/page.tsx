@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Calendar, MapPin, Globe, ArrowLeft, Flag, CheckCircle, Clock, Train, Car, Users } from 'lucide-react'
+import { Calendar, MapPin, Globe, ArrowLeft, Flag, CheckCircle, Clock, Train, Car, Users, Thermometer } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/Badge'
 import { formatDate } from '@/lib/utils'
@@ -208,7 +208,7 @@ export default async function EventDetailPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
       />
-    <div className="container-page py-10">
+    <div className={`container-page py-10${event.website_url ? ' pb-28 lg:pb-10' : ''}`}>
       <Link href="/events" className="btn-ghost mb-6 inline-flex px-0 text-ink-muted">
         <ArrowLeft className="h-4 w-4" /> Back to Events
       </Link>
@@ -275,53 +275,7 @@ export default async function EventDetailPage({ params }: PageProps) {
           <WeekendTipsSection />
 
           {/* Plan Your Trip */}
-          <section>
-            <SectionHeading>Plan Your Trip</SectionHeading>
-            <div className="card space-y-5">
-              <p className="text-sm text-ink-muted">
-                Most athletes need to coordinate travel and logistics for race weekend. Here are the key steps to get organised well in advance.
-              </p>
-              <ul className="space-y-4">
-                {[
-                  {
-                    icon: CheckCircle,
-                    heading: 'Check your registration is confirmed',
-                    tip: 'Log in to the event portal and download your confirmation email before race week. Some events require you to complete a waiver or provide a medical certificate at check-in.',
-                  },
-                  {
-                    icon: MapPin,
-                    heading: 'Confirm the venue address',
-                    tip: 'Check the official event website for the exact venue address and any race village or parking entrances specific to athletes. GPS can sometimes route you to the wrong gate.',
-                  },
-                  {
-                    icon: Calendar,
-                    heading: 'Book accommodation early',
-                    tip: 'Hotels near major race venues fill up months in advance, especially for multi-day events. Book as soon as your registration is confirmed — cancellation rates apply if your plans change.',
-                  },
-                  {
-                    icon: Train,
-                    heading: 'Plan your transport',
-                    tip: 'Many race venues restrict parking on event day or use remote parking with shuttles. Check the event logistics page for shuttle times, public transit options and recommended arrival windows.',
-                  },
-                  {
-                    icon: Clock,
-                    heading: 'Arrive early on race day',
-                    tip: 'Plan to arrive at least 60–90 minutes before your wave start. Allow time for parking, gear check, warm-up and finding your starting corral without rushing.',
-                  },
-                ].map(({ icon: Icon, heading, tip }) => (
-                  <li key={heading} className="flex items-start gap-4">
-                    <div className="rounded-lg bg-mint/10 p-2 shrink-0">
-                      <Icon className="h-4 w-4 text-mint" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold text-white mb-1">{heading}</div>
-                      <div className="text-sm text-ink-muted leading-relaxed">{tip}</div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
+          <PlanYourTripSection event={event} venue={venue} />
 
           {/* FAQs */}
           <FaqSection discipline={event.discipline} />
@@ -362,6 +316,22 @@ export default async function EventDetailPage({ params }: PageProps) {
               )}
             </div>
 
+            {/* Countdown */}
+            {(() => {
+              const days = getDaysUntil(event.start_date)
+              if (days < 0) return null
+              return (
+                <div className="rounded-lg bg-panel-raised px-4 py-3 text-center">
+                  <div className="font-heading text-3xl font-bold text-mint leading-none">
+                    {days === 0 ? 'Today' : days}
+                  </div>
+                  <div className="mt-1 text-xs font-medium uppercase tracking-widest text-ink-muted">
+                    {days === 0 ? 'Race day!' : days === 1 ? 'day to race day' : 'days to race day'}
+                  </div>
+                </div>
+              )
+            })()}
+
             {event.registration_deadline && (
               <div className="rounded-lg bg-mint/10 border border-mint/20 px-3 py-2.5 text-sm">
                 <span className="text-mint font-medium">Registration closes</span>
@@ -379,6 +349,13 @@ export default async function EventDetailPage({ params }: PageProps) {
                 <Globe className="h-4 w-4" /> Register Now
               </a>
             )}
+
+            <a
+              href={`/api/events/${event.slug}/ical`}
+              className="btn-secondary w-full justify-center"
+            >
+              <Calendar className="h-4 w-4" /> Add to Calendar
+            </a>
           </div>
 
           {/* Quick facts */}
@@ -412,6 +389,29 @@ export default async function EventDetailPage({ params }: PageProps) {
         </aside>
       </div>
     </div>
+
+    {/* Sticky mobile CTA — hidden on lg where sidebar is visible */}
+    {event.website_url && (
+      <div
+        className="fixed bottom-0 left-0 right-0 z-50 border-t border-wire bg-canvas/95 backdrop-blur-sm lg:hidden"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      >
+        <div className="flex items-center gap-3 px-4 py-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs text-ink-muted">{formatDate(event.start_date)} · {event.discipline}</p>
+            <p className="truncate text-sm font-semibold text-ink">{event.title}</p>
+          </div>
+          <a
+            href={event.website_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary shrink-0"
+          >
+            Register Now
+          </a>
+        </div>
+      </div>
+    )}
     </>
   )
 }
@@ -431,6 +431,264 @@ function extractVenue(description: string | null): string | null {
   const match = description.match(/^Venue:\s*(.+)/i)
   return match ? match[1].trim() : null
 }
+
+function getDaysUntil(dateStr: string): number {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const event = new Date(dateStr + 'T00:00:00')
+  event.setHours(0, 0, 0, 0)
+  return Math.round((event.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+}
+
+// ─── City travel data ─────────────────────────────────────────────────────────
+
+type CityEntry = {
+  airport: string
+  transport: string
+  climate: Record<number, string>
+}
+
+const CITY_DATA: Record<string, CityEntry> = {
+  'Sydney': {
+    airport: 'Sydney Kingsford Smith Airport (SYD), 25–40 min by taxi or rideshare from the CBD',
+    transport: 'Airport Link train to Central Station in 13 min. On race days, public transport is strongly recommended — parking near the SCG, ICC Sydney, and Sydney Olympic Park fills hours before start.',
+    climate: {
+      1:  'Hot, 20–28°C. Afternoon storms possible — choose early waves.',
+      2:  'Hot, 19–27°C. Heatwaves possible. Hydrate heavily.',
+      3:  'Warm, 18–25°C. Late summer. Pleasant racing conditions.',
+      4:  'Mild, 14–22°C. Ideal conditions. Best autumn racing month.',
+      5:  'Cool, 11–19°C. Good conditions. Layer for warm-up.',
+      6:  'Cool and dry, 9–17°C. Excellent for endurance events.',
+      7:  'Cool and dry, 8–16°C. Best month for outdoor racing.',
+      8:  'Mild and dry, 9–18°C. Excellent racing conditions.',
+      9:  'Spring, 12–21°C. Warming up. Comfortable.',
+      10: 'Warm, 14–23°C. Spring. Can be breezy near the coast.',
+      11: 'Warm, 17–25°C. Heating up. Pre-hydrate and start conservative.',
+      12: 'Hot, 19–27°C. Full summer. Seek early wave starts.',
+    },
+  },
+  'Melbourne': {
+    airport: 'Melbourne Airport (MEL), 30–50 min by taxi or SkyBus from the CBD',
+    transport: 'SkyBus to Southern Cross Station (30–40 min). No direct train link. CBD trams are free in the central zone — the most convenient option for CBD venues.',
+    climate: {
+      1:  'Unpredictable, 14–26°C. Famous four-seasons-in-one-day — always pack a layer.',
+      2:  'Warm, 14–25°C. Heatwaves possible.',
+      3:  'Warm, 13–23°C. Autumn conditions settling in.',
+      4:  'Cool, 10–19°C. Variable but good racing conditions.',
+      5:  'Cool, 8–15°C. Brisk mornings. Warm-up gear needed.',
+      6:  'Cold and wet, 6–13°C. Waterproof layer essential for outdoor events.',
+      7:  'Cold, 5–13°C. Coldest month. Allow extra warm-up time.',
+      8:  'Cool, 6–14°C. Conditions improving through the month.',
+      9:  'Mild, 8–16°C. Spring begins but weather stays unpredictable.',
+      10: 'Mild, 9–19°C. Layers still helpful.',
+      11: 'Warm, 12–22°C. Can be hot or stormy.',
+      12: 'Warm, 13–24°C. Summer arrives. Watch for extreme heat days.',
+    },
+  },
+  'Perth': {
+    airport: 'Perth Airport (PER), 20–30 min by taxi or rideshare from the CBD',
+    transport: 'Transperth train from Airport Central station to Perth Station (15 min). Free CAT buses operate in the CBD. RAC Arena and Perth venues are well-served by public transport.',
+    climate: {
+      1:  'Very hot and dry, 18–31°C. Start early — heat builds quickly.',
+      2:  'Hot and dry, 18–31°C. Hottest month. Shade and hydration critical.',
+      3:  'Hot, 16–29°C. Heat easing through the month.',
+      4:  'Warm, 13–25°C. Autumn. Very pleasant racing conditions.',
+      5:  'Mild, 10–20°C. Excellent conditions. Minimal rain.',
+      6:  'Cool and wet, 8–17°C. Perth winter — main rain season.',
+      7:  'Cool and wet, 8–17°C. Wettest month. Prepare for rain.',
+      8:  'Cool, 8–17°C. Rain easing. Good for endurance events.',
+      9:  'Mild, 9–19°C. Spring — near-ideal racing conditions.',
+      10: 'Warm, 11–22°C. Heating up. Good conditions.',
+      11: 'Warm, 14–26°C. Heating up. Recommend early starts.',
+      12: 'Hot, 17–30°C. Full summer heat returns.',
+    },
+  },
+  'Brisbane': {
+    airport: 'Brisbane Airport (BNE), 25–35 min by Airtrain or taxi from the CBD',
+    transport: 'Airtrain to Central Station every 15 min (30 min journey). Go Card accepted. Well-connected to the CBD and South Bank venues.',
+    climate: {
+      1:  'Hot and humid, 20–29°C. Wet season — afternoon storms.',
+      2:  'Hot and humid, 20–29°C. Wettest month.',
+      3:  'Warm, 18–28°C. Humidity easing.',
+      4:  'Warm, 15–26°C. Excellent autumn conditions.',
+      5:  'Mild, 11–23°C. Near-perfect racing weather.',
+      6:  'Cool and dry, 9–21°C. Best racing month.',
+      7:  'Cool and dry, 9–20°C. Brisbane winter is mild and dry.',
+      8:  'Mild, 10–23°C. Excellent conditions.',
+      9:  'Warm, 13–26°C. Spring warming.',
+      10: 'Warm, 16–28°C. Getting warmer and humid.',
+      11: 'Hot, 18–29°C. Storm season begins.',
+      12: 'Hot and humid, 20–29°C. Wet season approaching.',
+    },
+  },
+  'Gold Coast': {
+    airport: 'Gold Coast Airport (OOL), 35–45 min by taxi or bus to Broadbeach/Surfers Paradise',
+    transport: 'G:link light rail connects Broadbeach South to Helensvale. Bus routes cover the broader Gold Coast area.',
+    climate: {
+      1:  'Hot, 22–29°C. Summer. Humid with afternoon rain.',
+      2:  'Hot, 22–29°C. Wet season peak.',
+      3:  'Warm, 20–27°C. Late summer cooling.',
+      4:  'Warm, 17–25°C. Excellent autumn conditions.',
+      5:  'Mild, 13–22°C. Good racing weather.',
+      6:  'Cool, 10–20°C. Best month for outdoor events.',
+      7:  'Cool, 10–20°C. Dry and comfortable. Ideal racing conditions.',
+      8:  'Mild, 11–21°C. Excellent conditions.',
+      9:  'Mild, 14–23°C. Spring warmth.',
+      10: 'Warm, 17–26°C. Heating up.',
+      11: 'Warm, 19–27°C. Pre-summer.',
+      12: 'Hot, 21–29°C. Summer returns.',
+    },
+  },
+  'Cairns': {
+    airport: 'Cairns Airport (CNS), 10–15 min by taxi or rideshare from the CBD',
+    transport: 'No train or light rail. Taxi and rideshare are the main options. The city centre is compact — most venues are within 15 min of the CBD or airport.',
+    climate: {
+      1:  'Hot and wet, 23–32°C. Wet season. Heavy rain and high humidity.',
+      2:  'Hot and wet, 23–32°C. Wettest and most humid month.',
+      3:  'Hot and wet, 23–32°C. Wet season winding down.',
+      4:  'Warm, 22–31°C. Transitional. Humidity easing.',
+      5:  'Warm and dry, 19–29°C. Excellent conditions. Dry season begins.',
+      6:  'Warm and dry, 17–27°C. Best month for outdoor racing in Cairns.',
+      7:  'Warm and dry, 17–26°C. Ideal conditions. Cool evenings.',
+      8:  'Warm and dry, 18–27°C. Excellent racing weather.',
+      9:  'Warm, 20–29°C. Build-up season beginning.',
+      10: 'Warm and humid, 22–31°C. Humidity rising.',
+      11: 'Hot and humid, 23–32°C. Storm season begins.',
+      12: 'Hot and wet, 23–32°C. Wet season returns.',
+    },
+  },
+  'Auckland': {
+    airport: 'Auckland International Airport (AKL), 35–60 min by rail or taxi to the CBD',
+    transport: 'AT Metro Rail to Britomart in 45 min. Highly recommended — Auckland road traffic is heavy, especially on weekends. Snapper card for transit.',
+    climate: {
+      1:  'Warm, 16–24°C. Summer. Can be humid.',
+      2:  'Warm, 16–24°C. Peak summer. Sunscreen essential.',
+      3:  'Warm, 14–22°C. Late summer cooling.',
+      4:  'Mild, 12–19°C. Autumn. Variable but pleasant.',
+      5:  'Cool, 9–16°C. Comfortable for racing.',
+      6:  'Cool and wet, 7–13°C. Auckland winter. Rain gear recommended.',
+      7:  'Cool and wet, 7–13°C. Wettest month. Prepare accordingly.',
+      8:  'Cool, 7–14°C. Winter conditions easing.',
+      9:  'Mild, 9–16°C. Spring begins.',
+      10: 'Mild, 11–18°C. Good outdoor conditions.',
+      11: 'Warm, 12–20°C. Spring warming.',
+      12: 'Warm, 14–22°C. Summer returning.',
+    },
+  },
+  'Taupo': {
+    airport: 'Taupo Airport (TUO) for regional flights, or Hamilton Airport (HLZ, 130 km) or Rotorua Airport (ROT, 80 km) for more connections',
+    transport: 'Car hire is strongly recommended — Taupo has very limited public transport. From Auckland, it\'s a 4 hr drive on SH1. From Rotorua, 1 hr on SH5.',
+    climate: {
+      1:  'Warm, 13–24°C. Summer. Great conditions for IRONMAN Taupo.',
+      2:  'Warm, 13–23°C. Consistent summer conditions.',
+      3:  'Mild, 11–21°C. Cooling. Still comfortable.',
+      4:  'Cool, 7–16°C. Autumn. Lake water cooling quickly.',
+      5:  'Cool, 5–13°C. Cold mornings. Layer up.',
+      6:  'Cold, 2–10°C. Winter. Snow possible on nearby peaks.',
+      7:  'Cold, 2–9°C. Coldest month. Lake is cold.',
+      8:  'Cold, 2–10°C. Cold but dry.',
+      9:  'Cool, 5–14°C. Spring beginning.',
+      10: 'Mild, 7–16°C. Good conditions.',
+      11: 'Warm, 9–19°C. Spring warming.',
+      12: 'Warm, 12–22°C. Summer approaching.',
+    },
+  },
+  'Singapore': {
+    airport: 'Singapore Changi Airport (SIN), 30–40 min by MRT or taxi to Marina Bay / CBD',
+    transport: 'MRT East West Line from Changi to City Hall in ~30 min (SGD $2.50). The MRT is the best option — efficient, air-conditioned and direct to most race venues.',
+    climate: {
+      1:  'Hot and humid, 24–31°C. Northeast monsoon. Frequent rain.',
+      2:  'Hot and humid, 24–32°C. Drier period relative to other months.',
+      3:  'Hot and humid, 25–32°C. Inter-monsoon. Occasional heavy rain.',
+      4:  'Hot and humid, 25–33°C. One of the warmest months.',
+      5:  'Hot and humid, 25–33°C. Afternoon thunderstorms common.',
+      6:  'Hot and humid, 25–32°C. Southwest monsoon begins.',
+      7:  'Hot and humid, 25–31°C. Relatively drier.',
+      8:  'Hot and humid, 25–31°C. Haze season possible.',
+      9:  'Hot and humid, 25–31°C. Inter-monsoon. Heavy showers.',
+      10: 'Hot and humid, 24–31°C. Rain increases.',
+      11: 'Hot and humid, 24–31°C. Northeast monsoon. Wet.',
+      12: 'Hot and humid, 24–30°C. Wettest month. Start early, hydrate heavily.',
+    },
+  },
+  'Bangkok': {
+    airport: 'Suvarnabhumi Airport (BKK), 45–90 min by Airport Rail Link or taxi to central Bangkok',
+    transport: 'Airport Rail Link to Phaya Thai (28 min, THB 45) connects to the BTS Skytrain network. Traffic in Bangkok is severe — public transit is highly recommended for event days.',
+    climate: {
+      1:  'Warm and dry, 20–32°C. Cool season. Best outdoor racing month.',
+      2:  'Warm and dry, 22–33°C. Excellent conditions.',
+      3:  'Hot, 24–35°C. Getting very hot. Early starts essential.',
+      4:  'Very hot, 25–36°C. Hottest month. Pre-dawn starts for outdoor events.',
+      5:  'Hot and humid, 24–34°C. Monsoon begins.',
+      6:  'Hot and wet, 24–33°C. Heavy rain season.',
+      7:  'Hot and wet, 24–32°C. Consistent rain.',
+      8:  'Hot and wet, 24–32°C. Wettest period.',
+      9:  'Hot and wet, 24–32°C. Rain continues.',
+      10: 'Warm and wet, 23–31°C. Rain easing late month.',
+      11: 'Warm, 21–31°C. Dry season returning. Good conditions.',
+      12: 'Warm and dry, 19–31°C. Cool season. Excellent for racing.',
+    },
+  },
+  'Tokyo': {
+    airport: 'Haneda Airport (HND, 30–40 min to central Tokyo) or Narita Airport (NRT, 60–90 min)',
+    transport: 'From Haneda: Tokyo Monorail or Keikyu Line (30 min). From Narita: Narita Express (60 min). The Tokyo Metro and JR lines are the best way to reach any event venue — extremely punctual.',
+    climate: {
+      1:  'Cold and dry, 2–10°C. Coldest month. Dress in layers.',
+      2:  'Cold, 2–11°C. Snow possible. Warm gear essential.',
+      3:  'Cool, 5–15°C. Cherry blossom season. Excellent outdoor conditions.',
+      4:  'Mild, 10–20°C. Perfect racing weather. Peak spring.',
+      5:  'Warm, 14–24°C. Excellent conditions before summer heat.',
+      6:  'Warm and rainy, 18–27°C. Rainy season (tsuyu) — expect rain.',
+      7:  'Hot and humid, 22–31°C. Very humid. Hydrate aggressively.',
+      8:  'Very hot and humid, 23–33°C. Hottest month. Early starts essential.',
+      9:  'Warm, 20–29°C. Humidity easing. Some typhoon risk.',
+      10: 'Mild, 14–22°C. Excellent autumn conditions. Best racing month.',
+      11: 'Cool, 8–17°C. Comfortable. Autumn colours.',
+      12: 'Cold, 4–12°C. Crisp and dry. Good for winter racing.',
+    },
+  },
+  'Seoul': {
+    airport: 'Incheon International Airport (ICN), 50–60 min by AREX express train to Seoul Station',
+    transport: 'AREX Direct Train to Seoul Station (43 min, KRW 9,500). Highly efficient. Seoul subway connects to all major event venues.',
+    climate: {
+      1:  'Very cold, -6–3°C. Korean winter. Multiple thermal layers essential.',
+      2:  'Cold, -4–5°C. Still sub-zero. Full winter gear required.',
+      3:  'Cool, 1–12°C. Spring approaching. Variable conditions.',
+      4:  'Mild, 7–18°C. Good racing conditions.',
+      5:  'Warm, 12–24°C. Excellent month for outdoor events.',
+      6:  'Warm and humid, 17–28°C. Pre-monsoon. Warming quickly.',
+      7:  'Hot and rainy, 21–30°C. Monsoon season. Heavy rain.',
+      8:  'Hot and humid, 22–31°C. Typhoon risk. Very humid.',
+      9:  'Warm, 16–26°C. Humidity easing. Good racing conditions.',
+      10: 'Mild, 9–20°C. Excellent autumn conditions. Ideal month for racing.',
+      11: 'Cool, 2–12°C. Cold arriving quickly. Layer up.',
+      12: 'Cold, -4–4°C. Winter returns.',
+    },
+  },
+  'Hong Kong': {
+    airport: 'Hong Kong International Airport (HKG), 24 min by Airport Express to Hong Kong Station',
+    transport: 'Airport Express is the clear best option (HKD 115, 24 min). The MTR covers all major event areas on Hong Kong Island and Kowloon. Driving or parking on event days is not recommended.',
+    climate: {
+      1:  'Cool and dry, 14–18°C. Comfortable for racing.',
+      2:  'Cool, 14–19°C. Can be misty and damp.',
+      3:  'Mild, 17–22°C. Humid and occasionally foggy.',
+      4:  'Warm and humid, 21–26°C. Humidity building.',
+      5:  'Warm and humid, 24–29°C. Getting hot.',
+      6:  'Hot and wet, 26–31°C. Typhoon season begins.',
+      7:  'Hot and wet, 27–32°C. Peak typhoon season. Check race status.',
+      8:  'Hot and wet, 27–32°C. Hottest and wettest month.',
+      9:  'Hot and humid, 26–31°C. Typhoon risk. High humidity.',
+      10: 'Warm, 22–28°C. Typhoon risk easing. Good conditions.',
+      11: 'Mild, 18–24°C. Excellent racing weather.',
+      12: 'Cool, 15–20°C. Best outdoor racing month. Dry and comfortable.',
+    },
+  },
+}
+
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+]
 
 // ─── About section (discipline-aware editorial) ───────────────────────────────
 
@@ -1171,5 +1429,121 @@ function QuickFactsSidebar({ discipline }: { discipline: string }) {
         </div>
       ))}
     </div>
+  )
+}
+
+// ─── Plan Your Trip ───────────────────────────────────────────────────────────
+
+function PlanYourTripSection({ event, venue }: { event: EventRow; venue: string | null }) {
+  const month = new Date(event.start_date + 'T00:00:00').getMonth() + 1
+  const monthName = MONTH_NAMES[month - 1]
+  const cityData = event.city ? CITY_DATA[event.city] : undefined
+  const climate = cityData?.climate[month]
+
+  const mapsQuery = encodeURIComponent(
+    [venue, event.city, event.country].filter(Boolean).join(', '),
+  )
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`
+
+  const isIndoor = ['HYROX', 'CrossFit', 'Deka Fit'].includes(event.discipline)
+  const arrivalTime = isIndoor ? '90 minutes' : '2 hours'
+
+  return (
+    <section>
+      <SectionHeading>Plan Your Trip</SectionHeading>
+      <div className="space-y-4">
+
+        {/* Venue + Maps */}
+        <div className="card space-y-3">
+          <div className="flex items-center gap-2 text-sm font-semibold text-ink">
+            <MapPin className="h-4 w-4 text-mint shrink-0" />
+            Venue &amp; Location
+          </div>
+          <p className="text-sm text-ink-muted">
+            {venue && <span className="font-medium text-ink">{venue} — </span>}
+            {[event.city, event.region, event.country].filter(Boolean).join(', ')}
+          </p>
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-secondary inline-flex"
+          >
+            <MapPin className="h-4 w-4" />
+            Open in Google Maps
+          </a>
+        </div>
+
+        {/* Getting there */}
+        {cityData ? (
+          <div className="card space-y-4">
+            <div className="flex items-center gap-2 text-sm font-semibold text-ink">
+              <Train className="h-4 w-4 text-mint shrink-0" />
+              Getting There
+            </div>
+            <div className="space-y-3 text-sm text-ink-muted">
+              <div>
+                <span className="font-medium text-ink">Nearest airport — </span>
+                {cityData.airport}.
+              </div>
+              <div>
+                <span className="font-medium text-ink">Public transport — </span>
+                {cityData.transport}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="card space-y-2">
+            <div className="flex items-center gap-2 text-sm font-semibold text-ink">
+              <Train className="h-4 w-4 text-mint shrink-0" />
+              Getting There
+            </div>
+            <p className="text-sm text-ink-muted">
+              Check the official event website for transport and parking details specific to this venue.
+              Many race venues restrict parking on event day or operate shuttle services from nearby
+              car parks — confirm the logistics page before race week.
+            </p>
+          </div>
+        )}
+
+        {/* Climate */}
+        {climate && (
+          <div className="card space-y-2">
+            <div className="flex items-center gap-2 text-sm font-semibold text-ink">
+              <Thermometer className="h-4 w-4 text-mint shrink-0" />
+              {monthName} in {event.city}
+            </div>
+            <p className="text-sm text-ink-muted">{climate}</p>
+          </div>
+        )}
+
+        {/* Arrival timing */}
+        <div className="card space-y-2">
+          <div className="flex items-center gap-2 text-sm font-semibold text-ink">
+            <Clock className="h-4 w-4 text-mint shrink-0" />
+            Race Day Arrival
+          </div>
+          <p className="text-sm text-ink-muted">
+            Plan to arrive at least <span className="font-medium text-ink">{arrivalTime} before your wave start</span>.
+            Allow time for bag drop, bib collection, warm-up and locating your start corral.
+            {isIndoor
+              ? ' Indoor event venues are typically easy to navigate once inside, but entry queues can form during peak wave windows.'
+              : ' Outdoor events often use large sites with multiple entry gates — download the venue map in advance.'}
+          </p>
+        </div>
+
+        {/* Travel tip */}
+        <div className="card space-y-2 border-mint/20 bg-mint/5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-mint">Travel Tip</p>
+          <p className="text-sm text-ink-muted leading-relaxed">
+            Book accommodation as soon as your registration is confirmed. Hotels near major race
+            venues fill months in advance — particularly for multi-day events like IRONMAN and
+            Spartan weekends. Check whether your event has an official accommodation partner or
+            athlete block rates before searching independently.
+          </p>
+        </div>
+
+      </div>
+    </section>
   )
 }
