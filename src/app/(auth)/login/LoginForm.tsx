@@ -1,13 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 
 export function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const passwordReset = searchParams.get('reset') === 'success'
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -33,6 +37,12 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {passwordReset && (
+        <p className="rounded-lg border border-mint/30 bg-mint/10 px-3 py-2 text-sm text-mint">
+          Password updated — please log in with your new password.
+        </p>
+      )}
+
       <Input
         id="email"
         type="email"
@@ -42,18 +52,30 @@ export function LoginForm() {
         autoComplete="email"
         required
       />
-      <Input
-        id="password"
-        type="password"
-        label="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        autoComplete="current-password"
-        required
-      />
+
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <label htmlFor="password" className="label">Password</label>
+          <Link
+            href="/forgot-password"
+            className="text-xs text-ink-muted hover:text-mint transition-colors"
+          >
+            Forgot password?
+          </Link>
+        </div>
+        <input
+          id="password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          autoComplete="current-password"
+          required
+          className="input w-full"
+        />
+      </div>
 
       {error && (
-        <p className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2 text-sm text-red-400">
+        <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400">
           {error}
         </p>
       )}
