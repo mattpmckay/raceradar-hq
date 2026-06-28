@@ -85,6 +85,7 @@ type EventRow = {
   start_date: string
   end_date: string | null
   registration_deadline: string | null
+  registration_status: 'open' | 'closing_soon' | 'sold_out' | 'coming_soon' | null
   website_url: string | null
   description: string | null
   organiser: string | null
@@ -179,7 +180,7 @@ export default async function EventDetailPage({ params }: PageProps) {
   const [{ data: event }, { data: relatedRaw }, { data: { user } }] = await Promise.all([
     supabase
       .from('events')
-      .select('id, title, slug, discipline, event_type, city, region, country, start_date, end_date, registration_deadline, website_url, description, organiser, is_featured')
+      .select('id, title, slug, discipline, event_type, city, region, country, start_date, end_date, registration_deadline, registration_status, website_url, description, organiser, is_featured')
       .eq('slug', slug)
       .eq('is_published', true)
       .single(),
@@ -195,16 +196,21 @@ export default async function EventDetailPage({ params }: PageProps) {
 
   if (!event) notFound()
 
-  const isSaved = user
-    ? await supabase
-        .from('favourites')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('entity_type', 'event')
-        .eq('entity_id', event.id)
-        .single()
-        .then(({ data }) => !!data)
-    : false
+  const [isSaved, saveCount] = await Promise.all([
+    user
+      ? supabase
+          .from('favourites')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('entity_type', 'event')
+          .eq('entity_id', event.id)
+          .single()
+          .then(({ data }) => !!data)
+      : Promise.resolve(false),
+    supabase
+      .rpc('get_event_save_count', { p_event_id: event.id })
+      .then(({ data }) => (data as number | null) ?? 0),
+  ])
 
   const today = new Date().toISOString().split('T')[0]
   const related = (relatedRaw ?? [])
@@ -329,6 +335,11 @@ export default async function EventDetailPage({ params }: PageProps) {
               )}
             </div>
 
+            {/* Registration status */}
+            {event.registration_status && (
+              <RegistrationStatusBadge status={event.registration_status} />
+            )}
+
             {/* Countdown */}
             {(() => {
               const days = getDaysUntil(event.start_date)
@@ -371,6 +382,12 @@ export default async function EventDetailPage({ params }: PageProps) {
             </a>
 
             <SaveButton eventId={event.id} initialSaved={isSaved} />
+
+            {saveCount > 0 && (
+              <p className="text-center text-xs text-ink-subtle">
+                {saveCount} {saveCount === 1 ? 'athlete' : 'athletes'} saved this event
+              </p>
+            )}
           </div>
 
           {/* Quick facts */}
@@ -1560,5 +1577,31 @@ function PlanYourTripSection({ event, venue }: { event: EventRow; venue: string 
 
       </div>
     </section>
+  )
+}
+
+// ─── Registration status badge ────────────────────────────────────────────────
+
+const REG_STATUS_CONFIG = {
+  open:         { label: 'Registration Open',  color: '#22C55E', bg: 'rgba(34,197,94,0.12)',   dot: 'bg-green-400' },
+  closing_soon: { label: 'Closing Soon',        color: '#F59E0B', bg: 'rgba(245,158,11,0.12)',  dot: 'bg-amber-400' },
+  sold_out:     { label: 'Sold Out',            color: '#EF4444', bg: 'rgba(239,68,68,0.12)',   dot: 'bg-red-400' },
+  coming_soon:  { label: 'Coming Soon',         color: '#94A3B8', bg: 'rgba(148,163,184,0.12)', dot: 'bg-slate-400' },
+} as const
+
+function RegistrationStatusBadge({
+  status,
+}: {
+  status: 'open' | 'closing_soon' | 'sold_out' | 'coming_soon'
+}) {
+  const cfg = REG_STATUS_CONFIG[status]
+  return (
+    <div
+      className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium"
+      style={{ background: cfg.bg, color: cfg.color }}
+    >
+      <span className={`h-2 w-2 rounded-full shrink-0 ${cfg.dot} animate-pulse`} />
+      {cfg.label}
+    </div>
   )
 }

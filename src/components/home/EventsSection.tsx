@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import Link from 'next/link'
+import { HeartButton } from '@/components/events/HeartButton'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -163,9 +164,11 @@ const ROW_DEFS: RowDef[] = [
 export function EventsSection({
   events,
   error,
+  savedIds = new Set(),
 }: {
   events: SupabaseEvent[]
   error?: string
+  savedIds?: Set<string>
 }) {
   if (error) {
     return (
@@ -207,7 +210,7 @@ export function EventsSection({
     <section className="relative pb-24 pt-4">
       <div className="container-page space-y-16">
         {rows.map((row) => (
-          <SportRow key={row.key} row={row} />
+          <SportRow key={row.key} row={row} savedIds={savedIds} />
         ))}
       </div>
     </section>
@@ -218,7 +221,7 @@ export function EventsSection({
 
 type BuiltRow = RowDef & { events: Event[] }
 
-function SportRow({ row }: { row: BuiltRow }) {
+function SportRow({ row, savedIds }: { row: BuiltRow; savedIds: Set<string> }) {
   return (
     <div>
       <div className="mb-6 flex items-end justify-between">
@@ -244,7 +247,7 @@ function SportRow({ row }: { row: BuiltRow }) {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {row.events.map((event) => (
-          <EventCard key={event.id} event={event} />
+          <EventCard key={event.id} event={event} initialSaved={savedIds.has(event.id)} />
         ))}
       </div>
 
@@ -263,15 +266,12 @@ function SportRow({ row }: { row: BuiltRow }) {
 
 // ─── Event card ───────────────────────────────────────────────────────────────
 
-function EventCard({ event }: { event: Event }) {
+function EventCard({ event, initialSaved }: { event: Event; initialSaved: boolean }) {
   const style = SPORT_STYLES[event.sport] ?? defaultStyle
 
   return (
-    <Link
-      href={`/events/${event.slug}`}
-      className="group relative flex flex-col gap-5 overflow-hidden rounded-2xl border border-wire bg-panel p-6 transition-all duration-300 hover:border-wire-bright hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30"
-    >
-      {/* Badge + date */}
+    <div className="group relative flex flex-col gap-5 overflow-hidden rounded-2xl border border-wire bg-panel p-6 transition-all duration-300 hover:border-wire-bright hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30">
+      {/* Badge + save + date */}
       <div className="flex items-center justify-between gap-3">
         <span
           className="rounded-full px-3 py-1 text-xs font-semibold"
@@ -279,9 +279,12 @@ function EventCard({ event }: { event: Event }) {
         >
           {event.sport}
         </span>
-        <div className="text-right">
-          <div className="font-heading text-2xl font-bold leading-none text-ink">{event.date}</div>
-          <div className="mt-0.5 text-xs text-ink-muted">{event.month}</div>
+        <div className="relative z-10 flex items-center gap-2.5">
+          <HeartButton eventId={event.id} initialSaved={initialSaved} />
+          <div className="text-right">
+            <div className="font-heading text-2xl font-bold leading-none text-ink">{event.date}</div>
+            <div className="mt-0.5 text-xs text-ink-muted">{event.month}</div>
+          </div>
         </div>
       </div>
 
@@ -312,12 +315,19 @@ function EventCard({ event }: { event: Event }) {
         </span>
       </div>
 
+      {/* Full-card invisible link */}
+      <Link
+        href={`/events/${event.slug}`}
+        className="absolute inset-0 rounded-2xl"
+        aria-label={`View ${event.name}`}
+      />
+
       {/* Accent line on hover */}
       <div
         className="absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{ background: `linear-gradient(90deg, transparent, ${style.text}, transparent)` }}
       />
-    </Link>
+    </div>
   )
 }
 

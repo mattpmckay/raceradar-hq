@@ -166,6 +166,7 @@ export type Database = {
           country: string
           region: string | null
           city: string | null
+          registration_status: 'open' | 'closing_soon' | 'sold_out' | 'coming_soon' | null
           is_published: boolean
           is_featured: boolean
           created_at: string
@@ -182,6 +183,7 @@ export type Database = {
           start_date: string
           end_date?: string | null
           registration_deadline?: string | null
+          registration_status?: 'open' | 'closing_soon' | 'sold_out' | 'coming_soon' | null
           description?: string | null
           image_url?: string | null
           website_url?: string | null
@@ -205,6 +207,7 @@ export type Database = {
           start_date?: string
           end_date?: string | null
           registration_deadline?: string | null
+          registration_status?: 'open' | 'closing_soon' | 'sold_out' | 'coming_soon' | null
           description?: string | null
           image_url?: string | null
           website_url?: string | null
@@ -260,7 +263,12 @@ export type Database = {
       }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      get_event_save_count: {
+        Args: { p_event_id: string }
+        Returns: number
+      }
+    }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>
   }
