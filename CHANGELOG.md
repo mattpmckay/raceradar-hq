@@ -4,6 +4,41 @@ All significant changes to the product are recorded here. Format: sprint number,
 
 ---
 
+## Sprint 6 — Events Page Discovery Upgrade
+**Date:** 2026-06-28
+**Status:** Deployed ✓
+
+### Features Added
+- **Save/heart on event cards** — Heart button (icon-only) on every event card using an overlay link pattern. The card `<Link>` becomes an invisible absolute overlay; heart sits above it via `z-10`. Stops propagation to prevent card navigation on heart click. Correct saved/unsaved state server-prefetched per user.
+- **Multi-field search** — Search now covers title, city, country, and discipline. Previously title-only; searching "Sydney" returned zero results.
+- **Debounced live search** — 350ms debounce after keystroke; immediate clear when input emptied. Removed Enter/blur triggers.
+- **Month window filter** — "This month / Next 3 months / Next 6 months" dropdown. Translates to Supabase date range on the server. Works alongside all other filters.
+- **Event counts on discipline pills** — Live count of matching events per discipline (e.g. "HYROX 23"). Counts respect the active time window but not the active discipline filter.
+- **`loading.tsx` skeleton** — Full-page skeleton (hero + pills + filter bar + 8 card skeletons) shown during navigation to the events page.
+- **Better empty state** — Contextual copy depending on which filters are active; "Reset filters" button preserves discipline when clearing secondary filters.
+- **Active filter chips for all three filters** — Search query, country, and time window each get a removable chip.
+- **`useFavourite` shared hook** — Extracted toggle logic shared between `SaveButton` (sidebar) and `HeartButton` (cards).
+- **Favourites page** — Cards now show filled heart (initialSaved={true}).
+- **Product documentation** — ROADMAP.md, CHANGELOG.md, PRODUCT_PRINCIPLES.md created.
+
+### Files Affected
+- `src/hooks/useFavourite.ts` *(new)*
+- `src/components/events/HeartButton.tsx` *(new)*
+- `src/app/(public)/events/loading.tsx` *(new)*
+- `ROADMAP.md` *(new)*
+- `CHANGELOG.md` *(new)*
+- `PRODUCT_PRINCIPLES.md` *(new)*
+- `src/components/events/SaveButton.tsx`
+- `src/components/events/EventCard.tsx`
+- `src/app/(public)/events/page.tsx`
+- `src/components/events/EventFilters.tsx`
+- `src/app/dashboard/favourites/page.tsx`
+
+### Breaking Changes
+None. `EventCard` gained an optional `initialSaved` prop (default `false`) — existing call sites without the prop continue to work.
+
+---
+
 ## Sprint 5 — Save / Favourites
 **Date:** 2026-06-28
 **Status:** Deployed ✓

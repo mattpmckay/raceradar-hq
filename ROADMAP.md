@@ -69,6 +69,9 @@ Replaced tabbed filter homepage with permanent sport rows (Featured, HYROX, Cros
 ### Sprint 4a — Event Detail: Sticky CTA, Countdown, Plan Your Trip, iCal (2026-06-28)
 Sticky mobile Register Now bar. Countdown timer in sidebar. Plan Your Trip upgraded from "Coming Soon" to real venue/airport/climate/transport cards for 13 APAC cities. iCal export endpoint.
 
+### Sprint 6 — Events Page Discovery Upgrade (2026-06-28)
+Heart save button on every event card (overlay link pattern). Multi-field search (title, city, country, discipline) with 350ms debounce. Month window filter (This month / Next 3 / Next 6). Event counts on discipline pills. `loading.tsx` skeleton. Better empty state with Reset Filters. `useFavourite` shared hook. Product documentation created (ROADMAP, CHANGELOG, PRODUCT_PRINCIPLES).
+
 ### Sprint 5 — Save / Favourites (2026-06-28)
 Toggle API at `POST /api/favourites`. SaveButton client component with optimistic UI. Wired into event detail sidebar with server-prefetched initial state. Dashboard token migration.
 
@@ -76,20 +79,8 @@ Toggle API at `POST /api/favourites`. SaveButton client component with optimisti
 
 ## Current Sprint
 
-### Sprint 6 — Events Page: Discovery Upgrade (in planning)
-
-**Objective:** Turn the Events page into the best discovery experience possible.
-
-**Planned deliverables:**
-1. Save/Favourite from event cards (heart overlay, server-prefetched saved IDs)
-2. Debounced live search (title + city + country + discipline)
-3. Month filter (This Month / Next 3 Months / Next 6 Months)
-4. Event count on discipline pills ("HYROX (23)")
-5. `loading.tsx` skeleton for the events route
-6. Better empty state with "Reset Filters" button
-7. Mobile filter layout improvements
-
-**Status:** Awaiting approval before coding begins.
+### Sprint 7 — TBD
+To be defined. Leading candidates are listed under Next Planned Sprint below.
 
 ---
 
@@ -130,8 +121,7 @@ Known shortcuts and areas that need attention.
 |---|---|---|
 | Plan Your Trip city data is hardcoded | `events/[slug]/page.tsx` — `CITY_DATA` | Works for 13 APAC cities; will need DB table or CMS as cities expand |
 | Dashboard pages use `user!.id` (non-null assertion) | `dashboard/page.tsx`, `dashboard/favourites/page.tsx` | Safe because middleware protects these routes, but fragile if middleware config changes |
-| Search only debounces on blur/Enter | `EventFilters.tsx` | Sprint 6 will fix with proper debounce |
-| EventCard has no saved state | `components/events/EventCard.tsx` | Sprint 6 will add heart overlay |
+| Homepage event cards have no saved state | `components/home/EventsSection.tsx` | Homepage uses its own inline EventCard — not updated in Sprint 6 |
 | No pagination on events listing | `events/page.tsx` | Capped at 48 — fine for current scale |
 
 ---
