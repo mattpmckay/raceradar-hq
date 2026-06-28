@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Calendar, MapPin, Globe, ArrowLeft, Flag, CheckCircle, Clock, Train, Car, Users, Thermometer } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/Badge'
+import { SaveButton } from '@/components/events/SaveButton'
 import { formatDate } from '@/lib/utils'
 import type { Metadata } from 'next'
 
@@ -175,7 +176,7 @@ export default async function EventDetailPage({ params }: PageProps) {
   const { slug } = await params
   const supabase = await createClient()
 
-  const [{ data: event }, { data: relatedRaw }] = await Promise.all([
+  const [{ data: event }, { data: relatedRaw }, { data: { user } }] = await Promise.all([
     supabase
       .from('events')
       .select('id, title, slug, discipline, event_type, city, region, country, start_date, end_date, registration_deadline, website_url, description, organiser, is_featured')
@@ -189,9 +190,21 @@ export default async function EventDetailPage({ params }: PageProps) {
       .neq('slug', slug)
       .order('start_date', { ascending: true })
       .limit(20),
+    supabase.auth.getUser(),
   ])
 
   if (!event) notFound()
+
+  const isSaved = user
+    ? await supabase
+        .from('favourites')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('entity_type', 'event')
+        .eq('entity_id', event.id)
+        .single()
+        .then(({ data }) => !!data)
+    : false
 
   const today = new Date().toISOString().split('T')[0]
   const related = (relatedRaw ?? [])
@@ -356,6 +369,8 @@ export default async function EventDetailPage({ params }: PageProps) {
             >
               <Calendar className="h-4 w-4" /> Add to Calendar
             </a>
+
+            <SaveButton eventId={event.id} initialSaved={isSaved} />
           </div>
 
           {/* Quick facts */}

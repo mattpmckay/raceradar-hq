@@ -25,8 +25,8 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-white">Welcome back{displayName ? `, ${displayName}` : ''}.</h1>
-        <p className="mt-1 text-gray-400">Here&apos;s your event overview.</p>
+        <h1 className="text-2xl font-bold text-ink">Welcome back{displayName ? `, ${displayName}` : ''}.</h1>
+        <p className="mt-1 text-ink-muted">Here&apos;s your event overview.</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
@@ -35,16 +35,16 @@ export default async function DashboardPage() {
           { icon: Calendar, label: 'Upcoming Events', value: '—', href: '/events' },
           { icon: Trophy, label: 'Series', value: '—', href: '/championships' },
         ].map(({ icon: Icon, label, value, href }) => (
-          <Link key={label} href={href} className="card hover:border-brand-500/50 transition-colors">
-            <Icon className="h-5 w-5 text-brand-500 mb-3" />
-            <div className="text-2xl font-bold text-white">{value}</div>
-            <div className="text-sm text-gray-400">{label}</div>
+          <Link key={label} href={href} className="card hover:border-mint/40 transition-colors">
+            <Icon className="h-5 w-5 text-mint mb-3" />
+            <div className="text-2xl font-bold text-ink">{value}</div>
+            <div className="text-sm text-ink-muted">{label}</div>
           </Link>
         ))}
       </div>
 
       <div className="card">
-        <h2 className="font-semibold text-white mb-4">Quick Links</h2>
+        <h2 className="font-semibold text-ink mb-4">Quick Links</h2>
         <div className="flex flex-wrap gap-3">
           <Link href="/events" className="btn-secondary text-sm">Browse Events</Link>
           <Link href="/tracks" className="btn-secondary text-sm">Browse Venues</Link>

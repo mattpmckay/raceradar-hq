@@ -29,7 +29,7 @@ export default async function FavouritesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-white">Favourites</h1>
+      <h1 className="text-2xl font-bold text-ink">Favourites</h1>
 
       {events && events.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
