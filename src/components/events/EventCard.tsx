@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { Tables } from '@/types/supabase'
+import { HeartButton } from './HeartButton'
 
 type Event = Tables<'events'>
 
@@ -34,20 +35,24 @@ const COUNTRY_FLAGS: Record<string, string> = {
   'India':       '🇮🇳',
 }
 
-export function EventCard({ event }: { event: Event }) {
-  const style = DISCIPLINE_COLORS[event.discipline] ?? defaultStyle
-  const d     = new Date(event.start_date)
-  const day   = String(d.getUTCDate()).padStart(2, '0')
-  const month = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' })
-  const flag  = COUNTRY_FLAGS[event.country ?? ''] ?? ''
+export function EventCard({
+  event,
+  initialSaved = false,
+}: {
+  event: Event
+  initialSaved?: boolean
+}) {
+  const style    = DISCIPLINE_COLORS[event.discipline] ?? defaultStyle
+  const d        = new Date(event.start_date)
+  const day      = String(d.getUTCDate()).padStart(2, '0')
+  const month    = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' })
+  const flag     = COUNTRY_FLAGS[event.country ?? ''] ?? ''
   const location = [event.city, event.country].filter(Boolean).join(', ')
 
   return (
-    <Link
-      href={`/events/${event.slug}`}
-      className="group relative flex flex-col gap-5 overflow-hidden rounded-2xl border border-wire bg-panel p-6 transition-all duration-300 hover:border-wire-bright hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30"
-    >
-      {/* Top row: discipline badge + date */}
+    <div className="group relative flex flex-col gap-5 overflow-hidden rounded-2xl border border-wire bg-panel p-6 transition-all duration-300 hover:border-wire-bright hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30">
+
+      {/* Top row: discipline badge + save heart + date */}
       <div className="flex items-center justify-between gap-3">
         <span
           className="rounded-full px-3 py-1 text-xs font-semibold"
@@ -55,9 +60,13 @@ export function EventCard({ event }: { event: Event }) {
         >
           {event.discipline}
         </span>
-        <div className="text-right">
-          <div className="font-heading text-2xl font-bold leading-none text-ink">{day}</div>
-          <div className="mt-0.5 text-xs text-ink-muted">{month}</div>
+        {/* Heart and date sit in a stacking layer above the invisible link overlay */}
+        <div className="relative z-10 flex items-center gap-2.5">
+          <HeartButton eventId={event.id} initialSaved={initialSaved} />
+          <div className="text-right">
+            <div className="font-heading text-2xl font-bold leading-none text-ink">{day}</div>
+            <div className="mt-0.5 text-xs text-ink-muted">{month}</div>
+          </div>
         </div>
       </div>
 
@@ -86,12 +95,23 @@ export function EventCard({ event }: { event: Event }) {
         </span>
       </div>
 
-      {/* Top accent line on hover */}
+      {/*
+        Invisible full-card link — comes last in DOM so it sits above non-z-indexed
+        content but below the z-10 heart wrapper, making the whole card clickable
+        while the heart remains independently interactive.
+      */}
+      <Link
+        href={`/events/${event.slug}`}
+        className="absolute inset-0 rounded-2xl"
+        aria-label={`View ${event.title}`}
+      />
+
+      {/* Per-sport accent line on hover */}
       <div
         className="absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{ background: `linear-gradient(90deg, transparent, ${style.text}, transparent)` }}
       />
-    </Link>
+    </div>
   )
 }
 
