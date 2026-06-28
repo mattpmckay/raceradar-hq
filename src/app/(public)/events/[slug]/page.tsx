@@ -277,12 +277,49 @@ export default async function EventDetailPage({ params }: PageProps) {
           {/* Plan Your Trip */}
           <section>
             <SectionHeading>Plan Your Trip</SectionHeading>
-            <div className="card border-dashed text-center py-10">
-              <p className="text-gray-400 text-sm font-medium">Coming soon</p>
-              <p className="mt-2 text-gray-500 text-sm max-w-sm mx-auto">
-                Hotel recommendations, flight tips and travel packages will be listed here
-                closer to the event.
+            <div className="card space-y-5">
+              <p className="text-sm text-gray-400">
+                Most athletes need to coordinate travel and logistics for race weekend. Here are the key steps to get organised well in advance.
               </p>
+              <ul className="space-y-4">
+                {[
+                  {
+                    icon: CheckCircle,
+                    heading: 'Check your registration is confirmed',
+                    tip: 'Log in to the event portal and download your confirmation email before race week. Some events require you to complete a waiver or provide a medical certificate at check-in.',
+                  },
+                  {
+                    icon: MapPin,
+                    heading: 'Confirm the venue address',
+                    tip: 'Check the official event website for the exact venue address and any race village or parking entrances specific to athletes. GPS can sometimes route you to the wrong gate.',
+                  },
+                  {
+                    icon: Calendar,
+                    heading: 'Book accommodation early',
+                    tip: 'Hotels near major race venues fill up months in advance, especially for multi-day events. Book as soon as your registration is confirmed — cancellation rates apply if your plans change.',
+                  },
+                  {
+                    icon: Train,
+                    heading: 'Plan your transport',
+                    tip: 'Many race venues restrict parking on event day or use remote parking with shuttles. Check the event logistics page for shuttle times, public transit options and recommended arrival windows.',
+                  },
+                  {
+                    icon: Clock,
+                    heading: 'Arrive early on race day',
+                    tip: 'Plan to arrive at least 60–90 minutes before your wave start. Allow time for parking, gear check, warm-up and finding your starting corral without rushing.',
+                  },
+                ].map(({ icon: Icon, heading, tip }) => (
+                  <li key={heading} className="flex items-start gap-4">
+                    <div className="rounded-lg bg-brand-500/10 p-2 shrink-0">
+                      <Icon className="h-4 w-4 text-brand-400" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-white mb-1">{heading}</div>
+                      <div className="text-sm text-gray-400 leading-relaxed">{tip}</div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
           </section>
 

@@ -70,6 +70,7 @@ export function HomeFooter() {
           </p>
           <div className="flex items-center gap-5">
             {[
+              { label: 'About',            href: '/about' },
               { label: 'Privacy Policy',   href: '/privacy' },
               { label: 'Terms of Service', href: '/terms' },
               { label: 'Contact',          href: '/contact' },

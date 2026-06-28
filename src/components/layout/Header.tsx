@@ -101,7 +101,7 @@ export function Header() {
               className="block rounded-full bg-fire px-4 py-3 text-center text-sm font-semibold text-white"
               onClick={() => setOpen(false)}
             >
-              Get Free Events Calendar
+              Free Calendar
             </Link>
           </div>
         </div>

@@ -47,7 +47,7 @@ const EDITORIAL_SECTIONS: { heading: string; category: GuideCategory; guides: Ed
           'Not sure whether to sign up for a HYROX, Spartan Race or marathon? This guide walks through the key differences, training demands and what each discipline feels like for a first-timer — so you can match the race to your goals.',
         category: 'getting-started',
         readTime: '6 min read',
-        href: null,
+        href: '/guides/how-to-choose-your-first-fitness-race',
       },
       {
         title: 'What to Expect at Your First HYROX',
@@ -172,7 +172,7 @@ const EDITORIAL_SECTIONS: { heading: string; category: GuideCategory; guides: Ed
           'A printable checklist covering everything from bib and timing chip to nutrition, recovery kit and spectator arrangements — for HYROX, Spartan, triathlon and road races.',
         category: 'race-day',
         readTime: '4 min read',
-        href: null,
+        href: '/guides/race-day-checklist',
       },
       {
         title: 'Race Nutrition Guide',
@@ -333,22 +333,40 @@ export default async function GuidesPage() {
         </section>
       )}
 
-      {/* ── Editorial sections ────────────────────────────────────────── */}
-      <div className="space-y-14">
-        {EDITORIAL_SECTIONS.map((section) => (
-          <section key={section.category}>
-            <h2 className="text-sm font-semibold uppercase tracking-widest text-gray-500 mb-6">
-              {section.heading}
-            </h2>
+      {/* ── Editorial sections (live guides only) ────────────────────── */}
+      {(() => {
+        const liveSections = EDITORIAL_SECTIONS
+          .map((s) => ({ ...s, guides: s.guides.filter((g) => g.href !== null) }))
+          .filter((s) => s.guides.length > 0)
 
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {section.guides.map((guide) => (
-                <EditorialGuideCard key={guide.title} guide={guide} />
+        const totalGuides = EDITORIAL_SECTIONS.reduce((n, s) => n + s.guides.length, 0)
+        const liveCount   = liveSections.reduce((n, s) => n + s.guides.length, 0)
+        const comingCount = totalGuides - liveCount
+
+        return (
+          <>
+            <div className="space-y-14">
+              {liveSections.map((section) => (
+                <section key={section.category}>
+                  <h2 className="text-sm font-semibold uppercase tracking-widest text-gray-500 mb-6">
+                    {section.heading}
+                  </h2>
+                  <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    {section.guides.map((guide) => (
+                      <EditorialGuideCard key={guide.title} guide={guide} />
+                    ))}
+                  </div>
+                </section>
               ))}
             </div>
-          </section>
-        ))}
-      </div>
+            {comingCount > 0 && (
+              <p className="mt-8 text-center text-sm text-gray-600">
+                {comingCount} more guides in progress — new guides published regularly.
+              </p>
+            )}
+          </>
+        )
+      })()}
 
       {/* ── Suggest a guide CTA ───────────────────────────────────────── */}
       <div className="mt-16 rounded-2xl border border-surface-border bg-surface-card p-8 text-center">
