@@ -7,12 +7,12 @@ export async function EventsSectionServer() {
 
   const { data, error } = await supabase
     .from('events')
-    .select('id, title, slug, discipline, start_date, city, country')
+    .select('id, title, slug, discipline, start_date, city, country, is_featured')
     .eq('is_published', true)
     .gte('start_date', today)
     .lt('start_date', '2099-01-01')
     .order('start_date', { ascending: true })
-    .limit(6)
+    .limit(300)
 
   if (error) {
     console.error('[EventsSectionServer] Supabase error:', error.code, error.message, error.details)
@@ -20,7 +20,7 @@ export async function EventsSectionServer() {
 
   return (
     <EventsSection
-      initialEvents={data ?? []}
+      events={data ?? []}
       error={error?.message}
     />
   )

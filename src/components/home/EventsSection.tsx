@@ -1,6 +1,4 @@
-'use client'
-
-import { useState } from 'react'
+import type { CSSProperties } from 'react'
 import Link from 'next/link'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -13,6 +11,7 @@ export type SupabaseEvent = {
   start_date: string
   city: string | null
   country: string | null
+  is_featured: boolean | null
 }
 
 type Event = {
@@ -30,20 +29,20 @@ type Event = {
 // ─── Data maps ────────────────────────────────────────────────────────────────
 
 const COUNTRY_FLAGS: Record<string, string> = {
-  'Australia':    '🇦🇺',
-  'New Zealand':  '🇳🇿',
-  'Singapore':    '🇸🇬',
-  'Japan':        '🇯🇵',
-  'South Korea':  '🇰🇷',
-  'Thailand':     '🇹🇭',
-  'Malaysia':     '🇲🇾',
-  'Philippines':  '🇵🇭',
-  'Indonesia':    '🇮🇩',
-  'Vietnam':      '🇻🇳',
-  'China':        '🇨🇳',
-  'Hong Kong':    '🇭🇰',
-  'Taiwan':       '🇹🇼',
-  'India':        '🇮🇳',
+  'Australia':   '🇦🇺',
+  'New Zealand': '🇳🇿',
+  'Singapore':   '🇸🇬',
+  'Japan':       '🇯🇵',
+  'South Korea': '🇰🇷',
+  'Thailand':    '🇹🇭',
+  'Malaysia':    '🇲🇾',
+  'Philippines': '🇵🇭',
+  'Indonesia':   '🇮🇩',
+  'Vietnam':     '🇻🇳',
+  'China':       '🇨🇳',
+  'Hong Kong':   '🇭🇰',
+  'Taiwan':      '🇹🇼',
+  'India':       '🇮🇳',
 }
 
 const DISCIPLINE_MAP: Record<string, string> = {
@@ -51,16 +50,28 @@ const DISCIPLINE_MAP: Record<string, string> = {
   'CrossFit':      'CrossFit',
   'Spartan Race':  'Spartan',
   'Ironman':       'Ironman',
-  'Ironman 70.3':  'Ironman',
+  'Ironman 70.3':  'Ironman 70.3',
   'Marathon':      'Marathon',
+  'Road Racing':   'Road Racing',
   'Trail Running': 'Trail Running',
   'Deka Fit':      'Deka',
   'Tough Mudder':  'Tough Mudder',
 }
 
-function mapDiscipline(discipline: string): string {
-  return DISCIPLINE_MAP[discipline] ?? discipline
+const SPORT_STYLES: Record<string, { bg: string; text: string }> = {
+  'HYROX':         { bg: 'rgba(0,217,166,0.12)',   text: '#00D9A6' },
+  'CrossFit':      { bg: 'rgba(239,68,68,0.12)',    text: '#EF4444' },
+  'Spartan':       { bg: 'rgba(255,107,53,0.12)',   text: '#FF6B35' },
+  'Ironman':       { bg: 'rgba(248,113,113,0.12)',  text: '#F87171' },
+  'Ironman 70.3':  { bg: 'rgba(248,113,113,0.12)',  text: '#F87171' },
+  'Marathon':      { bg: 'rgba(96,165,250,0.12)',   text: '#60A5FA' },
+  'Road Racing':   { bg: 'rgba(148,163,184,0.12)',  text: '#94A3B8' },
+  'Trail Running': { bg: 'rgba(52,211,153,0.12)',   text: '#34D399' },
+  'Deka':          { bg: 'rgba(167,139,250,0.12)',  text: '#A78BFA' },
+  'Tough Mudder':  { bg: 'rgba(245,158,11,0.12)',   text: '#F59E0B' },
 }
+
+const defaultStyle = { bg: 'rgba(107,122,141,0.12)', text: '#8896A8' }
 
 function toDisplayEvent(e: SupabaseEvent): Event {
   const d = new Date(e.start_date)
@@ -68,7 +79,7 @@ function toDisplayEvent(e: SupabaseEvent): Event {
     id:      e.id,
     slug:    e.slug,
     name:    e.title,
-    sport:   mapDiscipline(e.discipline ?? ''),
+    sport:   DISCIPLINE_MAP[e.discipline ?? ''] ?? (e.discipline ?? ''),
     date:    String(d.getUTCDate()).padStart(2, '0'),
     month:   d.toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' }),
     city:    e.city    ?? '',
@@ -77,131 +88,180 @@ function toDisplayEvent(e: SupabaseEvent): Event {
   }
 }
 
-// ─── Sport config ─────────────────────────────────────────────────────────────
+// ─── Row definitions ──────────────────────────────────────────────────────────
 
-const SPORT_FILTERS = ['All', 'HYROX', 'CrossFit', 'Spartan', 'Ironman', 'Marathon', 'Trail Running', 'Deka']
-
-const SPORT_STYLES: Record<string, { bg: string; text: string }> = {
-  HYROX:           { bg: 'rgba(0,217,166,0.12)',   text: '#00D9A6' },
-  CrossFit:        { bg: 'rgba(239,68,68,0.12)',    text: '#EF4444' },
-  Spartan:         { bg: 'rgba(255,107,53,0.12)',   text: '#FF6B35' },
-  Ironman:         { bg: 'rgba(248,113,113,0.12)',  text: '#F87171' },
-  Marathon:        { bg: 'rgba(96,165,250,0.12)',   text: '#60A5FA' },
-  'Trail Running': { bg: 'rgba(52,211,153,0.12)',   text: '#34D399' },
-  Deka:            { bg: 'rgba(167,139,250,0.12)',  text: '#A78BFA' },
-  'Tough Mudder':  { bg: 'rgba(245,158,11,0.12)',   text: '#F59E0B' },
+type RowDef = {
+  key: string
+  label: string
+  eyebrow: string
+  disciplines: string[] | null  // null = filter by is_featured
+  filterHref: string
+  accentColor: string
 }
 
-const defaultStyle = { bg: 'rgba(107,122,141,0.12)', text: '#6B7A8D' }
+const ROW_DEFS: RowDef[] = [
+  {
+    key:          'featured',
+    label:        'Featured This Month',
+    eyebrow:      'Curated',
+    disciplines:  null,
+    filterHref:   '/events',
+    accentColor:  '#00D9A6',
+  },
+  {
+    key:          'hyrox',
+    label:        'HYROX',
+    eyebrow:      'Upcoming',
+    disciplines:  ['HYROX'],
+    filterHref:   '/events?discipline=HYROX',
+    accentColor:  '#00D9A6',
+  },
+  {
+    key:          'crossfit',
+    label:        'CrossFit',
+    eyebrow:      'Upcoming',
+    disciplines:  ['CrossFit'],
+    filterHref:   '/events?discipline=CrossFit',
+    accentColor:  '#EF4444',
+  },
+  {
+    key:          'spartan',
+    label:        'Spartan Race',
+    eyebrow:      'Upcoming',
+    disciplines:  ['Spartan Race'],
+    filterHref:   '/events?discipline=Spartan%20Race',
+    accentColor:  '#FF6B35',
+  },
+  {
+    key:          'ironman',
+    label:        'Ironman & Triathlon',
+    eyebrow:      'Upcoming',
+    disciplines:  ['Ironman', 'Ironman 70.3'],
+    filterHref:   '/events?discipline=Ironman',
+    accentColor:  '#F87171',
+  },
+  {
+    key:          'marathon',
+    label:        'Marathon & Road Racing',
+    eyebrow:      'Upcoming',
+    disciplines:  ['Marathon', 'Road Racing'],
+    filterHref:   '/events?discipline=Marathon',
+    accentColor:  '#60A5FA',
+  },
+  {
+    key:          'trail',
+    label:        'Trail Running',
+    eyebrow:      'Upcoming',
+    disciplines:  ['Trail Running'],
+    filterHref:   '/events?discipline=Trail%20Running',
+    accentColor:  '#34D399',
+  },
+]
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export function EventsSection({
-  initialEvents = [],
+  events,
   error,
 }: {
-  initialEvents?: SupabaseEvent[]
+  events: SupabaseEvent[]
   error?: string
 }) {
-  const [active, setActive] = useState('All')
-
-  const events   = initialEvents.map(toDisplayEvent)
-  const filtered = active === 'All' ? events : events.filter((e) => e.sport === active)
-
-  return (
-    <section className="relative pb-24 pt-4">
-      <div className="container-page">
-
-        {/* Section header */}
-        <div className="mb-10 flex items-end justify-between">
-          <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.15em] text-mint">
-              Upcoming
-            </p>
-            <h2 className="font-heading text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-              Featured Events
-            </h2>
-          </div>
-          <Link
-            href="/events"
-            className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
-          >
-            View all events
-            <ArrowRightIcon className="h-4 w-4" />
-          </Link>
-        </div>
-
-        {/* Error state */}
-        {error ? (
+  if (error) {
+    return (
+      <section className="relative pb-24 pt-4">
+        <div className="container-page">
           <div className="rounded-2xl border border-red-900/40 bg-red-950/20 px-6 py-12 text-center">
             <p className="text-sm font-medium text-red-400">
               Failed to load events. Please try refreshing the page.
             </p>
           </div>
-        ) : (
-          <>
-            {/* Filter strip */}
-            <div className="relative mb-10 -mx-4 px-4 sm:mx-0 sm:px-0">
-              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-                {SPORT_FILTERS.map((sport) => (
-                  <button
-                    key={sport}
-                    onClick={() => setActive(sport)}
-                    className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
-                      active === sport
-                        ? 'bg-mint text-canvas shadow-md shadow-mint/20'
-                        : 'border border-wire bg-panel text-ink-muted hover:border-wire-bright hover:text-ink'
-                    }`}
-                  >
-                    {sport}
-                  </button>
-                ))}
-              </div>
-              <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-canvas to-transparent sm:hidden" />
-            </div>
-
-            {/* Events grid */}
-            {filtered.length > 0 ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {filtered.map((event) => (
-                  <EventCard key={event.id} event={event} />
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-wire bg-panel py-16 text-center">
-                <p className="text-ink-muted">
-                  {events.length === 0
-                    ? 'No upcoming events found. Check back soon!'
-                    : 'No events found for this sport yet.'}
-                </p>
-                {events.length > 0 && (
-                  <button
-                    onClick={() => setActive('All')}
-                    className="mt-4 text-sm font-medium text-mint hover:underline"
-                  >
-                    View all events
-                  </button>
-                )}
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Mobile "view all" */}
-        <div className="mt-8 text-center sm:hidden">
-          <Link
-            href="/events"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted hover:text-ink"
-          >
-            View all events <ArrowRightIcon className="h-4 w-4" />
-          </Link>
         </div>
+      </section>
+    )
+  }
+
+  const rows = ROW_DEFS
+    .map((def) => {
+      const raw =
+        def.disciplines === null
+          ? events.filter((e) => e.is_featured)
+          : events.filter((e) => def.disciplines!.includes(e.discipline ?? ''))
+      return { ...def, events: raw.slice(0, 3).map(toDisplayEvent) }
+    })
+    .filter((row) => row.events.length > 0)
+
+  if (rows.length === 0) {
+    return (
+      <section className="relative pb-24 pt-4">
+        <div className="container-page">
+          <div className="rounded-2xl border border-wire bg-panel py-16 text-center">
+            <p className="text-ink-muted">No upcoming events found. Check back soon!</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <section className="relative pb-24 pt-4">
+      <div className="container-page space-y-16">
+        {rows.map((row) => (
+          <SportRow key={row.key} row={row} />
+        ))}
       </div>
     </section>
   )
 }
 
-// ─── Event Card ───────────────────────────────────────────────────────────────
+// ─── Sport row ────────────────────────────────────────────────────────────────
+
+type BuiltRow = RowDef & { events: Event[] }
+
+function SportRow({ row }: { row: BuiltRow }) {
+  return (
+    <div>
+      <div className="mb-6 flex items-end justify-between">
+        <div>
+          <p
+            className="mb-1.5 text-xs font-semibold uppercase tracking-[0.15em]"
+            style={{ color: row.accentColor }}
+          >
+            {row.eyebrow}
+          </p>
+          <h2 className="font-heading text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+            {row.label}
+          </h2>
+        </div>
+        <Link
+          href={row.filterHref}
+          className="hidden items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink sm:flex"
+        >
+          View all
+          <ArrowRightIcon className="h-4 w-4" />
+        </Link>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {row.events.map((event) => (
+          <EventCard key={event.id} event={event} />
+        ))}
+      </div>
+
+      <div className="mt-5 sm:hidden">
+        <Link
+          href={row.filterHref}
+          className="flex items-center gap-1.5 text-sm font-medium text-ink-muted hover:text-ink"
+        >
+          View all {row.label} events
+          <ArrowRightIcon className="h-4 w-4" />
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+// ─── Event card ───────────────────────────────────────────────────────────────
 
 function EventCard({ event }: { event: Event }) {
   const style = SPORT_STYLES[event.sport] ?? defaultStyle
@@ -211,7 +271,7 @@ function EventCard({ event }: { event: Event }) {
       href={`/events/${event.slug}`}
       className="group relative flex flex-col gap-5 overflow-hidden rounded-2xl border border-wire bg-panel p-6 transition-all duration-300 hover:border-wire-bright hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30"
     >
-      {/* Top row: badge + date */}
+      {/* Badge + date */}
       <div className="flex items-center justify-between gap-3">
         <span
           className="rounded-full px-3 py-1 text-xs font-semibold"
@@ -220,14 +280,12 @@ function EventCard({ event }: { event: Event }) {
           {event.sport}
         </span>
         <div className="text-right">
-          <div className="font-heading text-2xl font-bold leading-none text-ink">
-            {event.date}
-          </div>
+          <div className="font-heading text-2xl font-bold leading-none text-ink">{event.date}</div>
           <div className="mt-0.5 text-xs text-ink-muted">{event.month}</div>
         </div>
       </div>
 
-      {/* Event name */}
+      {/* Title */}
       <h3 className="font-heading text-lg font-semibold leading-snug text-ink transition-colors group-hover:text-mint">
         {event.name}
       </h3>
@@ -235,13 +293,10 @@ function EventCard({ event }: { event: Event }) {
       {/* Location */}
       <div className="flex items-center gap-2 text-sm text-ink-muted">
         <PinIcon className="h-4 w-4 shrink-0" style={{ color: style.text }} />
-        <span>
-          {event.city}, {event.country}
-        </span>
+        <span>{event.city}, {event.country}</span>
         <span className="ml-auto text-base">{event.flag}</span>
       </div>
 
-      {/* Divider */}
       <div className="border-t border-wire" />
 
       {/* CTA */}
@@ -257,7 +312,7 @@ function EventCard({ event }: { event: Event }) {
         </span>
       </div>
 
-      {/* Top accent line */}
+      {/* Accent line on hover */}
       <div
         className="absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{ background: `linear-gradient(90deg, transparent, ${style.text}, transparent)` }}
@@ -268,7 +323,7 @@ function EventCard({ event }: { event: Event }) {
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
-function ArrowRightIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+function ArrowRightIcon({ className, style }: { className?: string; style?: CSSProperties }) {
   return (
     <svg viewBox="0 0 16 16" fill="none" aria-hidden className={className} style={style}>
       <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -276,7 +331,7 @@ function ArrowRightIcon({ className, style }: { className?: string; style?: Reac
   )
 }
 
-function PinIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+function PinIcon({ className, style }: { className?: string; style?: CSSProperties }) {
   return (
     <svg viewBox="0 0 16 16" fill="none" aria-hidden className={className} style={style}>
       <path d="M8 1.5a4 4 0 0 1 4 4c0 2.5-4 9-4 9S4 8 4 5.5a4 4 0 0 1 4-4z" stroke="currentColor" strokeWidth="1.3" />
