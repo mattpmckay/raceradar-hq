@@ -3,12 +3,12 @@ import { cn } from '@/lib/utils'
 type BadgeVariant = 'default' | 'brand' | 'success' | 'warning' | 'danger' | 'outline'
 
 const variantClasses: Record<BadgeVariant, string> = {
-  default:  'bg-surface-muted text-gray-300',
-  brand:    'bg-brand-500/20 text-brand-400',
-  success:  'bg-green-500/20 text-green-400',
-  warning:  'bg-yellow-500/20 text-yellow-400',
-  danger:   'bg-red-500/20 text-red-400',
-  outline:  'border border-surface-border text-gray-400',
+  default:  'bg-panel-raised text-ink-muted',
+  brand:    'bg-mint/15 text-mint',
+  success:  'bg-green-500/15 text-green-400',
+  warning:  'bg-amber-500/15 text-amber-400',
+  danger:   'bg-red-500/15 text-red-400',
+  outline:  'border border-wire text-ink-muted',
 }
 
 interface BadgeProps {

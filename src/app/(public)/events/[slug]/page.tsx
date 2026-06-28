@@ -209,7 +209,7 @@ export default async function EventDetailPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
       />
     <div className="container-page py-10">
-      <Link href="/events" className="btn-ghost mb-6 inline-flex px-0 text-gray-400">
+      <Link href="/events" className="btn-ghost mb-6 inline-flex px-0 text-ink-muted">
         <ArrowLeft className="h-4 w-4" /> Back to Events
       </Link>
 
@@ -227,7 +227,7 @@ export default async function EventDetailPage({ params }: PageProps) {
             </div>
             <h1 className="page-title">{event.title}</h1>
             {location && (
-              <p className="mt-3 text-gray-400 text-lg">
+              <p className="mt-3 text-ink-muted text-lg">
                 {venue ?? location}
                 {event.city && venue ? ` · ${event.city}, ${event.country}` : ''}
                 {' · '}
@@ -258,9 +258,9 @@ export default async function EventDetailPage({ params }: PageProps) {
             <SectionHeading>Venue &amp; Location</SectionHeading>
             <div className="card space-y-3">
               {venue && <h3 className="font-semibold text-white">{venue}</h3>}
-              <p className="text-gray-300 text-sm">{location}</p>
+              <p className="text-ink text-sm">{location}</p>
               {!venue && (
-                <p className="text-gray-400 text-sm">
+                <p className="text-ink-muted text-sm">
                   Venue details will be confirmed closer to the event. Check the official website
                   for the most up-to-date information.
                 </p>
@@ -278,7 +278,7 @@ export default async function EventDetailPage({ params }: PageProps) {
           <section>
             <SectionHeading>Plan Your Trip</SectionHeading>
             <div className="card space-y-5">
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-ink-muted">
                 Most athletes need to coordinate travel and logistics for race weekend. Here are the key steps to get organised well in advance.
               </p>
               <ul className="space-y-4">
@@ -310,12 +310,12 @@ export default async function EventDetailPage({ params }: PageProps) {
                   },
                 ].map(({ icon: Icon, heading, tip }) => (
                   <li key={heading} className="flex items-start gap-4">
-                    <div className="rounded-lg bg-brand-500/10 p-2 shrink-0">
-                      <Icon className="h-4 w-4 text-brand-400" />
+                    <div className="rounded-lg bg-mint/10 p-2 shrink-0">
+                      <Icon className="h-4 w-4 text-mint" />
                     </div>
                     <div>
                       <div className="text-sm font-semibold text-white mb-1">{heading}</div>
-                      <div className="text-sm text-gray-400 leading-relaxed">{tip}</div>
+                      <div className="text-sm text-ink-muted leading-relaxed">{tip}</div>
                     </div>
                   </li>
                 ))}
@@ -336,26 +336,26 @@ export default async function EventDetailPage({ params }: PageProps) {
             <h2 className="font-semibold text-white">Event Details</h2>
             <div className="space-y-3 text-sm">
               <div className="flex items-start gap-3">
-                <Calendar className="h-4 w-4 text-brand-500 mt-0.5 shrink-0" />
+                <Calendar className="h-4 w-4 text-mint mt-0.5 shrink-0" />
                 <div>
                   <div className="font-medium text-white">{formatDate(event.start_date)}</div>
                   {event.end_date && event.end_date !== event.start_date && (
-                    <div className="text-gray-400">to {formatDate(event.end_date)}</div>
+                    <div className="text-ink-muted">to {formatDate(event.end_date)}</div>
                   )}
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <MapPin className="h-4 w-4 text-brand-500 mt-0.5 shrink-0" />
+                <MapPin className="h-4 w-4 text-mint mt-0.5 shrink-0" />
                 <div>
                   {venue && <div className="font-medium text-white">{venue}</div>}
-                  <div className="text-gray-400">{location}</div>
+                  <div className="text-ink-muted">{location}</div>
                 </div>
               </div>
               {event.organiser && (
                 <div className="flex items-start gap-3">
-                  <Flag className="h-4 w-4 text-brand-500 mt-0.5 shrink-0" />
+                  <Flag className="h-4 w-4 text-mint mt-0.5 shrink-0" />
                   <div>
-                    <div className="text-gray-400 text-xs">Organiser</div>
+                    <div className="text-ink-muted text-xs">Organiser</div>
                     <div className="font-medium text-white">{event.organiser}</div>
                   </div>
                 </div>
@@ -363,8 +363,8 @@ export default async function EventDetailPage({ params }: PageProps) {
             </div>
 
             {event.registration_deadline && (
-              <div className="rounded-lg bg-brand-500/10 border border-brand-500/20 px-3 py-2.5 text-sm">
-                <span className="text-brand-400 font-medium">Registration closes</span>
+              <div className="rounded-lg bg-mint/10 border border-mint/20 px-3 py-2.5 text-sm">
+                <span className="text-mint font-medium">Registration closes</span>
                 <div className="text-white">{formatDate(event.registration_deadline)}</div>
               </div>
             )}
@@ -388,13 +388,13 @@ export default async function EventDetailPage({ params }: PageProps) {
           {related.length > 0 && (
             <div className="card space-y-3 text-sm">
               <h2 className="font-semibold text-white">More {event.discipline} Events</h2>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-ink-muted">
                 {related.map((e) => (
                   <li key={e.slug}>
                     <Link href={`/events/${e.slug}`} className="hover:text-white transition-colors">
                       {e.title} →
                     </Link>
-                    <div className="text-gray-600 text-xs mt-0.5">
+                    <div className="text-ink-muted text-xs mt-0.5">
                       {e.city}, {e.country} · {formatDate(e.start_date)}
                     </div>
                   </li>
@@ -402,7 +402,7 @@ export default async function EventDetailPage({ params }: PageProps) {
               </ul>
               <Link
                 href={`/events?discipline=${encodeURIComponent(event.discipline)}`}
-                className="text-brand-400 hover:text-brand-300 transition-colors text-xs"
+                className="text-mint hover:text-mint-300 transition-colors text-xs"
               >
                 View all {event.discipline} events →
               </Link>
@@ -420,7 +420,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-xl font-bold text-white mb-5 pb-3 border-b border-surface-border">
+    <h2 className="text-xl font-bold text-white mb-5 pb-3 border-b border-wire">
       {children}
     </h2>
   )
@@ -438,6 +438,31 @@ function AboutSection({ discipline, event }: { discipline: string; event: EventR
   const location = [event.city, event.country].filter(Boolean).join(', ')
 
   const copy: Record<string, React.ReactNode> = {
+    'CrossFit': (
+      <>
+        <p>
+          CrossFit competitions test athletes across weightlifting, gymnastics and metabolic
+          conditioning in constantly varied workouts (WODs) scored for time, load or reps.
+          Events range from local box throwdowns and regional invitationals to Licensed Sanctional
+          competitions that qualify athletes for the CrossFit Games — the world&apos;s premier test
+          of fitness.
+        </p>
+        <p>
+          The CrossFit Open, held annually in February and March, is the world&apos;s largest online
+          fitness competition with hundreds of thousands of athletes from every country. The top
+          finishers progress to the Quarterfinals, Semifinals and ultimately the CrossFit Games.
+          Local throwdowns and team competitions run throughout the year at affiliate boxes,
+          providing competitive opportunities at every fitness level.
+        </p>
+        <p>
+          CrossFit competitions typically span one or two days and include multiple WODs announced
+          at or shortly before the event. Unlike standardised race formats, every CrossFit event
+          is different — the element of the unknown is central to the competitive experience.
+          Most events offer RX (prescribed), Scaled and Masters divisions, making competition
+          accessible for athletes at every stage of their CrossFit journey.
+        </p>
+      </>
+    ),
     'HYROX': (
       <>
         <p>
@@ -575,7 +600,7 @@ function AboutSection({ discipline, event }: { discipline: string; event: EventR
   return (
     <section>
       <SectionHeading>About the Event</SectionHeading>
-      <div className="space-y-4 text-gray-300 leading-relaxed text-[0.9375rem]">
+      <div className="space-y-4 text-ink leading-relaxed text-[0.9375rem]">
         {copy[discipline] ?? fallback}
       </div>
     </section>
@@ -589,33 +614,33 @@ function HYROXSections() {
     <>
       <section>
         <SectionHeading>Race Format</SectionHeading>
-        <p className="text-gray-400 mb-6">
+        <p className="text-ink-muted mb-6">
           8 rounds. Each round: 1 km run → workout station. Total running: 8 km.
           Workout volume is fixed across all divisions — only weights and vest requirements differ.
         </p>
-        <div className="overflow-x-auto rounded-xl border border-surface-border">
+        <div className="overflow-x-auto rounded-xl border border-wire">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-surface-border bg-surface-card">
-                <th className="text-left px-4 py-3 text-gray-400 font-medium w-8">#</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Station</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Distance / Reps</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium hidden sm:table-cell">Notes</th>
+              <tr className="border-b border-wire bg-panel">
+                <th className="text-left px-4 py-3 text-ink-muted font-medium w-8">#</th>
+                <th className="text-left px-4 py-3 text-ink-muted font-medium">Station</th>
+                <th className="text-left px-4 py-3 text-ink-muted font-medium">Distance / Reps</th>
+                <th className="text-left px-4 py-3 text-ink-muted font-medium hidden sm:table-cell">Notes</th>
               </tr>
             </thead>
             <tbody>
               {HYROX_STATIONS.map((s, i) => (
-                <tr key={s.order} className={`border-b border-surface-border last:border-0 ${i % 2 === 0 ? '' : 'bg-surface-card/40'}`}>
-                  <td className="px-4 py-3 text-brand-400 font-bold">{s.order}</td>
+                <tr key={s.order} className={`border-b border-wire last:border-0 ${i % 2 === 0 ? '' : 'bg-panel/40'}`}>
+                  <td className="px-4 py-3 text-mint font-bold">{s.order}</td>
                   <td className="px-4 py-3 text-white font-medium">{s.name}</td>
-                  <td className="px-4 py-3 text-gray-300">{s.distance}</td>
-                  <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">{s.note}</td>
+                  <td className="px-4 py-3 text-ink">{s.distance}</td>
+                  <td className="px-4 py-3 text-ink-muted hidden sm:table-cell">{s.note}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <p className="mt-3 text-xs text-gray-500">
+        <p className="mt-3 text-xs text-ink-muted">
           Pro division distances and weights may vary — confirm with the official HYROX race guide.
         </p>
       </section>
@@ -634,7 +659,7 @@ function HYROXSections() {
                 <h3 className="font-semibold text-white">{cat.name}</h3>
                 <Badge variant={cat.variant}>{cat.tag}</Badge>
               </div>
-              <p className="text-sm text-gray-400 leading-relaxed">{cat.desc}</p>
+              <p className="text-sm text-ink-muted leading-relaxed">{cat.desc}</p>
             </div>
           ))}
         </div>
@@ -649,11 +674,11 @@ function HYROXSections() {
             { title: 'Competitive',   cta: 'Target finish: Sub-75 min (Open) / Sub-60 min (Pro)', desc: 'CrossFit, triathlon or elite running background. Consider the Pro division if you\'re targeting a top-10 age-group result.' },
           ].map((level) => (
             <div key={level.title} className="card flex gap-4">
-              <CheckCircle className="h-5 w-5 text-brand-400 mt-0.5 shrink-0" />
+              <CheckCircle className="h-5 w-5 text-mint mt-0.5 shrink-0" />
               <div>
                 <h3 className="font-semibold text-white mb-1">{level.title}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{level.desc}</p>
-                <p className="mt-2 text-xs font-medium text-brand-400">{level.cta}</p>
+                <p className="text-sm text-ink-muted leading-relaxed">{level.desc}</p>
+                <p className="mt-2 text-xs font-medium text-mint">{level.cta}</p>
               </div>
             </div>
           ))}
@@ -670,33 +695,33 @@ function SpartanSections() {
     <>
       <section>
         <SectionHeading>Race Types</SectionHeading>
-        <p className="text-gray-400 mb-6">
+        <p className="text-ink-muted mb-6">
           Most Spartan events offer multiple race formats on the same weekend. Distances are
           approximate — actual course length depends on terrain.
         </p>
-        <div className="overflow-x-auto rounded-xl border border-surface-border">
+        <div className="overflow-x-auto rounded-xl border border-wire">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-surface-border bg-surface-card">
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Format</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Distance</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Obstacles</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium hidden sm:table-cell">Level</th>
+              <tr className="border-b border-wire bg-panel">
+                <th className="text-left px-4 py-3 text-ink-muted font-medium">Format</th>
+                <th className="text-left px-4 py-3 text-ink-muted font-medium">Distance</th>
+                <th className="text-left px-4 py-3 text-ink-muted font-medium">Obstacles</th>
+                <th className="text-left px-4 py-3 text-ink-muted font-medium hidden sm:table-cell">Level</th>
               </tr>
             </thead>
             <tbody>
               {SPARTAN_FORMATS.map((f, i) => (
-                <tr key={f.name} className={`border-b border-surface-border last:border-0 ${i % 2 === 0 ? '' : 'bg-surface-card/40'}`}>
+                <tr key={f.name} className={`border-b border-wire last:border-0 ${i % 2 === 0 ? '' : 'bg-panel/40'}`}>
                   <td className="px-4 py-3 text-white font-medium">{f.name}</td>
-                  <td className="px-4 py-3 text-gray-300">{f.distance}</td>
-                  <td className="px-4 py-3 text-gray-300">{f.obstacles}</td>
-                  <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">{f.level}</td>
+                  <td className="px-4 py-3 text-ink">{f.distance}</td>
+                  <td className="px-4 py-3 text-ink">{f.obstacles}</td>
+                  <td className="px-4 py-3 text-ink-muted hidden sm:table-cell">{f.level}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <p className="mt-3 text-xs text-gray-500">
+        <p className="mt-3 text-xs text-ink-muted">
           Check the event registration page to confirm which formats are available at this specific event.
           Not all events offer every distance.
         </p>
@@ -711,11 +736,11 @@ function SpartanSections() {
             { title: 'Experienced',    desc: 'The Beast and Ultra formats demand serious endurance base and obstacle proficiency. Expect significant elevation gain and time on feet of 4–12+ hours.', cta: 'Push for: Spartan Beast or Ultra' },
           ].map((level) => (
             <div key={level.title} className="card flex gap-4">
-              <CheckCircle className="h-5 w-5 text-brand-400 mt-0.5 shrink-0" />
+              <CheckCircle className="h-5 w-5 text-mint mt-0.5 shrink-0" />
               <div>
                 <h3 className="font-semibold text-white mb-1">{level.title}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{level.desc}</p>
-                <p className="mt-2 text-xs font-medium text-brand-400">{level.cta}</p>
+                <p className="text-sm text-ink-muted leading-relaxed">{level.desc}</p>
+                <p className="mt-2 text-xs font-medium text-mint">{level.cta}</p>
               </div>
             </div>
           ))}
@@ -734,12 +759,12 @@ function IronmanSections({ discipline }: { discipline: string }) {
   return (
     <section>
       <SectionHeading>Race Distances</SectionHeading>
-      <div className="overflow-x-auto rounded-xl border border-surface-border mb-4">
+      <div className="overflow-x-auto rounded-xl border border-wire mb-4">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-surface-border bg-surface-card">
-              <th className="text-left px-4 py-3 text-gray-400 font-medium">Leg</th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium">Distance</th>
+            <tr className="border-b border-wire bg-panel">
+              <th className="text-left px-4 py-3 text-ink-muted font-medium">Leg</th>
+              <th className="text-left px-4 py-3 text-ink-muted font-medium">Distance</th>
             </tr>
           </thead>
           <tbody>
@@ -749,9 +774,9 @@ function IronmanSections({ discipline }: { discipline: string }) {
               { leg: 'Run',   dist: d.run  },
               { leg: 'Total', dist: d.total },
             ].map((row, i) => (
-              <tr key={row.leg} className={`border-b border-surface-border last:border-0 ${i % 2 === 0 ? '' : 'bg-surface-card/40'}`}>
-                <td className={`px-4 py-3 font-medium ${row.leg === 'Total' ? 'text-brand-400' : 'text-white'}`}>{row.leg}</td>
-                <td className="px-4 py-3 text-gray-300">{row.dist}</td>
+              <tr key={row.leg} className={`border-b border-wire last:border-0 ${i % 2 === 0 ? '' : 'bg-panel/40'}`}>
+                <td className={`px-4 py-3 font-medium ${row.leg === 'Total' ? 'text-mint' : 'text-white'}`}>{row.leg}</td>
+                <td className="px-4 py-3 text-ink">{row.dist}</td>
               </tr>
             ))}
           </tbody>
@@ -764,11 +789,11 @@ function IronmanSections({ discipline }: { discipline: string }) {
           { title: 'Experienced',  desc: `You've completed a ${discipline === 'Ironman 70.3' ? 'full IRONMAN or multiple 70.3s' : 'prior full IRONMAN'} and are targeting a competitive finish or Kona/World Champs qualification.`, cta: 'Focus: race-specific pacing and nutrition strategy' },
         ].map((level) => (
           <div key={level.title} className="card flex gap-4">
-            <CheckCircle className="h-5 w-5 text-brand-400 mt-0.5 shrink-0" />
+            <CheckCircle className="h-5 w-5 text-mint mt-0.5 shrink-0" />
             <div>
               <h3 className="font-semibold text-white mb-1">{level.title}</h3>
-              <p className="text-sm text-gray-400 leading-relaxed">{level.desc}</p>
-              <p className="mt-2 text-xs font-medium text-brand-400">{level.cta}</p>
+              <p className="text-sm text-ink-muted leading-relaxed">{level.desc}</p>
+              <p className="mt-2 text-xs font-medium text-mint">{level.cta}</p>
             </div>
           </div>
         ))}
@@ -809,11 +834,11 @@ function RunningSection({ discipline }: { discipline: string }) {
           },
         ].map((level) => (
           <div key={level.title} className="card flex gap-4">
-            <CheckCircle className="h-5 w-5 text-brand-400 mt-0.5 shrink-0" />
+            <CheckCircle className="h-5 w-5 text-mint mt-0.5 shrink-0" />
             <div>
               <h3 className="font-semibold text-white mb-1">{level.title}</h3>
-              <p className="text-sm text-gray-400 leading-relaxed">{level.desc}</p>
-              <p className="mt-2 text-xs font-medium text-brand-400">{level.cta}</p>
+              <p className="text-sm text-ink-muted leading-relaxed">{level.desc}</p>
+              <p className="mt-2 text-xs font-medium text-mint">{level.cta}</p>
             </div>
           </div>
         ))}
@@ -828,25 +853,25 @@ function DekaSections() {
   return (
     <section>
       <SectionHeading>Race Format</SectionHeading>
-      <p className="text-gray-400 mb-6">
+      <p className="text-ink-muted mb-6">
         10 rounds. Each round: 500 m run → workout station. Total running: 5 km.
         All results are globally comparable — every Deka Fit event uses the same format.
       </p>
-      <div className="overflow-x-auto rounded-xl border border-surface-border">
+      <div className="overflow-x-auto rounded-xl border border-wire">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-surface-border bg-surface-card">
-              <th className="text-left px-4 py-3 text-gray-400 font-medium w-8">#</th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium">Station</th>
-              <th className="text-left px-4 py-3 text-gray-400 font-medium">Distance / Reps</th>
+            <tr className="border-b border-wire bg-panel">
+              <th className="text-left px-4 py-3 text-ink-muted font-medium w-8">#</th>
+              <th className="text-left px-4 py-3 text-ink-muted font-medium">Station</th>
+              <th className="text-left px-4 py-3 text-ink-muted font-medium">Distance / Reps</th>
             </tr>
           </thead>
           <tbody>
             {DEKA_STATIONS.map((s, i) => (
-              <tr key={s.order} className={`border-b border-surface-border last:border-0 ${i % 2 === 0 ? '' : 'bg-surface-card/40'}`}>
-                <td className="px-4 py-3 text-brand-400 font-bold">{s.order}</td>
+              <tr key={s.order} className={`border-b border-wire last:border-0 ${i % 2 === 0 ? '' : 'bg-panel/40'}`}>
+                <td className="px-4 py-3 text-mint font-bold">{s.order}</td>
                 <td className="px-4 py-3 text-white font-medium">{s.name}</td>
-                <td className="px-4 py-3 text-gray-300">{s.distance}</td>
+                <td className="px-4 py-3 text-ink">{s.distance}</td>
               </tr>
             ))}
           </tbody>
@@ -861,6 +886,12 @@ function DekaSections() {
 function EntryFeesSection({ discipline }: { discipline: string }) {
   type Fee = { category: string; price: string }
   const fees: Record<string, Fee[]> = {
+    'CrossFit': [
+      { category: 'Individual (RX)',       price: '~AUD $80–180' },
+      { category: 'Individual (Scaled)',   price: '~AUD $60–150' },
+      { category: 'Masters divisions',     price: '~AUD $60–150' },
+      { category: 'Team (3–5 athletes)',   price: '~AUD $200–400 per team' },
+    ],
     'HYROX': [
       { category: 'Open Individual', price: '~AUD $175–195' },
       { category: 'Pro Individual',  price: '~AUD $175–195' },
@@ -903,22 +934,22 @@ function EntryFeesSection({ discipline }: { discipline: string }) {
       <div className="card overflow-hidden p-0">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-surface-border bg-surface-card">
-              <th className="text-left px-5 py-3 text-gray-400 font-medium">Category</th>
-              <th className="text-left px-5 py-3 text-gray-400 font-medium">Approx. Price</th>
+            <tr className="border-b border-wire bg-panel">
+              <th className="text-left px-5 py-3 text-ink-muted font-medium">Category</th>
+              <th className="text-left px-5 py-3 text-ink-muted font-medium">Approx. Price</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((fee, i) => (
-              <tr key={fee.category} className={`border-b border-surface-border last:border-0 ${i % 2 === 0 ? '' : 'bg-surface-card/40'}`}>
+              <tr key={fee.category} className={`border-b border-wire last:border-0 ${i % 2 === 0 ? '' : 'bg-panel/40'}`}>
                 <td className="px-5 py-3.5 text-white font-medium">{fee.category}</td>
-                <td className="px-5 py-3.5 text-gray-300">{fee.price}</td>
+                <td className="px-5 py-3.5 text-ink">{fee.price}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <p className="mt-3 text-xs text-gray-500">
+      <p className="mt-3 text-xs text-ink-muted">
         Prices are approximate and based on early-bird rates. Fees increase as the event approaches.
         Check the official website for current pricing before registering.
       </p>
@@ -940,16 +971,16 @@ function WeekendTipsSection() {
           { icon: <Users className="h-4 w-4" />, title: 'Spectators', body: 'Check whether spectators need tickets. Indoor events like HYROX and Deka Fit typically offer free spectator entry; outdoor events may have different policies.' },
         ].map((tip) => (
           <div key={tip.title} className="card space-y-3">
-            <div className="flex items-center gap-2 text-brand-400 font-medium text-sm">
+            <div className="flex items-center gap-2 text-mint font-medium text-sm">
               {tip.icon} {tip.title}
             </div>
-            <p className="text-sm text-gray-400 leading-relaxed">{tip.body}</p>
+            <p className="text-sm text-ink-muted leading-relaxed">{tip.body}</p>
           </div>
         ))}
       </div>
       <div className="card mt-4">
         <h3 className="font-semibold text-white mb-3">What to Bring</h3>
-        <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-400">
+        <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-ink-muted">
           {[
             'Confirmation email or event app entry',
             'Appropriate footwear for the discipline',
@@ -961,7 +992,7 @@ function WeekendTipsSection() {
             'Sunscreen and hat for outdoor events',
           ].map((item) => (
             <li key={item} className="flex items-start gap-2">
-              <CheckCircle className="h-3.5 w-3.5 text-brand-400 mt-0.5 shrink-0" />
+              <CheckCircle className="h-3.5 w-3.5 text-mint mt-0.5 shrink-0" />
               {item}
             </li>
           ))}
@@ -976,6 +1007,14 @@ function WeekendTipsSection() {
 function FaqSection({ discipline }: { discipline: string }) {
   type Faq = { q: string; a: string }
   const faqs: Record<string, Faq[]> = {
+    'CrossFit': [
+      { q: 'What is a CrossFit throwdown?', a: 'A CrossFit throwdown is a local or regional competition held at a CrossFit affiliate box or external venue. Athletes complete a series of WODs (workouts of the day) over one or two days, scored for time, load or reps. Unlike sanctional events, throwdowns are community-organised and the format varies by event.' },
+      { q: 'What is the CrossFit Open?', a: 'The CrossFit Open is an annual online qualifier held each February–March. Athletes complete three or four workouts over consecutive weeks and submit their scores online. It is the first stage of the CrossFit Games season and the largest online fitness competition in the world — open to all fitness levels.' },
+      { q: 'What divisions are available at CrossFit competitions?', a: 'Most CrossFit competitions offer RX (prescribed — standard weights and movements), Scaled (reduced weights and movement modifications), and Masters divisions by age group (35+, 40+, 45+, 50+, 55+, 60+). Many events also include Team categories (3–5 athletes) and Adaptive divisions.' },
+      { q: 'What does RX mean?', a: 'RX means "as prescribed" — the athlete completes every movement at the specified weight and standard without any modifications. Scaled divisions allow athletes to reduce weights or substitute movements, making competition accessible for athletes who are still building strength or technique in movements like muscle-ups or heavy barbell lifts.' },
+      { q: 'Do I need to be a CrossFit member to compete?', a: 'No — most CrossFit competitions are open to all athletes regardless of gym affiliation. A CrossFit membership is not required to register. However, if you\'re new to CrossFit movements, training at a CrossFit box before competing will help you learn the standardised movements safely.' },
+      { q: 'How are workouts announced at CrossFit competitions?', a: 'Workouts at local throwdowns are typically announced on the event day or the evening before. At larger sanctional events, some workouts may be announced in advance to allow preparation. The element of the unknown — not knowing your workout until close to competition — is fundamental to CrossFit\'s competitive philosophy.' },
+    ],
     'HYROX': [
       { q: 'What exactly is HYROX?', a: 'HYROX is a standardised global fitness race: 8 × 1 km runs alternating with 8 workout stations — SkiErg, Sled Push, Sled Pull, Burpee Broad Jumps, Rowing, Farmer\'s Carry, Sandbag Lunges and Wall Balls. Because the format never changes, every finish time is globally comparable.' },
       { q: 'Do I need prior experience to enter?', a: 'No. The Open division is designed for recreational athletes of all fitness levels. If you can run 5 km and have a few months of gym training, you have the base fitness to complete HYROX.' },
@@ -1044,7 +1083,7 @@ function FaqSection({ discipline }: { discipline: string }) {
         {rows.map((faq) => (
           <div key={faq.q} className="card">
             <h3 className="font-semibold text-white mb-2">{faq.q}</h3>
-            <p className="text-sm text-gray-400 leading-relaxed">{faq.a}</p>
+            <p className="text-sm text-ink-muted leading-relaxed">{faq.a}</p>
           </div>
         ))}
       </div>
@@ -1057,6 +1096,14 @@ function FaqSection({ discipline }: { discipline: string }) {
 function QuickFactsSidebar({ discipline }: { discipline: string }) {
   type Fact = { label: string; value: string }
   const facts: Record<string, Fact[]> = {
+    'CrossFit': [
+      { label: 'Format',          value: 'Multiple WODs (workouts of the day)' },
+      { label: 'Scoring',         value: 'Time, load, or reps' },
+      { label: 'Divisions',       value: 'RX, Scaled, Masters, Team, Adaptive' },
+      { label: 'Duration',        value: '1–2 days' },
+      { label: 'WODs per event',  value: '3–6 workouts typical' },
+      { label: 'Spectators',      value: 'Free entry at most events' },
+    ],
     'HYROX': [
       { label: 'Total running',   value: '8 km' },
       { label: 'Stations',        value: '8 workout stations' },
@@ -1119,8 +1166,8 @@ function QuickFactsSidebar({ discipline }: { discipline: string }) {
       <h2 className="font-semibold text-white">Quick Facts</h2>
       {rows.map((fact) => (
         <div key={fact.label} className="flex justify-between gap-4">
-          <span className="text-gray-500">{fact.label}</span>
-          <span className="text-gray-300 text-right">{fact.value}</span>
+          <span className="text-ink-muted">{fact.label}</span>
+          <span className="text-ink text-right">{fact.value}</span>
         </div>
       ))}
     </div>

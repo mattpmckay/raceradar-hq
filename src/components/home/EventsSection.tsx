@@ -48,12 +48,14 @@ const COUNTRY_FLAGS: Record<string, string> = {
 
 const DISCIPLINE_MAP: Record<string, string> = {
   'HYROX':         'HYROX',
+  'CrossFit':      'CrossFit',
   'Spartan Race':  'Spartan',
   'Ironman':       'Ironman',
   'Ironman 70.3':  'Ironman',
   'Marathon':      'Marathon',
   'Trail Running': 'Trail Running',
   'Deka Fit':      'Deka',
+  'Tough Mudder':  'Tough Mudder',
 }
 
 function mapDiscipline(discipline: string): string {
@@ -77,15 +79,17 @@ function toDisplayEvent(e: SupabaseEvent): Event {
 
 // ─── Sport config ─────────────────────────────────────────────────────────────
 
-const SPORT_FILTERS = ['All', 'HYROX', 'Spartan', 'Ironman', 'Marathon', 'Trail Running', 'Deka']
+const SPORT_FILTERS = ['All', 'HYROX', 'CrossFit', 'Spartan', 'Ironman', 'Marathon', 'Trail Running', 'Deka']
 
 const SPORT_STYLES: Record<string, { bg: string; text: string }> = {
   HYROX:           { bg: 'rgba(0,217,166,0.12)',   text: '#00D9A6' },
-  Spartan:         { bg: 'rgba(255,77,0,0.12)',     text: '#FF6B35' },
-  Ironman:         { bg: 'rgba(239,68,68,0.12)',    text: '#F87171' },
+  CrossFit:        { bg: 'rgba(239,68,68,0.12)',    text: '#EF4444' },
+  Spartan:         { bg: 'rgba(255,107,53,0.12)',   text: '#FF6B35' },
+  Ironman:         { bg: 'rgba(248,113,113,0.12)',  text: '#F87171' },
   Marathon:        { bg: 'rgba(96,165,250,0.12)',   text: '#60A5FA' },
-  'Trail Running': { bg: 'rgba(16,185,129,0.12)',   text: '#34D399' },
+  'Trail Running': { bg: 'rgba(52,211,153,0.12)',   text: '#34D399' },
   Deka:            { bg: 'rgba(167,139,250,0.12)',  text: '#A78BFA' },
+  'Tough Mudder':  { bg: 'rgba(245,158,11,0.12)',   text: '#F59E0B' },
 }
 
 const defaultStyle = { bg: 'rgba(107,122,141,0.12)', text: '#6B7A8D' }

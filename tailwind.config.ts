@@ -40,8 +40,8 @@ const config: Config = {
         },
         ink: {
           DEFAULT: '#F0F4F8',
-          muted:   '#6B7A8D',
-          subtle:  '#3D4A5C',
+          muted:   '#8896A8',
+          subtle:  '#52667A',
           faint:   '#1E2A38',
         },
         // ── Legacy tokens — keep for admin / dashboard ───────────────

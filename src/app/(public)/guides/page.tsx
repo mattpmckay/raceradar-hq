@@ -244,7 +244,7 @@ export default async function GuidesPage() {
       {/* Header */}
       <div className="mb-12 max-w-2xl">
         <h1 className="page-title">Race Guides</h1>
-        <p className="mt-3 text-gray-400 text-lg leading-relaxed">
+        <p className="mt-3 text-ink-muted text-lg leading-relaxed">
           Everything you need to train, prepare and race — event-specific guides, discipline
           explainers, training plans and race day tips from the RaceRadar team.
         </p>
@@ -254,12 +254,12 @@ export default async function GuidesPage() {
       {events.length > 0 && (
         <section className="mb-16">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-sm font-semibold uppercase tracking-widest text-gray-500">
+            <h2 className="text-sm font-semibold uppercase tracking-widest text-ink-muted">
               Event Race Guides
             </h2>
             <Link
               href="/events"
-              className="text-sm text-brand-400 hover:text-brand-300 transition-colors flex items-center gap-1"
+              className="text-sm text-mint hover:text-mint-300 transition-colors flex items-center gap-1"
             >
               All events <ChevronRight className="h-3.5 w-3.5" />
             </Link>
@@ -275,25 +275,25 @@ export default async function GuidesPage() {
                 <Link
                   key={event.id}
                   href={`/events/${event.slug}`}
-                  className={`card group flex flex-col gap-4 hover:border-brand-500/40 transition-colors ${
+                  className={`card group flex flex-col gap-4 hover:border-mint/40 transition-colors ${
                     isFeaturedHero ? 'sm:col-span-2 lg:col-span-1' : ''
                   }`}
                 >
                   {/* Top: discipline + category */}
                   <div className="flex items-center justify-between gap-2">
                     <Badge variant={badgeVariant}>{event.discipline}</Badge>
-                    <span className="flex items-center gap-1 text-xs text-gray-600">
+                    <span className="flex items-center gap-1 text-xs text-ink-muted">
                       <BookOpen className="h-3 w-3" /> Race Guide
                     </span>
                   </div>
 
                   {/* Title */}
-                  <h3 className="font-semibold text-white group-hover:text-brand-400 transition-colors leading-snug">
+                  <h3 className="font-semibold text-ink group-hover:text-mint transition-colors leading-snug">
                     {event.title}
                   </h3>
 
                   {/* Location + date */}
-                  <div className="text-xs text-gray-500 space-y-0.5">
+                  <div className="text-xs text-ink-muted space-y-0.5">
                     {venue && <div>{venue}</div>}
                     <div>
                       {[event.city, event.country].filter(Boolean).join(', ')}
@@ -307,7 +307,7 @@ export default async function GuidesPage() {
 
                   {/* What's inside */}
                   <div className="mt-auto">
-                    <p className="text-xs text-gray-600 mb-2 font-medium">Guide covers</p>
+                    <p className="text-xs text-ink-muted mb-2 font-medium">Guide covers</p>
                     <ul className="space-y-1">
                       {[
                         'Race format & workout stations',
@@ -315,15 +315,15 @@ export default async function GuidesPage() {
                         'Venue, transport & tips',
                         'FAQs for first-timers',
                       ].map((item) => (
-                        <li key={item} className="flex items-center gap-1.5 text-xs text-gray-500">
-                          <span className="h-1 w-1 rounded-full bg-brand-500/60 shrink-0" />
+                        <li key={item} className="flex items-center gap-1.5 text-xs text-ink-muted">
+                          <span className="h-1 w-1 rounded-full bg-mint/60 shrink-0" />
                           {item}
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  <div className="flex items-center gap-1 text-xs font-medium text-brand-400 group-hover:text-brand-300 transition-colors">
+                  <div className="flex items-center gap-1 text-xs font-medium text-mint group-hover:text-mint-300 transition-colors">
                     Read guide <ChevronRight className="h-3.5 w-3.5" />
                   </div>
                 </Link>
@@ -348,7 +348,7 @@ export default async function GuidesPage() {
             <div className="space-y-14">
               {liveSections.map((section) => (
                 <section key={section.category}>
-                  <h2 className="text-sm font-semibold uppercase tracking-widest text-gray-500 mb-6">
+                  <h2 className="text-sm font-semibold uppercase tracking-widest text-ink-muted mb-6">
                     {section.heading}
                   </h2>
                   <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -360,7 +360,7 @@ export default async function GuidesPage() {
               ))}
             </div>
             {comingCount > 0 && (
-              <p className="mt-8 text-center text-sm text-gray-600">
+              <p className="mt-8 text-center text-sm text-ink-muted">
                 {comingCount} more guides in progress — new guides published regularly.
               </p>
             )}
@@ -369,10 +369,10 @@ export default async function GuidesPage() {
       })()}
 
       {/* ── Suggest a guide CTA ───────────────────────────────────────── */}
-      <div className="mt-16 rounded-2xl border border-surface-border bg-surface-card p-8 text-center">
-        <BookOpen className="h-8 w-8 text-brand-500 mx-auto mb-3" />
-        <h2 className="text-xl font-bold text-white">Want a guide on a specific topic?</h2>
-        <p className="mt-2 text-gray-400 max-w-md mx-auto text-sm">
+      <div className="mt-16 rounded-2xl border border-wire bg-panel p-8 text-center">
+        <BookOpen className="h-8 w-8 text-mint mx-auto mb-3" />
+        <h2 className="text-xl font-bold text-ink">Want a guide on a specific topic?</h2>
+        <p className="mt-2 text-ink-muted max-w-md mx-auto text-sm">
           New guides are published regularly. Browse upcoming events or explore sports to find
           the information you need right now.
         </p>
@@ -403,13 +403,13 @@ function EditorialGuideCard({ guide }: { guide: EditorialGuide }) {
     <div
       className={`card flex flex-col gap-3 ${
         isLive
-          ? 'hover:border-brand-500/40 transition-colors'
+          ? 'hover:border-mint/40 transition-colors'
           : 'opacity-60'
       }`}
     >
       {/* Category + discipline */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+        <span className="text-xs font-medium text-ink-muted uppercase tracking-wide">
           {CATEGORY_LABELS[guide.category]}
         </span>
         {guide.discipline && (
@@ -420,30 +420,30 @@ function EditorialGuideCard({ guide }: { guide: EditorialGuide }) {
       </div>
 
       {/* Title */}
-      <h3 className={`font-semibold leading-snug ${isLive ? 'text-white' : 'text-gray-400'}`}>
+      <h3 className={`font-semibold leading-snug ${isLive ? 'text-ink' : 'text-ink-muted'}`}>
         {guide.title}
       </h3>
 
       {/* Description */}
-      <p className="text-sm text-gray-500 leading-relaxed flex-1">
+      <p className="text-sm text-ink-muted leading-relaxed flex-1">
         {guide.description}
       </p>
 
       {/* Footer: read time + CTA */}
       <div className="flex items-center justify-between mt-auto pt-1">
-        <span className="flex items-center gap-1 text-xs text-gray-600">
+        <span className="flex items-center gap-1 text-xs text-ink-muted">
           <Clock className="h-3 w-3" />
           {guide.readTime}
         </span>
         {isLive ? (
           <Link
             href={guide.href!}
-            className="flex items-center gap-1 text-xs font-medium text-brand-400 hover:text-brand-300 transition-colors"
+            className="flex items-center gap-1 text-xs font-medium text-mint hover:text-mint-300 transition-colors"
           >
             Read <ChevronRight className="h-3.5 w-3.5" />
           </Link>
         ) : (
-          <span className="flex items-center gap-1 text-xs text-gray-600">
+          <span className="flex items-center gap-1 text-xs text-ink-muted">
             <Lock className="h-3 w-3" /> Coming soon
           </span>
         )}

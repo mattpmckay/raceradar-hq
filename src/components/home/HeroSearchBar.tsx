@@ -6,12 +6,15 @@ import { useRouter } from 'next/navigation'
 // Values must match exact discipline strings stored in the DB
 const SPORTS = [
   'HYROX',
+  'CrossFit',
+  'Deka Fit',
   'Spartan Race',
+  'Tough Mudder',
   'Ironman',
   'Ironman 70.3',
   'Marathon',
+  'Road Racing',
   'Trail Running',
-  'Deka Fit',
 ]
 
 const COUNTRIES = [

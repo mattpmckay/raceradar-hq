@@ -155,7 +155,7 @@ export default async function LocationsPage() {
       {/* Header */}
       <div className="mb-10 max-w-2xl">
         <h1 className="page-title">Locations</h1>
-        <p className="mt-3 text-gray-400 text-lg leading-relaxed">
+        <p className="mt-3 text-ink-muted text-lg leading-relaxed">
           Discover fitness races and endurance events across Asia Pacific — from Sydney&apos;s indoor
           arenas to the slopes of Mt Fuji.
         </p>
@@ -169,8 +169,8 @@ export default async function LocationsPage() {
           { value: totalCities,   label: 'cities & venues' },
         ].map((stat) => (
           <div key={stat.label} className="card text-center py-4">
-            <div className="text-2xl font-bold text-white">{stat.value}</div>
-            <div className="text-xs text-gray-500 mt-0.5">{stat.label}</div>
+            <div className="text-2xl font-bold text-ink">{stat.value}</div>
+            <div className="text-xs text-ink-muted mt-0.5">{stat.label}</div>
           </div>
         ))}
       </div>
@@ -179,7 +179,7 @@ export default async function LocationsPage() {
       <div className="space-y-14">
         {REGIONS.map((region) => (
           <section key={region.name}>
-            <h2 className="text-sm font-semibold uppercase tracking-widest text-gray-500 mb-5">
+            <h2 className="text-sm font-semibold uppercase tracking-widest text-ink-muted mb-5">
               {region.name}
             </h2>
 
@@ -189,40 +189,40 @@ export default async function LocationsPage() {
                 return (
                   <div
                     key={loc.country}
-                    className="card flex flex-col gap-4 hover:border-surface-border transition-colors"
+                    className="card flex flex-col gap-4 hover:border-wire transition-colors"
                   >
                     {/* Flag + name + count */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
                         <span className="text-3xl leading-none">{loc.flag}</span>
                         <div>
-                          <h3 className="font-bold text-white text-lg leading-tight">{loc.country}</h3>
-                          <p className="text-xs text-gray-500">{loc.region}</p>
+                          <h3 className="font-bold text-ink text-lg leading-tight">{loc.country}</h3>
+                          <p className="text-xs text-ink-muted">{loc.region}</p>
                         </div>
                       </div>
                       {count > 0 && (
-                        <span className="shrink-0 rounded-full bg-surface-card border border-surface-border px-2.5 py-0.5 text-xs font-medium text-gray-300">
+                        <span className="shrink-0 rounded-full bg-panel border border-wire px-2.5 py-0.5 text-xs font-medium text-ink">
                           {count} upcoming
                         </span>
                       )}
                     </div>
 
                     {/* Blurb */}
-                    <p className="text-sm text-gray-400 leading-relaxed flex-1">
+                    <p className="text-sm text-ink-muted leading-relaxed flex-1">
                       {loc.blurb}
                     </p>
 
                     {/* Cities */}
                     <div>
                       <div className="flex items-center gap-1.5 mb-2">
-                        <MapPin className="h-3 w-3 text-gray-600" />
-                        <span className="text-xs text-gray-600 font-medium">Key cities</span>
+                        <MapPin className="h-3 w-3 text-ink-muted" />
+                        <span className="text-xs text-ink-muted font-medium">Key cities</span>
                       </div>
                       <div className="flex flex-wrap gap-1.5">
                         {loc.cities.map((city) => (
                           <span
                             key={city}
-                            className="rounded-md bg-surface-card border border-surface-border px-2 py-0.5 text-xs text-gray-400"
+                            className="rounded-md bg-panel border border-wire px-2 py-0.5 text-xs text-ink-muted"
                           >
                             {city}
                           </span>
@@ -233,7 +233,7 @@ export default async function LocationsPage() {
                     {/* Disciplines */}
                     <div className="flex flex-wrap gap-1.5">
                       {loc.disciplines.map((d) => (
-                        <span key={d} className="text-xs text-gray-600">
+                        <span key={d} className="text-xs text-ink-muted">
                           {d}
                           {loc.disciplines.indexOf(d) < loc.disciplines.length - 1 ? ' ·' : ''}
                         </span>
@@ -244,13 +244,13 @@ export default async function LocationsPage() {
                     {count > 0 ? (
                       <Link
                         href={`/events?country=${encodeURIComponent(loc.country)}`}
-                        className="flex items-center gap-1 text-sm font-medium text-brand-400 hover:text-brand-300 transition-colors"
+                        className="flex items-center gap-1 text-sm font-medium text-mint hover:text-mint-300 transition-colors"
                       >
                         View {loc.country} events
                         <ChevronRight className="h-4 w-4" />
                       </Link>
                     ) : (
-                      <p className="text-xs text-gray-600">Events coming soon</p>
+                      <p className="text-xs text-ink-muted">Events coming soon</p>
                     )}
                   </div>
                 )
@@ -261,9 +261,9 @@ export default async function LocationsPage() {
       </div>
 
       {/* Bottom CTA */}
-      <div className="mt-16 rounded-2xl border border-surface-border bg-surface-card p-8 text-center">
-        <h2 className="text-xl font-bold text-white">Browse all events</h2>
-        <p className="mt-2 text-gray-400 max-w-md mx-auto">
+      <div className="mt-16 rounded-2xl border border-wire bg-panel p-8 text-center">
+        <h2 className="text-xl font-bold text-ink">Browse all events</h2>
+        <p className="mt-2 text-ink-muted max-w-md mx-auto">
           View the full calendar across every location, discipline and date — with filters to
           narrow it down.
         </p>

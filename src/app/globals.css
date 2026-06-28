@@ -38,9 +38,9 @@
     @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
   }
 
-  /* ── Legacy admin / dashboard components ────────── */
+  /* ── Shared public + admin components ───────────── */
   .card {
-    @apply rounded-xl border border-surface-border bg-surface-card p-6;
+    @apply rounded-xl border border-wire bg-panel p-6;
   }
 
   .badge {
@@ -48,23 +48,23 @@
   }
 
   .btn-primary {
-    @apply inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:opacity-50;
+    @apply inline-flex items-center gap-2 rounded-lg bg-fire px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-fire-600 hover:-translate-y-px hover:shadow-lg hover:shadow-fire/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fire disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center gap-2 rounded-lg border border-surface-border bg-surface-card px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-surface-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:opacity-50;
+    @apply inline-flex items-center gap-2 rounded-lg border border-wire bg-panel px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:bg-panel-raised hover:border-wire-bright focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-wire-bright disabled:opacity-50;
   }
 
   .btn-ghost {
-    @apply inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-gray-300 transition-colors hover:bg-surface-card hover:text-white disabled:opacity-50;
+    @apply inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-ink-muted transition-colors hover:bg-panel hover:text-ink disabled:opacity-50;
   }
 
   .input {
-    @apply block w-full rounded-lg border border-surface-border bg-surface-card px-3.5 py-2.5 text-sm text-white placeholder:text-gray-500 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500;
+    @apply block w-full rounded-lg border border-wire bg-panel px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-muted focus:border-mint/60 focus:outline-none focus:ring-1 focus:ring-mint/20 transition-colors;
   }
 
   .label {
-    @apply block text-sm font-medium text-gray-300;
+    @apply block text-sm font-medium text-ink;
   }
 
   .section-title {

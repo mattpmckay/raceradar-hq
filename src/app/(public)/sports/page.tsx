@@ -32,10 +32,10 @@ interface SportDef {
 }
 
 const accentClasses: Record<AccentColor, { icon: string; badge: string; border: string; cta: string }> = {
-  brand:   { icon: 'bg-brand-500/15 text-brand-400',   badge: 'bg-brand-500/10 text-brand-400 border-brand-500/20',    border: 'hover:border-brand-500/50',   cta: 'text-brand-400 hover:text-brand-300' },
+  brand:   { icon: 'bg-mint/15 text-mint',             badge: 'bg-mint/10 text-mint border-mint/20',                  border: 'hover:border-mint/50',        cta: 'text-mint hover:text-mint-300' },
   warning: { icon: 'bg-yellow-500/15 text-yellow-400', badge: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20', border: 'hover:border-yellow-500/50', cta: 'text-yellow-400 hover:text-yellow-300' },
   success: { icon: 'bg-green-500/15 text-green-400',   badge: 'bg-green-500/10 text-green-400 border-green-500/20',   border: 'hover:border-green-500/50',  cta: 'text-green-400 hover:text-green-300' },
-  default: { icon: 'bg-surface-card text-gray-400',    badge: 'bg-surface-card text-gray-400 border-surface-border',  border: 'hover:border-surface-border', cta: 'text-gray-300 hover:text-white' },
+  default: { icon: 'bg-panel text-ink-muted',          badge: 'bg-panel text-ink-muted border-wire',                  border: 'hover:border-wire-bright',    cta: 'text-ink-muted hover:text-ink' },
 }
 
 const SPORTS: SportDef[] = [
@@ -209,7 +209,7 @@ export default async function SportsPage() {
       {/* Header */}
       <div className="mb-12 max-w-2xl">
         <h1 className="page-title">Explore Sports</h1>
-        <p className="mt-3 text-gray-400 text-lg leading-relaxed">
+        <p className="mt-3 text-ink-muted text-lg leading-relaxed">
           From indoor fitness races to mountain ultras, discover every discipline on RaceRadar HQ
           and find events that match your training goals.
         </p>
@@ -241,28 +241,28 @@ export default async function SportsPage() {
 
               {/* Name + tagline */}
               <div>
-                <h2 className="text-lg font-bold text-white">{sport.label}</h2>
+                <h2 className="text-lg font-bold text-ink">{sport.label}</h2>
                 <p className={`text-sm font-medium mt-0.5 ${a.cta}`}>{sport.tagline}</p>
               </div>
 
               {/* Description */}
-              <p className="text-sm text-gray-400 leading-relaxed flex-1">
+              <p className="text-sm text-ink-muted leading-relaxed flex-1">
                 {sport.description}
               </p>
 
               {/* Key stats */}
-              <div className="grid grid-cols-3 gap-2 rounded-lg bg-surface-card p-3 text-center text-xs">
+              <div className="grid grid-cols-3 gap-2 rounded-lg bg-panel p-3 text-center text-xs">
                 <div>
-                  <div className="text-gray-500 mb-0.5">Format</div>
-                  <div className="text-gray-300 font-medium leading-tight">{sport.format}</div>
+                  <div className="text-ink-muted mb-0.5">Format</div>
+                  <div className="text-ink font-medium leading-tight">{sport.format}</div>
                 </div>
-                <div className="border-x border-surface-border">
-                  <div className="text-gray-500 mb-0.5">Distance</div>
-                  <div className="text-gray-300 font-medium leading-tight">{sport.distance}</div>
+                <div className="border-x border-wire">
+                  <div className="text-ink-muted mb-0.5">Distance</div>
+                  <div className="text-ink font-medium leading-tight">{sport.distance}</div>
                 </div>
                 <div>
-                  <div className="text-gray-500 mb-0.5">Who for</div>
-                  <div className="text-gray-300 font-medium leading-tight">{sport.whoFor}</div>
+                  <div className="text-ink-muted mb-0.5">Who for</div>
+                  <div className="text-ink font-medium leading-tight">{sport.whoFor}</div>
                 </div>
               </div>
 
@@ -280,9 +280,9 @@ export default async function SportsPage() {
       </div>
 
       {/* Bottom CTA */}
-      <div className="mt-16 rounded-2xl border border-surface-border bg-surface-card p-8 text-center">
-        <h2 className="text-xl font-bold text-white">Not sure where to start?</h2>
-        <p className="mt-2 text-gray-400 max-w-md mx-auto">
+      <div className="mt-16 rounded-2xl border border-wire bg-panel p-8 text-center">
+        <h2 className="text-xl font-bold text-ink">Not sure where to start?</h2>
+        <p className="mt-2 text-ink-muted max-w-md mx-auto">
           Browse all upcoming events across every discipline, filtered by date, location or sport.
         </p>
         <Link href="/events" className="btn-primary mt-5 inline-flex">
