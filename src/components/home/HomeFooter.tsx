@@ -10,10 +10,13 @@ const FOOTER_LINKS = {
   Sports: [
     { label: 'HYROX',         href: '/events?discipline=HYROX' },
     { label: 'Spartan Race',  href: '/events?discipline=Spartan+Race' },
+    { label: 'Tough Mudder',  href: '/events?discipline=Tough+Mudder' },
     { label: 'Ironman',       href: '/events?discipline=Ironman' },
     { label: 'Marathon',      href: '/events?discipline=Marathon' },
+    { label: 'Road Racing',   href: '/events?discipline=Road+Racing' },
     { label: 'Trail Running', href: '/events?discipline=Trail+Running' },
     { label: 'Deka Fit',      href: '/events?discipline=Deka+Fit' },
+    { label: 'CrossFit',      href: '/events?discipline=CrossFit' },
   ],
 }
 

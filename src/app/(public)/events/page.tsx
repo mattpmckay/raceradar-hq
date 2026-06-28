@@ -37,19 +37,25 @@ const DISCIPLINES = [
   { label: 'All Events',   value: '' },
   { label: 'HYROX',        value: 'HYROX' },
   { label: 'Spartan Race', value: 'Spartan Race' },
+  { label: 'Tough Mudder', value: 'Tough Mudder' },
   { label: 'Ironman',      value: 'Ironman' },
   { label: 'Marathon',     value: 'Marathon' },
+  { label: 'Road Racing',  value: 'Road Racing' },
   { label: 'Trail Running',value: 'Trail Running' },
   { label: 'Deka Fit',     value: 'Deka Fit' },
+  { label: 'CrossFit',     value: 'CrossFit' },
 ]
 
 const DISCIPLINE_COLORS: Record<string, string> = {
   'HYROX':         '#00D9A6',
   'Spartan Race':  '#FF6B35',
+  'Tough Mudder':  '#F59E0B',
   'Ironman':       '#F87171',
   'Marathon':      '#60A5FA',
+  'Road Racing':   '#94A3B8',
   'Trail Running': '#34D399',
   'Deka Fit':      '#A78BFA',
+  'CrossFit':      '#EF4444',
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -180,11 +186,15 @@ export default async function EventsPage({ searchParams }: PageProps) {
           <EmptyState
             icon={<Calendar className="h-10 w-10" />}
             title={params.discipline || params.country || params.q
-              ? 'No events match your filters'
+              ? 'No events found'
               : 'No upcoming events found'}
-            description={params.discipline || params.country || params.q
-              ? 'Try adjusting or clearing your filters.'
-              : 'Check back soon — new events are added regularly.'}
+            description={
+              params.discipline && !params.country && !params.q
+                ? `No ${params.discipline} events are listed yet — check back soon.`
+                : params.discipline || params.country || params.q
+                ? 'Try adjusting or clearing your filters.'
+                : 'Check back soon — new events are added regularly.'
+            }
           />
         )}
       </div>

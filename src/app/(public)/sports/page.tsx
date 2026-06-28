@@ -1,16 +1,16 @@
 import Link from 'next/link'
-import { ArrowRight, Dumbbell, Shield, Waves, Mountain, Timer, Zap, ChevronRight } from 'lucide-react'
+import { ArrowRight, Dumbbell, Shield, Waves, Mountain, Timer, Zap, ChevronRight, Users, Flame, Activity } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: { absolute: 'Sports — Fitness Races & Endurance Events | RaceRadar HQ' },
   description:
-    'Explore every sport on RaceRadar HQ: HYROX, Spartan Race, IRONMAN, Ironman 70.3, Marathon, Trail Running and Deka Fit. Find upcoming events across Asia Pacific.',
+    'Explore every sport on RaceRadar HQ: HYROX, Spartan Race, Tough Mudder, IRONMAN, Marathon, Road Racing, Trail Running, Deka Fit and CrossFit. Find upcoming events across Asia Pacific.',
   openGraph: {
     title: 'Sports — Explore Fitness Disciplines | RaceRadar HQ',
     description:
-      'Discover HYROX, Spartan, Ironman, Marathon, Trail Running and more across Asia Pacific.',
+      'Discover HYROX, Spartan, Tough Mudder, Ironman, Marathon, Road Racing, CrossFit and more across Asia Pacific.',
   },
 }
 
@@ -66,6 +66,19 @@ const SPORTS: SportDef[] = [
     accent: 'warning',
   },
   {
+    discipline: 'Tough Mudder',
+    slug: 'Tough Mudder',
+    label: 'Tough Mudder',
+    tagline: 'The original team obstacle mud run',
+    description:
+      'Tough Mudder is a 15–20 km obstacle course series built around camaraderie and mental toughness — not competitive racing. Courses feature 20–25 obstacles including electric shocks, ice baths and fire pits. Unlike Spartan Race, there are no penalties, no mandatory race bibs, and the finish line is collective. Teams are the point.',
+    format: 'Team + Obstacles',
+    distance: '15 – 20 km',
+    whoFor: 'Groups and first-timers',
+    icon: <Users className="h-6 w-6" />,
+    accent: 'warning',
+  },
+  {
     discipline: 'Ironman',
     slug: 'Ironman',
     label: 'IRONMAN',
@@ -105,6 +118,19 @@ const SPORTS: SportDef[] = [
     accent: 'default',
   },
   {
+    discipline: 'Road Racing',
+    slug: 'Road Racing',
+    label: 'Road Racing',
+    tagline: 'City runs from 5 km to half marathon',
+    description:
+      'Road racing covers the full spectrum of timed running events on sealed roads below marathon distance — 5 km fun runs, 10 km classics, half marathons and iconic city races like City2Surf. The format is pure running: no obstacles, no bike legs, no transitions. The most accessible entry point into competitive fitness events.',
+    format: 'Road running',
+    distance: '5 km – 21.1 km',
+    whoFor: 'All runners',
+    icon: <Activity className="h-6 w-6" />,
+    accent: 'default',
+  },
+  {
     discipline: 'Trail Running',
     slug: 'Trail Running',
     label: 'Trail Running',
@@ -129,6 +155,19 @@ const SPORTS: SportDef[] = [
     whoFor: 'Gym-based athletes, HYROX fans',
     icon: <Zap className="h-6 w-6" />,
     accent: 'warning',
+  },
+  {
+    discipline: 'CrossFit',
+    slug: 'CrossFit',
+    label: 'CrossFit',
+    tagline: 'Constantly varied functional fitness competition',
+    description:
+      'CrossFit events test athletes across weightlifting, gymnastics and metabolic conditioning in constantly varied workouts scored for time or load. The CrossFit Open — the world\'s largest online qualifier — runs annually and feeds into Sanctional events and the CrossFit Games. Local throwdowns and team competitions run throughout the year.',
+    format: 'WODs + Barbell',
+    distance: 'Varied',
+    whoFor: 'CrossFit athletes',
+    icon: <Flame className="h-6 w-6" />,
+    accent: 'brand',
   },
 ]
 
