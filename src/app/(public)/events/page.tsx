@@ -190,10 +190,20 @@ export default async function EventsPage({ searchParams }: PageProps) {
               : 'No upcoming events found'}
             description={
               params.discipline && !params.country && !params.q
-                ? `No ${params.discipline} events are listed yet — check back soon.`
+                ? `${params.discipline} events are being added soon — check back shortly.`
                 : params.discipline || params.country || params.q
                 ? 'Try adjusting or clearing your filters.'
                 : 'Check back soon — new events are added regularly.'
+            }
+            action={
+              params.discipline && !params.country && !params.q ? (
+                <Link
+                  href="/calendar"
+                  className="inline-flex items-center gap-2 rounded-full bg-fire px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-fire-600 hover:-translate-y-px hover:shadow-lg hover:shadow-fire/25"
+                >
+                  Join the free calendar
+                </Link>
+              ) : undefined
             }
           />
         )}

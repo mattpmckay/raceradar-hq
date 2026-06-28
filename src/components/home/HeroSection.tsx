@@ -18,7 +18,7 @@ export async function HeroSection() {
 
   const eventCount      = rows?.length ?? 0
   const countryCount    = new Set(rows?.map((r) => r.country).filter(Boolean)).size
-  const disciplineCount = new Set(rows?.map((r) => r.discipline).filter(Boolean)).size
+  const disciplineCount = 10 // matches DISCIPLINE_PILLS count in HeroDisciplinePills
 
   return (
     <section className="relative flex min-h-screen items-center overflow-hidden">
