@@ -77,21 +77,26 @@ Toggle API at `POST /api/favourites`. SaveButton client component with optimisti
 
 ---
 
+## Completed Sprints (continued)
+
+### Sprint 7 — Registration Status, Save Counts, Homepage Hearts, Profile (2026-06-28)
+Registration status badge on event detail sidebar (open/closing_soon/sold_out/coming_soon). Save count via SECURITY DEFINER RPC bypassing RLS. Homepage EventCards now have HeartButton with server-prefetched saved state. Profile page at /dashboard/profile with username/display name editing. Dashboard layout fully migrated to premium tokens.
+
 ## Current Sprint
 
-### Sprint 7 — TBD
+### Sprint 8 — TBD
 To be defined. Leading candidates are listed under Next Planned Sprint below.
 
 ---
 
 ## Next Planned Sprint
 
-### Sprint 7 — TBD
-To be defined after Sprint 6. Leading candidates:
+### Sprint 8 — TBD
+To be defined. Leading candidates:
 - Events listing pagination / "Load more" (currently capped at 48)
-- User profile page (edit name, avatar, preferences)
-- Registration status badge on events (requires DB migration)
-- Admin event CRUD improvements
+- Admin event CRUD (create/edit form for events with registration_status field)
+- Email notifications for saved events approaching registration deadline
+- Track/circuit directory pages with content
 
 ---
 
@@ -101,10 +106,9 @@ Items approved for the product but not yet scheduled into a sprint.
 
 | Priority | Feature | Notes |
 |---|---|---|
-| High | Registration status badge | Requires `registration_status` enum migration + admin field |
 | High | Events pagination / Load More | 48-event cap is fine now, will hit limits as DB grows |
-| High | User profile page | Edit display name, avatar, sport preferences |
-| Medium | Admin event CRUD improvements | Currently read-only stubs |
+| High | Admin event CRUD improvements | Currently read-only stubs; needs create/edit form with registration_status field |
+| Medium | Avatar upload on profile | Requires Supabase Storage bucket setup |
 | Medium | Track / circuit directory pages | `/tracks/[slug]` template exists, needs content |
 | Medium | Championship / series pages | `/championships/[slug]` template exists, needs content |
 | Medium | Sort toggle on events page | Soonest first / Furthest out |

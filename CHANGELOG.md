@@ -4,6 +4,36 @@ All significant changes to the product are recorded here. Format: sprint number,
 
 ---
 
+## Sprint 7 — Registration Status, Save Counts, Homepage Hearts, Profile Page
+**Date:** 2026-06-28
+**Status:** Deployed ✓
+
+### Features Added
+- **Registration status badge** — `registration_status` column added to `events` table (nullable, 4 values: open / closing_soon / sold_out / coming_soon). `RegistrationStatusBadge` component renders in sidebar with per-status colour and animated pulse dot. Only renders when a status is set — zero impact on existing events.
+- **"X athletes saved this" count** — `get_event_save_count(uuid)` RPC function with `SECURITY DEFINER` bypasses RLS to count total saves across all users without exposing individual rows. Count shown below Save button on event detail sidebar.
+- **Homepage card hearts** — Homepage inline `EventCard` (in `EventsSection.tsx`) converted to overlay link pattern + `HeartButton`. `EventsSectionServer.tsx` fetches user session + saved IDs in parallel; zero extra queries for guests.
+- **Profile page** — `/dashboard/profile` page with `ProfileForm` client component (display name + username). `PATCH /api/profile` validates username format and handles unique constraint violations with friendly error copy.
+- **Dashboard layout migration** — All legacy tokens replaced with premium tokens; "Profile" added to sidebar nav.
+
+### Files Added / Modified
+- `supabase/migrations/20260628000001_add_registration_status.sql` *(new)*
+- `src/app/api/profile/route.ts` *(new)*
+- `src/components/dashboard/ProfileForm.tsx` *(new)*
+- `src/app/dashboard/profile/page.tsx` *(new)*
+- `src/types/supabase.ts` — `registration_status` + `get_event_save_count` RPC added
+- `src/app/(public)/events/[slug]/page.tsx`
+- `src/components/home/EventsSection.tsx`
+- `src/components/home/EventsSectionServer.tsx`
+- `src/app/dashboard/layout.tsx`
+
+### Breaking Changes
+None.
+
+### Action Required
+The migration `20260628000001_add_registration_status.sql` must be applied to the Supabase project before `registration_status` and `get_event_save_count` are available in production. Apply via Supabase dashboard SQL editor or `npx supabase migration up`.
+
+---
+
 ## Sprint 6 — Events Page Discovery Upgrade
 **Date:** 2026-06-28
 **Status:** Deployed ✓
