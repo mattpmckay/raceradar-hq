@@ -17,6 +17,15 @@ export type Database = {
           id: string
           username: string | null
           full_name: string | null
+          first_name: string | null
+          last_name: string | null
+          date_of_birth: string | null
+          gender: 'male' | 'female' | 'non_binary' | 'prefer_not_to_say' | null
+          country: string | null
+          state: string | null
+          city: string | null
+          preferred_sports: string[] | null
+          profile_photo_url: string | null
           avatar_url: string | null
           role: 'user' | 'admin'
           created_at: string
@@ -26,6 +35,15 @@ export type Database = {
           id: string
           username?: string | null
           full_name?: string | null
+          first_name?: string | null
+          last_name?: string | null
+          date_of_birth?: string | null
+          gender?: 'male' | 'female' | 'non_binary' | 'prefer_not_to_say' | null
+          country?: string | null
+          state?: string | null
+          city?: string | null
+          preferred_sports?: string[] | null
+          profile_photo_url?: string | null
           avatar_url?: string | null
           role?: 'user' | 'admin'
           created_at?: string
@@ -35,6 +53,15 @@ export type Database = {
           id?: string
           username?: string | null
           full_name?: string | null
+          first_name?: string | null
+          last_name?: string | null
+          date_of_birth?: string | null
+          gender?: 'male' | 'female' | 'non_binary' | 'prefer_not_to_say' | null
+          country?: string | null
+          state?: string | null
+          city?: string | null
+          preferred_sports?: string[] | null
+          profile_photo_url?: string | null
           avatar_url?: string | null
           role?: 'user' | 'admin'
           created_at?: string

@@ -15,6 +15,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const email = user?.email ?? ''
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('first_name, full_name')
+    .eq('id', user!.id)
+    .single()
+
+  const displayName = profile?.first_name
+    ?? profile?.full_name?.trim().split(' ')[0]
+    ?? email
+
   return (
     <div className="flex min-h-screen flex-col">
       {/* Top bar */}
@@ -25,7 +35,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <span>RaceRadar <span className="text-mint">HQ</span></span>
           </Link>
           <div className="flex items-center gap-1">
-            <span className="hidden text-sm text-ink-muted sm:block mr-2">{email}</span>
+            <span className="hidden text-sm text-ink-muted sm:block mr-2">{displayName}</span>
             <Link
               href="/dashboard/profile"
               aria-label="Profile settings"

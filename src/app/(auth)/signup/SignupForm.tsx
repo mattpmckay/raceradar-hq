@@ -8,15 +8,19 @@ import { PasswordInput } from '@/components/ui/PasswordInput'
 import { PasswordRules, validatePassword } from '@/components/ui/PasswordRules'
 
 export function SignupForm() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [firstName, setFirstName] = useState('')
+  const [lastName,  setLastName]  = useState('')
+  const [email,     setEmail]     = useState('')
+  const [password,  setPassword]  = useState('')
+  const [error,     setError]     = useState<string | null>(null)
+  const [success,   setSuccess]   = useState(false)
+  const [loading,   setLoading]   = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
+
+    if (!firstName.trim()) { setError('First name is required.'); return }
 
     const passwordError = validatePassword(password)
     if (passwordError) { setError(passwordError); return }
@@ -26,7 +30,14 @@ export function SignupForm() {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        data: {
+          first_name: firstName.trim(),
+          last_name:  lastName.trim(),
+          full_name:  `${firstName.trim()} ${lastName.trim()}`.trim(),
+        },
+      },
     })
 
     if (error) {
@@ -41,14 +52,54 @@ export function SignupForm() {
 
   if (success) {
     return (
-      <div className="rounded-lg border border-mint/30 bg-mint/10 px-4 py-3 text-sm text-mint">
-        Check your email to confirm your account.
+      <div className="space-y-3">
+        <div className="rounded-xl border border-mint/30 bg-mint/10 px-5 py-4">
+          <p className="font-semibold text-ink">Check your inbox</p>
+          <p className="mt-1 text-sm text-ink-muted">
+            We sent a confirmation link to <span className="text-ink">{email}</span>.
+            Click it to activate your account.
+          </p>
+        </div>
+        <p className="text-center text-xs text-ink-muted">
+          Didn&apos;t receive it? Check your spam folder or{' '}
+          <button
+            type="button"
+            onClick={() => { setSuccess(false); setPassword('') }}
+            className="text-mint hover:text-mint/80 transition-colors"
+          >
+            try again
+          </button>
+          .
+        </p>
       </div>
     )
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Name row */}
+      <div className="grid grid-cols-2 gap-3">
+        <Input
+          id="first-name"
+          type="text"
+          label="First Name"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          autoComplete="given-name"
+          required
+          placeholder="Matt"
+        />
+        <Input
+          id="last-name"
+          type="text"
+          label="Last Name"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          autoComplete="family-name"
+          placeholder="McKay"
+        />
+      </div>
+
       <Input
         id="email"
         type="email"
@@ -57,7 +108,9 @@ export function SignupForm() {
         onChange={(e) => setEmail(e.target.value)}
         autoComplete="email"
         required
+        placeholder="you@example.com"
       />
+
       <PasswordInput
         id="password"
         label="Password"

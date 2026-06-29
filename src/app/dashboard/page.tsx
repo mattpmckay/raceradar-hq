@@ -11,7 +11,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, username')
+    .select('full_name, first_name, username')
     .eq('id', user!.id)
     .single()
 
@@ -21,18 +21,34 @@ export default async function DashboardPage() {
     .eq('user_id', user!.id)
 
   const saved = favouriteCount ?? 0
-  const firstName = profile?.full_name?.trim().split(' ')[0] ?? user!.email
+  const firstName = profile?.first_name ?? profile?.full_name?.trim().split(' ')[0] ?? user!.email
+  const isProfileIncomplete = !profile?.first_name
 
   return (
     <div className="space-y-5 md:space-y-8">
 
       {/* Welcome */}
       <div>
-        <h1 className="text-2xl font-bold text-ink">
+        <h1 className="font-heading text-2xl font-bold text-ink">
           Welcome back, {firstName}!
         </h1>
         <p className="mt-1 text-sm text-ink-muted">Here&apos;s your event overview.</p>
       </div>
+
+      {/* Complete profile prompt */}
+      {isProfileIncomplete && (
+        <Link
+          href="/dashboard/profile"
+          className="flex items-start gap-3 rounded-xl border border-mint/30 bg-mint/8 px-4 py-3.5 transition-colors hover:border-mint/50 hover:bg-mint/12"
+        >
+          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-mint text-[10px] font-bold text-canvas">!</span>
+          <div>
+            <p className="text-sm font-semibold text-ink">Complete your profile</p>
+            <p className="mt-0.5 text-xs text-ink-muted">Add your name, location, and preferred sports to get personalised event recommendations.</p>
+          </div>
+          <span className="ml-auto self-center text-xs font-semibold text-mint">Set up →</span>
+        </Link>
+      )}
 
       {/* Quick Actions */}
       <section>
