@@ -1,7 +1,7 @@
 import { ResetPasswordForm } from './ResetPasswordForm'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: 'Set New Password — RaceRadar HQ' }
+export const metadata: Metadata = { title: 'Set New Password' }
 
 export default function ResetPasswordPage() {
   return (

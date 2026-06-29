@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { ProfileForm } from '@/components/dashboard/ProfileForm'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: 'Profile — RaceRadar HQ' }
+export const metadata: Metadata = { title: 'Profile Settings' }
 
 export default async function ProfilePage() {
   const supabase = await createClient()
