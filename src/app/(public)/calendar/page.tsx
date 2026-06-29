@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import { EmailCapture } from '@/components/home/EmailCapture'
+import { createClient } from '@/lib/supabase/server'
+import { CalendarSignup, sportsToCategories } from '@/components/home/CalendarSignup'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -9,7 +10,26 @@ export const metadata: Metadata = {
     'Get the free 2026 Asia Pacific fitness events calendar — every major HYROX, Spartan Race, Ironman, Marathon and Trail Running event, curated and delivered to your inbox.',
 }
 
-export default function CalendarPage() {
+export default async function CalendarPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  let preferredCategories: string[] = []
+  let isPersonalised = false
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('preferred_sports')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.preferred_sports && profile.preferred_sports.length > 0) {
+      preferredCategories = sportsToCategories(profile.preferred_sports)
+      isPersonalised = true
+    }
+  }
+
   return (
     <div>
       {/* Hero */}
@@ -23,17 +43,23 @@ export default function CalendarPage() {
           </h1>
           <p className="mt-4 text-base leading-relaxed text-ink-muted max-w-2xl mx-auto">
             Every major HYROX, Spartan Race, Ironman, Marathon, Trail Running and Deka Fit
-            event across Asia Pacific — curated, dated, and delivered to your inbox as soon as
-            it&apos;s ready.
+            event across Asia Pacific — curated, dated, and delivered to your inbox.
           </p>
         </div>
       </div>
 
-      {/* Email capture */}
-      <EmailCapture />
+      {/* Calendar selector */}
+      <section id="calendar-signup" className="container-page py-12 lg:py-16">
+        <div className="mx-auto max-w-lg">
+          <CalendarSignup
+            preferredCategories={preferredCategories}
+            isPersonalised={isPersonalised}
+          />
+        </div>
+      </section>
 
       {/* Browse now CTA */}
-      <div className="container-page py-10 text-center">
+      <div className="container-page pb-12 text-center">
         <p className="text-ink-muted text-sm mb-4">
           Can&apos;t wait? Browse all confirmed upcoming events right now.
         </p>

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   let body: unknown
@@ -16,17 +17,52 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'A valid email address is required.' }, { status: 400 })
   }
 
+  const rawCategories =
+    typeof body === 'object' && body !== null && 'categories' in body
+      ? (body as { categories: unknown }).categories
+      : undefined
+
+  const categories: string[] = Array.isArray(rawCategories)
+    ? rawCategories.filter((c): c is string => typeof c === 'string')
+    : []
+
+  // ── Save to Supabase ────────────────────────────────────────────────────
+  // Uses anon key + "anyone can subscribe" RLS policy — no auth required.
+  const supabase = await createClient()
+  const { error: dbError } = await supabase
+    .from('calendar_subscriptions')
+    .insert({ email, categories, source: 'calendar_page' })
+
+  if (dbError) {
+    console.error('[subscribe] Supabase insert error:', dbError.code, dbError.message)
+    // Don't fail the whole request if DB is unavailable — still try Beehiiv
+  }
+
+  // ── Send to Beehiiv ─────────────────────────────────────────────────────
   const apiKey = process.env.BEEHIIV_API_KEY
   const pubId  = process.env.BEEHIIV_PUB_ID
 
-  // Beehiiv not yet configured — log clearly and return a graceful success
-  // so the form works in staging/development before credentials are wired.
   if (!apiKey || !pubId) {
     console.warn(
-      '[subscribe] Beehiiv not configured. Set BEEHIIV_API_KEY and BEEHIIV_PUB_ID in .env.local and Vercel env vars. Would have subscribed:',
+      '[subscribe] Beehiiv not configured — would have subscribed:',
       email,
+      categories,
     )
     return NextResponse.json({ success: true, configured: false })
+  }
+
+  // Note: the "calendar_categories" custom field must be created in your
+  // Beehiiv dashboard before this will attach to subscribers.
+  const beehiivBody: Record<string, unknown> = {
+    email,
+    reactivate_existing: false,
+    send_welcome_email: true,
+  }
+
+  if (categories.length > 0) {
+    beehiivBody.custom_fields = [
+      { name: 'calendar_categories', value: categories.join(',') },
+    ]
   }
 
   try {
@@ -38,11 +74,7 @@ export async function POST(request: NextRequest) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${apiKey}`,
         },
-        body: JSON.stringify({
-          email,
-          reactivate_existing: false,
-          send_welcome_email: true,
-        }),
+        body: JSON.stringify(beehiivBody),
       },
     )
 

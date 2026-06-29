@@ -12,6 +12,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      calendar_subscriptions: {
+        Row: {
+          id: string
+          email: string
+          categories: string[]
+          source: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          categories?: string[]
+          source?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          categories?: string[]
+          source?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           id: string
