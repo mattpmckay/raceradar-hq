@@ -1,7 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { CheckCircle, User } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { Camera, CheckCircle, Loader2, X } from 'lucide-react'
+import Image from 'next/image'
+import { createClient } from '@/lib/supabase/client'
 import type { Tables } from '@/types/supabase'
 
 type Profile = Tables<'profiles'>
@@ -29,6 +31,9 @@ const COUNTRIES = [
   'United Arab Emirates', 'South Africa',
 ]
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
+const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function ProfileForm({
@@ -44,7 +49,15 @@ export function ProfileForm({
   const displayName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ')
     || profile?.full_name || email
 
-  // ── State ────────────────────────────────────────────────────────────────
+  // ── Photo state ──────────────────────────────────────────────────────────
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [photoUrl,       setPhotoUrl]       = useState<string | null>(
+    profile?.profile_photo_url ?? profile?.avatar_url ?? null,
+  )
+  const [photoUploading, setPhotoUploading] = useState(false)
+  const [photoError,     setPhotoError]     = useState('')
+
+  // ── Form state ───────────────────────────────────────────────────────────
   const [firstName,       setFirstName]       = useState(profile?.first_name ?? '')
   const [lastName,        setLastName]        = useState(profile?.last_name ?? '')
   const [dateOfBirth,     setDateOfBirth]     = useState(profile?.date_of_birth ?? '')
@@ -58,6 +71,75 @@ export function ProfileForm({
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [error,  setError]  = useState('')
 
+  // ── Photo upload ──────────────────────────────────────────────────────────
+  async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!fileInputRef.current) return
+    fileInputRef.current.value = ''
+
+    if (!file) return
+
+    if (!ACCEPTED_TYPES.includes(file.type)) {
+      setPhotoError('Please upload a JPEG, PNG, WebP, or GIF image.')
+      return
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      setPhotoError('Image must be under 5 MB.')
+      return
+    }
+
+    setPhotoError('')
+    setPhotoUploading(true)
+
+    try {
+      const supabase = createClient()
+      const ext = file.name.split('.').pop() ?? 'jpg'
+      const path = `${profile!.id}/avatar.${ext}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(path, file, { upsert: true, contentType: file.type })
+
+      if (uploadError) {
+        setPhotoError(uploadError.message)
+        setPhotoUploading(false)
+        return
+      }
+
+      const { data } = supabase.storage.from('avatars').getPublicUrl(path)
+      // Bust cache by appending a timestamp
+      const url = `${data.publicUrl}?t=${Date.now()}`
+
+      const res = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profile_photo_url: url }),
+      })
+
+      if (res.ok) {
+        setPhotoUrl(url)
+      } else {
+        const body = await res.json() as { error?: string }
+        setPhotoError(body.error ?? 'Failed to save photo.')
+      }
+    } catch {
+      setPhotoError('Network error. Please try again.')
+    } finally {
+      setPhotoUploading(false)
+    }
+  }
+
+  async function handleRemovePhoto() {
+    setPhotoError('')
+    const res = await fetch('/api/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile_photo_url: null }),
+    })
+    if (res.ok) setPhotoUrl(null)
+  }
+
+  // ── Sports toggle ─────────────────────────────────────────────────────────
   function toggleSport(sport: string) {
     setPreferredSports((prev) =>
       prev.includes(sport) ? prev.filter((s) => s !== sport) : [...prev, sport],
@@ -65,6 +147,7 @@ export function ProfileForm({
     setStatus('idle')
   }
 
+  // ── Save all fields ───────────────────────────────────────────────────────
   async function handleSave() {
     setStatus('saving')
     setError('')
@@ -104,17 +187,76 @@ export function ProfileForm({
 
       {/* ── Avatar header ──────────────────────────────────────────────── */}
       <div className="card flex items-center gap-5">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-mint/15 ring-2 ring-mint/30">
-          <span className="font-heading text-xl font-bold text-mint">{initials}</span>
+
+        {/* Avatar circle — photo if uploaded, else initials */}
+        <div className="relative shrink-0">
+          <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-mint/15 ring-2 ring-mint/30">
+            {photoUrl ? (
+              <Image
+                src={photoUrl}
+                alt={displayName}
+                width={64}
+                height={64}
+                className="h-full w-full object-cover"
+                unoptimized
+              />
+            ) : (
+              <span className="font-heading text-xl font-bold text-mint">{initials}</span>
+            )}
+          </div>
+          {photoUploading && (
+            <div className="absolute inset-0 flex items-center justify-center rounded-full bg-canvas/70">
+              <Loader2 className="h-5 w-5 animate-spin text-mint" />
+            </div>
+          )}
         </div>
-        <div className="min-w-0">
+
+        {/* Name / email */}
+        <div className="min-w-0 flex-1">
           <p className="font-heading text-lg font-semibold text-ink truncate">{displayName}</p>
           <p className="text-sm text-ink-muted truncate">{email}</p>
         </div>
-        <div className="ml-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-wire text-ink-muted">
-          <User className="h-4 w-4" />
+
+        {/* Photo actions */}
+        <div className="ml-auto flex shrink-0 flex-col items-end gap-1.5">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={photoUploading}
+            className="flex items-center gap-1.5 rounded-lg border border-wire px-3 py-1.5 text-xs font-medium text-ink-muted transition-colors hover:border-wire-bright hover:text-ink disabled:opacity-50"
+          >
+            <Camera className="h-3.5 w-3.5" />
+            {photoUrl ? 'Change photo' : 'Upload photo'}
+          </button>
+          {photoUrl && (
+            <button
+              type="button"
+              onClick={handleRemovePhoto}
+              className="flex items-center gap-1 text-xs text-ink-subtle transition-colors hover:text-red-400"
+            >
+              <X className="h-3 w-3" />
+              Remove
+            </button>
+          )}
         </div>
+
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept={ACCEPTED_TYPES.join(',')}
+          onChange={handlePhotoSelect}
+          className="sr-only"
+          aria-label="Upload profile photo"
+        />
       </div>
+
+      {/* Photo upload error */}
+      {photoError && (
+        <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400">
+          {photoError}
+        </p>
+      )}
 
       {/* ── Personal Details ────────────────────────────────────────────── */}
       <section className="card space-y-5">

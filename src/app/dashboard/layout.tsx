@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
-import { Radar, UserCircle } from 'lucide-react'
+import { Radar } from 'lucide-react'
 import { LogoutButton } from './LogoutButton'
 import { DashboardNav } from './DashboardNav'
 
@@ -17,13 +18,18 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('first_name, full_name')
+    .select('first_name, last_name, full_name, profile_photo_url, avatar_url')
     .eq('id', user!.id)
     .single()
 
   const displayName = profile?.first_name
     ?? profile?.full_name?.trim().split(' ')[0]
     ?? email
+
+  const headerInitials = [profile?.first_name?.[0], profile?.last_name?.[0]]
+    .filter(Boolean).join('').toUpperCase() || email[0]?.toUpperCase() || '?'
+
+  const headerPhoto = profile?.profile_photo_url ?? profile?.avatar_url ?? null
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -39,9 +45,20 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <Link
               href="/dashboard/profile"
               aria-label="Profile settings"
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-muted transition-colors hover:bg-panel hover:text-ink"
+              className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-mint/15 ring-1 ring-mint/30 transition-opacity hover:opacity-80"
             >
-              <UserCircle className="h-5 w-5" />
+              {headerPhoto ? (
+                <Image
+                  src={headerPhoto}
+                  alt={displayName}
+                  width={36}
+                  height={36}
+                  className="h-full w-full object-cover"
+                  unoptimized
+                />
+              ) : (
+                <span className="text-xs font-bold text-mint">{headerInitials}</span>
+              )}
             </Link>
             <LogoutButton />
           </div>
