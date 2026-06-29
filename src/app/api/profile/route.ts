@@ -22,26 +22,16 @@ export async function PATCH(req: Request) {
     return typeof v === 'string' ? v.trim() || null : null
   }
 
-  // Validate before building the update object
-  const username = 'username' in body ? str('username') : undefined
-  if (username !== undefined && username && !/^[a-zA-Z0-9_]{2,30}$/.test(username)) {
-    return NextResponse.json(
-      { error: 'Username must be 2–30 characters: letters, numbers, or underscores only.' },
-      { status: 422 },
-    )
-  }
-
   const gender = 'gender' in body ? str('gender') : undefined
   if (gender !== undefined && gender && !(VALID_GENDERS as readonly string[]).includes(gender)) {
     return NextResponse.json({ error: 'Invalid gender value.' }, { status: 422 })
   }
 
-  // Build update object — only include keys that were explicitly sent
+  // Build update object — only include keys explicitly sent in the request body
   const updates: TablesUpdate<'profiles'> = {
     updated_at: new Date().toISOString(),
   }
 
-  if ('username'          in body) updates.username          = username
   if ('first_name'        in body) updates.first_name        = str('first_name')
   if ('last_name'         in body) updates.last_name         = str('last_name')
   if ('date_of_birth'     in body) updates.date_of_birth     = str('date_of_birth')
@@ -59,8 +49,8 @@ export async function PATCH(req: Request) {
 
   // Derive full_name whenever either name field is being updated
   if ('first_name' in body || 'last_name' in body) {
-    const first = updates.first_name ?? str('first_name')
-    const last  = updates.last_name  ?? str('last_name')
+    const first = ('first_name' in updates ? updates.first_name : null)
+    const last  = ('last_name'  in updates ? updates.last_name  : null)
     updates.full_name = [first, last].filter(Boolean).join(' ') || null
   }
 
@@ -70,10 +60,20 @@ export async function PATCH(req: Request) {
     .eq('id', user.id)
 
   if (error) {
-    if (error.code === '23505') {
-      return NextResponse.json({ error: 'That username is already taken.' }, { status: 409 })
+    console.error('[PATCH /api/profile]', {
+      code:    error.code,
+      message: error.message,
+      details: error.details,
+      hint:    error.hint,
+    })
+
+    if (error.code === '42703') {
+      return NextResponse.json(
+        { error: 'Database schema is out of date. Please apply the pending migration.' },
+        { status: 500 },
+      )
     }
-    console.error('[PATCH /api/profile]', error)
+
     return NextResponse.json({ error: 'Failed to update profile.' }, { status: 500 })
   }
 

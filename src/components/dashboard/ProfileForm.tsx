@@ -31,7 +31,7 @@ const COUNTRIES = [
   'United Arab Emirates', 'South Africa',
 ]
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
+const MAX_FILE_SIZE  = 5 * 1024 * 1024
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -43,11 +43,15 @@ export function ProfileForm({
   profile: Profile | null
   email: string
 }) {
-  const initials = [profile?.first_name?.[0], profile?.last_name?.[0]]
-    .filter(Boolean).join('').toUpperCase() || email[0]?.toUpperCase() || '?'
+  const fullName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ')
+    || profile?.full_name
+    || null
 
-  const displayName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ')
-    || profile?.full_name || email
+  const initials = [profile?.first_name?.[0], profile?.last_name?.[0]]
+    .filter(Boolean).join('').toUpperCase()
+    || (profile?.full_name?.[0]?.toUpperCase())
+    || email[0]?.toUpperCase()
+    || '?'
 
   // ── Photo state ──────────────────────────────────────────────────────────
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -66,7 +70,6 @@ export function ProfileForm({
   const [state,           setState]           = useState(profile?.state ?? '')
   const [city,            setCity]            = useState(profile?.city ?? '')
   const [preferredSports, setPreferredSports] = useState<string[]>(profile?.preferred_sports ?? [])
-  const [username,        setUsername]        = useState(profile?.username ?? '')
 
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [error,  setError]  = useState('')
@@ -74,9 +77,7 @@ export function ProfileForm({
   // ── Photo upload ──────────────────────────────────────────────────────────
   async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!fileInputRef.current) return
-    fileInputRef.current.value = ''
-
+    if (fileInputRef.current) fileInputRef.current.value = ''
     if (!file) return
 
     if (!ACCEPTED_TYPES.includes(file.type)) {
@@ -93,7 +94,7 @@ export function ProfileForm({
 
     try {
       const supabase = createClient()
-      const ext = file.name.split('.').pop() ?? 'jpg'
+      const ext  = file.name.split('.').pop() ?? 'jpg'
       const path = `${profile!.id}/avatar.${ext}`
 
       const { error: uploadError } = await supabase.storage
@@ -107,7 +108,6 @@ export function ProfileForm({
       }
 
       const { data } = supabase.storage.from('avatars').getPublicUrl(path)
-      // Bust cache by appending a timestamp
       const url = `${data.publicUrl}?t=${Date.now()}`
 
       const res = await fetch('/api/profile', {
@@ -147,7 +147,7 @@ export function ProfileForm({
     setStatus('idle')
   }
 
-  // ── Save all fields ───────────────────────────────────────────────────────
+  // ── Save ─────────────────────────────────────────────────────────────────
   async function handleSave() {
     setStatus('saving')
     setError('')
@@ -164,7 +164,6 @@ export function ProfileForm({
           state:            state.trim()      || null,
           city:             city.trim()       || null,
           preferred_sports: preferredSports.length ? preferredSports : null,
-          username:         username.trim()   || null,
         }),
       })
 
@@ -185,16 +184,16 @@ export function ProfileForm({
   return (
     <div className="space-y-6 max-w-2xl">
 
-      {/* ── Avatar header ──────────────────────────────────────────────── */}
+      {/* ── Identity card ───────────────────────────────────────────────── */}
       <div className="card flex items-center gap-5">
 
-        {/* Avatar circle — photo if uploaded, else initials */}
+        {/* Avatar */}
         <div className="relative shrink-0">
           <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-mint/15 ring-2 ring-mint/30">
             {photoUrl ? (
               <Image
                 src={photoUrl}
-                alt={displayName}
+                alt={fullName ?? email}
                 width={64}
                 height={64}
                 className="h-full w-full object-cover"
@@ -211,10 +210,14 @@ export function ProfileForm({
           )}
         </div>
 
-        {/* Name / email */}
+        {/* Name + email */}
         <div className="min-w-0 flex-1">
-          <p className="font-heading text-lg font-semibold text-ink truncate">{displayName}</p>
-          <p className="text-sm text-ink-muted truncate">{email}</p>
+          <p className="font-heading text-lg font-semibold text-ink truncate">
+            {fullName ?? email}
+          </p>
+          {fullName && (
+            <p className="text-sm text-ink-muted truncate">{email}</p>
+          )}
         </div>
 
         {/* Photo actions */}
@@ -240,7 +243,6 @@ export function ProfileForm({
           )}
         </div>
 
-        {/* Hidden file input */}
         <input
           ref={fileInputRef}
           type="file"
@@ -251,7 +253,7 @@ export function ProfileForm({
         />
       </div>
 
-      {/* Photo upload error */}
+      {/* Photo error */}
       {photoError && (
         <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400">
           {photoError}
@@ -318,6 +320,16 @@ export function ProfileForm({
             </div>
           </Field>
         </div>
+
+        <Field label="Email address" htmlFor="email-display" hint="Contact support to change your email address.">
+          <input
+            id="email-display"
+            type="email"
+            value={email}
+            disabled
+            className="input cursor-not-allowed opacity-60"
+          />
+        </Field>
       </section>
 
       {/* ── Location ────────────────────────────────────────────────────── */}
@@ -414,38 +426,6 @@ export function ProfileForm({
             )
           })}
         </div>
-      </section>
-
-      {/* ── Account ─────────────────────────────────────────────────────── */}
-      <section className="card space-y-5">
-        <div className="border-b border-wire pb-4">
-          <h2 className="font-heading font-semibold text-ink">Account</h2>
-        </div>
-
-        <Field label="Username" htmlFor="username" hint="Letters, numbers, underscores. 2–30 characters.">
-          <div className="relative">
-            <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-ink-muted select-none">@</span>
-            <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => { setUsername(e.target.value); setStatus('idle') }}
-              autoComplete="username"
-              placeholder="yourhandle"
-              className="input pl-7"
-            />
-          </div>
-        </Field>
-
-        <Field label="Email address" htmlFor="email-display" hint="Contact support to change your email address.">
-          <input
-            id="email-display"
-            type="email"
-            value={email}
-            disabled
-            className="input cursor-not-allowed opacity-60"
-          />
-        </Field>
       </section>
 
       {/* ── Error ───────────────────────────────────────────────────────── */}
