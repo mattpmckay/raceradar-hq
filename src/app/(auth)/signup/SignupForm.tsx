@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { PasswordInput } from '@/components/ui/PasswordInput'
+import { PasswordRules, validatePassword } from '@/components/ui/PasswordRules'
 
 export function SignupForm() {
   const [email, setEmail] = useState('')
@@ -15,15 +17,16 @@ export function SignupForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
-    setLoading(true)
 
+    const passwordError = validatePassword(password)
+    if (passwordError) { setError(passwordError); return }
+
+    setLoading(true)
     const supabase = createClient()
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
     })
 
     if (error) {
@@ -38,7 +41,7 @@ export function SignupForm() {
 
   if (success) {
     return (
-      <div className="rounded-lg bg-green-500/10 border border-green-500/20 px-4 py-3 text-sm text-green-400">
+      <div className="rounded-lg border border-mint/30 bg-mint/10 px-4 py-3 text-sm text-mint">
         Check your email to confirm your account.
       </div>
     )
@@ -55,19 +58,18 @@ export function SignupForm() {
         autoComplete="email"
         required
       />
-      <Input
+      <PasswordInput
         id="password"
-        type="password"
         label="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         autoComplete="new-password"
-        minLength={8}
         required
       />
+      <PasswordRules password={password} />
 
       {error && (
-        <p className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2 text-sm text-red-400">
+        <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400">
           {error}
         </p>
       )}

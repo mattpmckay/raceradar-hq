@@ -4,8 +4,23 @@ import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { PasswordInput } from '@/components/ui/PasswordInput'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+
+
+function friendlyAuthError(message: string): string {
+  if (message.toLowerCase().includes('invalid login credentials') || message.toLowerCase().includes('invalid credentials')) {
+    return 'Incorrect email or password. Please try again.'
+  }
+  if (message.toLowerCase().includes('email not confirmed')) {
+    return 'Please confirm your email address before logging in.'
+  }
+  if (message.toLowerCase().includes('too many requests')) {
+    return 'Too many login attempts. Please wait a few minutes and try again.'
+  }
+  return message
+}
 
 export function LoginForm() {
   const router = useRouter()
@@ -14,6 +29,7 @@ export function LoginForm() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [remember, setRemember] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -22,11 +38,11 @@ export function LoginForm() {
     setError(null)
     setLoading(true)
 
-    const supabase = createClient()
+    const supabase = createClient(remember)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
-      setError(error.message)
+      setError(friendlyAuthError(error.message))
       setLoading(false)
       return
     }
@@ -39,7 +55,7 @@ export function LoginForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       {passwordReset && (
         <p className="rounded-lg border border-mint/30 bg-mint/10 px-3 py-2 text-sm text-mint">
-          Password updated — please log in with your new password.
+          Password updated — log in with your new password.
         </p>
       )}
 
@@ -53,26 +69,29 @@ export function LoginForm() {
         required
       />
 
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <label htmlFor="password" className="label">Password</label>
-          <Link
-            href="/forgot-password"
-            className="text-xs text-ink-muted hover:text-mint transition-colors"
-          >
+      <PasswordInput
+        id="password"
+        label="Password"
+        labelRight={
+          <Link href="/forgot-password" className="text-xs text-ink-muted hover:text-mint transition-colors">
             Forgot password?
           </Link>
-        </div>
+        }
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        autoComplete="current-password"
+        required
+      />
+
+      <label className="flex items-center gap-2.5 cursor-pointer select-none">
         <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoComplete="current-password"
-          required
-          className="input w-full"
+          type="checkbox"
+          checked={remember}
+          onChange={(e) => setRemember(e.target.checked)}
+          className="h-4 w-4 rounded border-wire bg-canvas accent-mint"
         />
-      </div>
+        <span className="text-sm text-ink-muted">Remember me</span>
+      </label>
 
       {error && (
         <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400">
