@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Heart, Settings, LayoutDashboard } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { Heart, Settings, LayoutDashboard, LogOut } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
 
 const navItems = [
   { href: '/dashboard',            label: 'Overview',   icon: LayoutDashboard },
@@ -13,11 +14,19 @@ const navItems = [
 
 export function DashboardNav() {
   const pathname = usePathname()
+  const router = useRouter()
+
+  async function handleLogout() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/')
+    router.refresh()
+  }
 
   return (
     <>
       {/* Sidebar — desktop only */}
-      <nav aria-label="Dashboard navigation" className="hidden w-48 shrink-0 md:block">
+      <nav aria-label="Dashboard sidebar navigation" className="hidden w-48 shrink-0 md:block">
         <ul className="space-y-1">
           {navItems.map(({ href, label, icon: Icon }) => {
             const active = pathname === href
@@ -46,7 +55,7 @@ export function DashboardNav() {
 
       {/* Mobile bottom nav */}
       <nav
-        aria-label="Dashboard navigation"
+        aria-label="Dashboard mobile navigation"
         className="fixed bottom-0 left-0 right-0 z-50 border-t border-wire bg-canvas/95 backdrop-blur md:hidden"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
@@ -69,6 +78,15 @@ export function DashboardNav() {
               </li>
             )
           })}
+          <li>
+            <button
+              onClick={handleLogout}
+              className="flex flex-col items-center gap-0.5 px-4 py-1 text-ink-muted transition-colors hover:text-red-400"
+            >
+              <LogOut className="h-5 w-5" />
+              <span className="text-[10px] font-medium">Log out</span>
+            </button>
+          </li>
         </ul>
       </nav>
     </>

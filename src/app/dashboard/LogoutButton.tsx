@@ -20,7 +20,7 @@ export function LogoutButton() {
       className="flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-sm text-ink-muted transition-colors hover:bg-panel hover:text-ink"
     >
       <LogOut className="h-4 w-4" />
-      <span className="hidden sm:inline">Log out</span>
+      <span>Log out</span>
     </button>
   )
 }

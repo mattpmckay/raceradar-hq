@@ -47,7 +47,8 @@ export function LoginForm() {
       return
     }
 
-    router.push('/dashboard')
+    const next = searchParams.get('next') ?? '/dashboard'
+    router.push(next)
     router.refresh()
   }
 
