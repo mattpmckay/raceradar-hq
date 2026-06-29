@@ -276,7 +276,7 @@ export default async function EventDetailPage({ params }: PageProps) {
           <section>
             <SectionHeading>Venue &amp; Location</SectionHeading>
             <div className="card space-y-3">
-              {venue && <h3 className="font-semibold text-white">{venue}</h3>}
+              {venue && <h3 className="font-semibold text-ink">{venue}</h3>}
               <p className="text-ink text-sm">{location}</p>
               {!venue && (
                 <p className="text-ink-muted text-sm">
@@ -306,12 +306,12 @@ export default async function EventDetailPage({ params }: PageProps) {
 
           {/* Event details */}
           <div className="card space-y-4">
-            <h2 className="font-semibold text-white">Event Details</h2>
+            <h2 className="font-heading font-semibold text-ink">Event Details</h2>
             <div className="space-y-3 text-sm">
               <div className="flex items-start gap-3">
                 <Calendar className="h-4 w-4 text-mint mt-0.5 shrink-0" />
                 <div>
-                  <div className="font-medium text-white">{formatDate(event.start_date)}</div>
+                  <div className="font-medium text-ink">{formatDate(event.start_date)}</div>
                   {event.end_date && event.end_date !== event.start_date && (
                     <div className="text-ink-muted">to {formatDate(event.end_date)}</div>
                   )}
@@ -320,7 +320,7 @@ export default async function EventDetailPage({ params }: PageProps) {
               <div className="flex items-start gap-3">
                 <MapPin className="h-4 w-4 text-mint mt-0.5 shrink-0" />
                 <div>
-                  {venue && <div className="font-medium text-white">{venue}</div>}
+                  {venue && <div className="font-medium text-ink">{venue}</div>}
                   <div className="text-ink-muted">{location}</div>
                 </div>
               </div>
@@ -329,7 +329,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                   <Flag className="h-4 w-4 text-mint mt-0.5 shrink-0" />
                   <div>
                     <div className="text-ink-muted text-xs">Organiser</div>
-                    <div className="font-medium text-white">{event.organiser}</div>
+                    <div className="font-medium text-ink">{event.organiser}</div>
                   </div>
                 </div>
               )}
@@ -346,7 +346,7 @@ export default async function EventDetailPage({ params }: PageProps) {
               if (days < 0) return null
               return (
                 <div className="rounded-lg bg-panel-raised px-4 py-3 text-center">
-                  <div className="font-heading text-3xl font-bold text-mint leading-none">
+                  <div className="tabular-nums font-heading text-3xl font-bold text-mint leading-none">
                     {days === 0 ? 'Today' : days}
                   </div>
                   <div className="mt-1 text-xs font-medium uppercase tracking-widest text-ink-muted">
@@ -359,7 +359,7 @@ export default async function EventDetailPage({ params }: PageProps) {
             {event.registration_deadline && (
               <div className="rounded-lg bg-mint/10 border border-mint/20 px-3 py-2.5 text-sm">
                 <span className="text-mint font-medium">Registration closes</span>
-                <div className="text-white">{formatDate(event.registration_deadline)}</div>
+                <div className="text-ink">{formatDate(event.registration_deadline)}</div>
               </div>
             )}
 
@@ -396,11 +396,11 @@ export default async function EventDetailPage({ params }: PageProps) {
           {/* Related events */}
           {related.length > 0 && (
             <div className="card space-y-3 text-sm">
-              <h2 className="font-semibold text-white">More {event.discipline} Events</h2>
+              <h2 className="font-heading font-semibold text-ink">More {event.discipline} Events</h2>
               <ul className="space-y-2 text-ink-muted">
                 {related.map((e) => (
                   <li key={e.slug}>
-                    <Link href={`/events/${e.slug}`} className="hover:text-white transition-colors">
+                    <Link href={`/events/${e.slug}`} className="hover:text-ink transition-colors">
                       {e.title} →
                     </Link>
                     <div className="text-ink-muted text-xs mt-0.5">
@@ -452,7 +452,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-xl font-bold text-white mb-5 pb-3 border-b border-wire">
+    <h2 className="mb-5 border-b border-wire pb-3 font-heading text-xl font-bold text-ink">
       {children}
     </h2>
   )
@@ -922,7 +922,7 @@ function HYROXSections() {
               {HYROX_STATIONS.map((s, i) => (
                 <tr key={s.order} className={`border-b border-wire last:border-0 ${i % 2 === 0 ? '' : 'bg-panel/40'}`}>
                   <td className="px-4 py-3 text-mint font-bold">{s.order}</td>
-                  <td className="px-4 py-3 text-white font-medium">{s.name}</td>
+                  <td className="px-4 py-3 text-ink font-medium">{s.name}</td>
                   <td className="px-4 py-3 text-ink">{s.distance}</td>
                   <td className="px-4 py-3 text-ink-muted hidden sm:table-cell">{s.note}</td>
                 </tr>
@@ -946,7 +946,7 @@ function HYROXSections() {
           ].map((cat) => (
             <div key={cat.name} className="card flex flex-col gap-3">
               <div className="flex items-start justify-between gap-2">
-                <h3 className="font-semibold text-white">{cat.name}</h3>
+                <h3 className="font-semibold text-ink">{cat.name}</h3>
                 <Badge variant={cat.variant}>{cat.tag}</Badge>
               </div>
               <p className="text-sm text-ink-muted leading-relaxed">{cat.desc}</p>
@@ -966,7 +966,7 @@ function HYROXSections() {
             <div key={level.title} className="card flex gap-4">
               <CheckCircle className="h-5 w-5 text-mint mt-0.5 shrink-0" />
               <div>
-                <h3 className="font-semibold text-white mb-1">{level.title}</h3>
+                <h3 className="font-semibold text-ink mb-1">{level.title}</h3>
                 <p className="text-sm text-ink-muted leading-relaxed">{level.desc}</p>
                 <p className="mt-2 text-xs font-medium text-mint">{level.cta}</p>
               </div>
@@ -1002,7 +1002,7 @@ function SpartanSections() {
             <tbody>
               {SPARTAN_FORMATS.map((f, i) => (
                 <tr key={f.name} className={`border-b border-wire last:border-0 ${i % 2 === 0 ? '' : 'bg-panel/40'}`}>
-                  <td className="px-4 py-3 text-white font-medium">{f.name}</td>
+                  <td className="px-4 py-3 text-ink font-medium">{f.name}</td>
                   <td className="px-4 py-3 text-ink">{f.distance}</td>
                   <td className="px-4 py-3 text-ink">{f.obstacles}</td>
                   <td className="px-4 py-3 text-ink-muted hidden sm:table-cell">{f.level}</td>
@@ -1028,7 +1028,7 @@ function SpartanSections() {
             <div key={level.title} className="card flex gap-4">
               <CheckCircle className="h-5 w-5 text-mint mt-0.5 shrink-0" />
               <div>
-                <h3 className="font-semibold text-white mb-1">{level.title}</h3>
+                <h3 className="font-semibold text-ink mb-1">{level.title}</h3>
                 <p className="text-sm text-ink-muted leading-relaxed">{level.desc}</p>
                 <p className="mt-2 text-xs font-medium text-mint">{level.cta}</p>
               </div>
@@ -1065,7 +1065,7 @@ function IronmanSections({ discipline }: { discipline: string }) {
               { leg: 'Total', dist: d.total },
             ].map((row, i) => (
               <tr key={row.leg} className={`border-b border-wire last:border-0 ${i % 2 === 0 ? '' : 'bg-panel/40'}`}>
-                <td className={`px-4 py-3 font-medium ${row.leg === 'Total' ? 'text-mint' : 'text-white'}`}>{row.leg}</td>
+                <td className={`px-4 py-3 font-medium ${row.leg === 'Total' ? 'text-mint' : 'text-ink'}`}>{row.leg}</td>
                 <td className="px-4 py-3 text-ink">{row.dist}</td>
               </tr>
             ))}
@@ -1081,7 +1081,7 @@ function IronmanSections({ discipline }: { discipline: string }) {
           <div key={level.title} className="card flex gap-4">
             <CheckCircle className="h-5 w-5 text-mint mt-0.5 shrink-0" />
             <div>
-              <h3 className="font-semibold text-white mb-1">{level.title}</h3>
+              <h3 className="font-semibold text-ink mb-1">{level.title}</h3>
               <p className="text-sm text-ink-muted leading-relaxed">{level.desc}</p>
               <p className="mt-2 text-xs font-medium text-mint">{level.cta}</p>
             </div>
@@ -1126,7 +1126,7 @@ function RunningSection({ discipline }: { discipline: string }) {
           <div key={level.title} className="card flex gap-4">
             <CheckCircle className="h-5 w-5 text-mint mt-0.5 shrink-0" />
             <div>
-              <h3 className="font-semibold text-white mb-1">{level.title}</h3>
+              <h3 className="font-semibold text-ink mb-1">{level.title}</h3>
               <p className="text-sm text-ink-muted leading-relaxed">{level.desc}</p>
               <p className="mt-2 text-xs font-medium text-mint">{level.cta}</p>
             </div>
@@ -1160,7 +1160,7 @@ function DekaSections() {
             {DEKA_STATIONS.map((s, i) => (
               <tr key={s.order} className={`border-b border-wire last:border-0 ${i % 2 === 0 ? '' : 'bg-panel/40'}`}>
                 <td className="px-4 py-3 text-mint font-bold">{s.order}</td>
-                <td className="px-4 py-3 text-white font-medium">{s.name}</td>
+                <td className="px-4 py-3 text-ink font-medium">{s.name}</td>
                 <td className="px-4 py-3 text-ink">{s.distance}</td>
               </tr>
             ))}
@@ -1232,7 +1232,7 @@ function EntryFeesSection({ discipline }: { discipline: string }) {
           <tbody>
             {rows.map((fee, i) => (
               <tr key={fee.category} className={`border-b border-wire last:border-0 ${i % 2 === 0 ? '' : 'bg-panel/40'}`}>
-                <td className="px-5 py-3.5 text-white font-medium">{fee.category}</td>
+                <td className="px-5 py-3.5 text-ink font-medium">{fee.category}</td>
                 <td className="px-5 py-3.5 text-ink">{fee.price}</td>
               </tr>
             ))}
@@ -1269,7 +1269,7 @@ function WeekendTipsSection() {
         ))}
       </div>
       <div className="card mt-4">
-        <h3 className="font-semibold text-white mb-3">What to Bring</h3>
+        <h3 className="font-semibold text-ink mb-3">What to Bring</h3>
         <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-ink-muted">
           {[
             'Confirmation email or event app entry',
@@ -1372,7 +1372,7 @@ function FaqSection({ discipline }: { discipline: string }) {
       <div className="space-y-4">
         {rows.map((faq) => (
           <div key={faq.q} className="card">
-            <h3 className="font-semibold text-white mb-2">{faq.q}</h3>
+            <h3 className="font-semibold text-ink mb-2">{faq.q}</h3>
             <p className="text-sm text-ink-muted leading-relaxed">{faq.a}</p>
           </div>
         ))}
@@ -1453,7 +1453,7 @@ function QuickFactsSidebar({ discipline }: { discipline: string }) {
 
   return (
     <div className="card space-y-3 text-sm">
-      <h2 className="font-semibold text-white">Quick Facts</h2>
+      <h2 className="font-semibold text-ink">Quick Facts</h2>
       {rows.map((fact) => (
         <div key={fact.label} className="flex justify-between gap-4">
           <span className="text-ink-muted">{fact.label}</span>

@@ -34,7 +34,7 @@ export function Header() {
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-0.5">
+          <nav aria-label="Main navigation" className="hidden md:flex items-center gap-0.5">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
@@ -63,8 +63,9 @@ export function Header() {
           <button
             className="md:hidden rounded-lg p-2 text-ink-muted transition-colors hover:bg-panel hover:text-ink"
             onClick={() => setOpen(!open)}
-            aria-label="Toggle navigation"
+            aria-label={open ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={open}
+            aria-controls="mobile-nav"
           >
             {open ? <XIcon /> : <MenuIcon />}
           </button>
@@ -74,6 +75,7 @@ export function Header() {
 
       {/* Mobile menu */}
       <div
+        id="mobile-nav"
         className={cn(
           'md:hidden border-t border-wire bg-canvas transition-all duration-200',
           open ? 'max-h-[400px] opacity-100' : 'max-h-0 overflow-hidden opacity-0',

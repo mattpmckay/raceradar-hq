@@ -108,11 +108,11 @@ export async function HeroSection() {
 
 function StatItem({ value, label }: { value: number; label: string }) {
   return (
-    <div className="flex flex-col gap-1">
-      <span className="font-heading text-4xl font-bold leading-none text-ink">
-        {value > 0 ? value : '—'}
+    <div className="flex flex-col gap-1.5">
+      <span className="tabular-nums font-heading text-4xl font-bold leading-none text-ink sm:text-5xl">
+        {value > 0 ? `${value}+` : '—'}
       </span>
-      <span className="text-xs uppercase tracking-widest text-ink-muted">{label}</span>
+      <span className="text-xs font-medium uppercase tracking-[0.15em] text-ink-muted">{label}</span>
     </div>
   )
 }

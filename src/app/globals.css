@@ -10,6 +10,9 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
 }
 
 @layer base {
@@ -30,9 +33,22 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-space-grotesk), system-ui, sans-serif;
   }
+
+  /* Keyboard focus ring — applies when there's no custom focus-visible style */
+  a:focus-visible,
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  summary:focus-visible {
+    @apply outline-none ring-2 ring-mint/50 ring-offset-2 ring-offset-canvas;
+  }
 }
 
 @layer components {
+  /* ── Accessibility ──────────────────────────────── */
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[9999] focus:rounded-lg focus:bg-mint focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-canvas focus:shadow-xl focus:outline-none;
+  }
+
   /* ── Shared layout ──────────────────────────────── */
   .container-page {
     @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
@@ -48,15 +64,15 @@
   }
 
   .btn-primary {
-    @apply inline-flex items-center gap-2 rounded-lg bg-fire px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-fire-600 hover:-translate-y-px hover:shadow-lg hover:shadow-fire/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fire disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none;
+    @apply inline-flex items-center gap-2 rounded-lg bg-fire px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-fire-600 hover:-translate-y-px hover:shadow-lg hover:shadow-fire/20 focus-visible:ring-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fire disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center gap-2 rounded-lg border border-wire bg-panel px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:bg-panel-raised hover:border-wire-bright focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-wire-bright disabled:opacity-50;
+    @apply inline-flex items-center gap-2 rounded-lg border border-wire bg-panel px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:bg-panel-raised hover:border-wire-bright focus-visible:ring-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-wire-bright disabled:opacity-50;
   }
 
   .btn-ghost {
-    @apply inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-ink-muted transition-colors hover:bg-panel hover:text-ink disabled:opacity-50;
+    @apply inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-ink-muted transition-colors hover:bg-panel hover:text-ink focus-visible:ring-0 disabled:opacity-50;
   }
 
   .input,
@@ -66,6 +82,11 @@
 
   .label {
     @apply block text-sm font-medium text-ink;
+  }
+
+  /* ── Typography utilities ───────────────────────── */
+  .section-eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.15em];
   }
 
   .section-title {

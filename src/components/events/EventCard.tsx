@@ -90,8 +90,11 @@ export function EventCard({
         <span className="text-sm font-medium text-ink-muted transition-colors group-hover:text-ink">
           View Event
         </span>
-        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-wire transition-all duration-200 group-hover:border-wire-bright">
-          <ArrowRightIcon className="h-3.5 w-3.5" style={{ color: style.text }} />
+        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-wire transition-all duration-200 group-hover:border-wire-bright group-hover:scale-110">
+          <ArrowRightIcon
+            className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
+            style={{ color: style.text }}
+          />
         </span>
       </div>
 

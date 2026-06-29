@@ -18,7 +18,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-canvas text-ink font-body">
       <Header />
-      <main>
+      <main id="main-content">
         <HeroSection />
         <Suspense fallback={<EventsSectionSkeleton />}>
           <EventsSectionServer />

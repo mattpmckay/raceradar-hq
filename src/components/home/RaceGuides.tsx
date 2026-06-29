@@ -51,7 +51,7 @@ export function RaceGuides() {
         {/* Header */}
         <div className="mb-12 flex items-end justify-between">
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.15em] text-fire">
+            <p className="section-eyebrow mb-2 text-fire">
               Editorial
             </p>
             <h2 className="font-heading text-3xl font-bold tracking-tight text-ink sm:text-4xl">
@@ -120,7 +120,7 @@ function GuideCard({ guide }: { guide: Guide }) {
       {/* Content */}
       <div className="flex flex-1 flex-col gap-4 p-6">
         <div>
-          <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-ink-muted">
+          <p className="section-eyebrow mb-1.5 text-ink-muted">
             {guide.event}
           </p>
           <h3 className="font-heading text-lg font-semibold leading-snug text-ink transition-colors group-hover:text-mint">

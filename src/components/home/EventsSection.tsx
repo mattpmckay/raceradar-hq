@@ -227,7 +227,7 @@ function SportRow({ row, savedIds }: { row: BuiltRow; savedIds: Set<string> }) {
       <div className="mb-6 flex items-end justify-between">
         <div>
           <p
-            className="mb-1.5 text-xs font-semibold uppercase tracking-[0.15em]"
+            className="section-eyebrow mb-1.5"
             style={{ color: row.accentColor }}
           >
             {row.eyebrow}
@@ -307,7 +307,7 @@ function EventCard({ event, initialSaved }: { event: Event; initialSaved: boolea
         <span className="text-sm font-medium text-ink-muted transition-colors group-hover:text-ink">
           View Event
         </span>
-        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-wire transition-all duration-200 group-hover:border-transparent">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-wire transition-all duration-200 group-hover:border-wire-bright group-hover:scale-110">
           <ArrowRightIcon
             className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
             style={{ color: style.text }}
