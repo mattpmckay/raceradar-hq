@@ -41,9 +41,11 @@ function buildEventSchema(event: {
     '@type': 'SportsEvent',
     name: event.title,
     url: `${siteUrl}/events/${event.slug}`,
-    startDate: event.start_date,
-    ...(event.end_date ? { endDate: event.end_date } : {}),
-    eventStatus: 'https://schema.org/EventScheduled',
+    ...(event.start_date !== '2099-01-01' ? { startDate: event.start_date } : {}),
+    ...(event.end_date && event.start_date !== '2099-01-01' ? { endDate: event.end_date } : {}),
+    eventStatus: event.start_date === '2099-01-01'
+      ? 'https://schema.org/EventPostponed'
+      : 'https://schema.org/EventScheduled',
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     sport: event.discipline,
     location: {
@@ -219,6 +221,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 
   const venue = extractVenue(event.description)
   const location = [event.city, event.region, event.country].filter(Boolean).join(', ')
+  const isTBC = event.start_date === '2099-01-01'
   const eventSchema = buildEventSchema(event)
 
   return (
@@ -250,8 +253,8 @@ export default async function EventDetailPage({ params }: PageProps) {
                 {venue ?? location}
                 {event.city && venue ? ` · ${event.city}, ${event.country}` : ''}
                 {' · '}
-                {formatDate(event.start_date)}
-                {event.end_date && event.end_date !== event.start_date
+                {isTBC ? 'Date TBC' : formatDate(event.start_date)}
+                {!isTBC && event.end_date && event.end_date !== event.start_date
                   ? ` – ${formatDate(event.end_date)}`
                   : ''}
               </p>
@@ -311,8 +314,10 @@ export default async function EventDetailPage({ params }: PageProps) {
               <div className="flex items-start gap-3">
                 <Calendar className="h-4 w-4 text-mint mt-0.5 shrink-0" />
                 <div>
-                  <div className="font-medium text-ink">{formatDate(event.start_date)}</div>
-                  {event.end_date && event.end_date !== event.start_date && (
+                  <div className="font-medium text-ink">
+                    {isTBC ? 'Date TBC' : formatDate(event.start_date)}
+                  </div>
+                  {!isTBC && event.end_date && event.end_date !== event.start_date && (
                     <div className="text-ink-muted">to {formatDate(event.end_date)}</div>
                   )}
                 </div>
@@ -341,7 +346,7 @@ export default async function EventDetailPage({ params }: PageProps) {
             )}
 
             {/* Countdown */}
-            {(() => {
+            {!isTBC && (() => {
               const days = getDaysUntil(event.start_date)
               if (days < 0) return null
               return (
@@ -430,7 +435,7 @@ export default async function EventDetailPage({ params }: PageProps) {
       >
         <div className="flex items-center gap-3 px-4 py-3">
           <div className="min-w-0 flex-1">
-            <p className="text-xs text-ink-muted">{formatDate(event.start_date)} · {event.discipline}</p>
+            <p className="text-xs text-ink-muted">{isTBC ? 'Date TBC' : formatDate(event.start_date)} · {event.discipline}</p>
             <p className="truncate text-sm font-semibold text-ink">{event.title}</p>
           </div>
           <a

@@ -16,13 +16,14 @@ export async function generateMetadata({
   searchParams: Promise<{ q?: string; discipline?: string; country?: string; window?: string }>
 }): Promise<Metadata> {
   const params = await searchParams
-  const parts: string[] = []
-  if (params.discipline) parts.push(params.discipline)
-  if (params.country)    parts.push(`in ${params.country}`)
-
-  const title = parts.length
-    ? `${parts.join(' ')} Events | RaceRadar HQ`
-    : 'Events — Fitness Races Across Asia Pacific | RaceRadar HQ'
+  const title =
+    params.discipline && params.country
+      ? `${params.discipline} Events in ${params.country} | RaceRadar HQ`
+      : params.discipline
+      ? `${params.discipline} Events | RaceRadar HQ`
+      : params.country
+      ? `Events in ${params.country} | RaceRadar HQ`
+      : 'Events — Fitness Races Across Asia Pacific | RaceRadar HQ'
 
   const description = params.discipline
     ? `Find upcoming ${params.discipline} events${params.country ? ` in ${params.country}` : ' across Asia Pacific'} — race dates, categories, entry fees and venue guides.`
