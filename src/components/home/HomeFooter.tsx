@@ -32,7 +32,7 @@ export function HomeFooter() {
               </span>
             </Link>
             <p className="mt-3 text-sm leading-relaxed text-ink-muted">
-              APAC&apos;s home for endurance athletes. Discover, plan and race.
+              Your race planning HQ for Asia Pacific. Discover events, save races and plan your season.
             </p>
           </div>
 

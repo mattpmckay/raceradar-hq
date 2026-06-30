@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 const LIVE_BENEFITS = [
-  { icon: '❤️', label: 'Save races you\'re interested in' },
+  { icon: '❤️', label: 'Save races to your season plan' },
   { icon: '🔔', label: 'Get notified before registrations open' },
   { icon: '📅', label: 'Build your personal race calendar' },
   { icon: '🏁', label: 'Count down to race day' },
@@ -63,7 +63,7 @@ export function MemberValueSection({ isLoggedIn }: Props) {
               </h2>
 
               <p className="mt-3 text-sm leading-relaxed text-ink-muted sm:text-base">
-                Save events, get registration reminders and build your race calendar.
+                Save races to your season plan, get registration reminders and never miss an event you care about.
               </p>
 
               <div className="mt-6 sm:mt-8">

@@ -56,10 +56,11 @@ export async function HeroSection() {
           </h1>
 
           {/* Subheading — shorter on mobile */}
-          <p className="mt-1 text-sm leading-snug text-ink-muted animate-fade-up sm:mt-6 sm:text-xl sm:leading-relaxed [animation-delay:150ms]">
-            <span className="sm:hidden">Find and plan fitness events across APAC.</span>
+          <p className="mt-1 text-sm leading-snug animate-fade-up sm:mt-6 sm:text-xl sm:leading-relaxed [animation-delay:150ms]">
+            <span className="sm:hidden font-semibold text-ink">Plan your race season across APAC.</span>
             <span className="hidden sm:inline">
-              Discover, compare and plan endurance events across APAC — from your first HYROX to your next Ironman.
+              <span className="font-semibold text-ink">Plan your race season.</span>{' '}
+              <span className="text-ink-muted">Discover events, save races, get registration reminders and build your personal race calendar.</span>
             </span>
           </p>
 

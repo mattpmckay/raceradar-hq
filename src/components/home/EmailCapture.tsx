@@ -65,7 +65,7 @@ export function EmailCapture() {
           </h2>
 
           <p className="mt-3 text-sm leading-relaxed text-ink-muted sm:mt-4 sm:text-base">
-            HYROX, Spartan, Ironman, OCR and more — curated, dated, and sent to your inbox. Free.
+            Every major APAC fitness event for 2026 — curated, dated and built for your race season plan. Free.
           </p>
 
           {submitted ? (
