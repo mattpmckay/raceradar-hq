@@ -6,7 +6,6 @@ import { HeroSection }           from '@/components/home/HeroSection'
 import { EventsSectionServer }   from '@/components/home/EventsSectionServer'
 import { EventsSectionSkeleton } from '@/components/home/EventsSectionSkeleton'
 import { MemberValueSection }    from '@/components/home/MemberValueSection'
-import { RaceGuides }            from '@/components/home/RaceGuides'
 import { EmailCapture }          from '@/components/home/EmailCapture'
 import { HomeFooter }            from '@/components/home/HomeFooter'
 import type { HeaderUser }       from '@/components/layout/Header'
@@ -47,10 +46,9 @@ export default async function HomePage() {
       <main id="main-content">
         <HeroSection />
         <Suspense fallback={<EventsSectionSkeleton />}>
-          <EventsSectionServer />
+          <EventsSectionServer featuredOnly />
         </Suspense>
         <MemberValueSection isLoggedIn={!!user} />
-        <RaceGuides />
         <EmailCapture />
       </main>
       <HomeFooter />

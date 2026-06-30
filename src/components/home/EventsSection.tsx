@@ -166,15 +166,19 @@ export function EventsSection({
   error,
   savedIds = new Set(),
   isLoggedIn = false,
+  featuredOnly = false,
+  totalCount,
 }: {
   events: SupabaseEvent[]
   error?: string
   savedIds?: Set<string>
   isLoggedIn?: boolean
+  featuredOnly?: boolean
+  totalCount?: number
 }) {
   if (error) {
     return (
-      <section className="relative pb-24 pt-4">
+      <section className="relative pb-12 pt-4">
         <div className="container-page">
           <div className="rounded-2xl border border-red-900/40 bg-red-950/20 px-6 py-12 text-center">
             <p className="text-sm font-medium text-red-400">
@@ -186,6 +190,55 @@ export function EventsSection({
     )
   }
 
+  // ── Featured-only mode (homepage) ──────────────────────────────────────────
+  if (featuredOnly) {
+    const featured = events
+      .filter((e) => e.is_featured)
+      .slice(0, 3)
+      .map(toDisplayEvent)
+
+    if (featured.length === 0) return null
+
+    const browseCount = totalCount ?? events.length
+
+    return (
+      <section className="relative pb-6 pt-4">
+        <div className="container-page">
+          <div className="mb-5 flex items-end justify-between">
+            <div>
+              <p className="section-eyebrow mb-1.5 text-mint">Curated</p>
+              <h2 className="font-heading text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+                Featured Events
+              </h2>
+            </div>
+            <Link
+              href="/events"
+              className="hidden items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink sm:flex"
+            >
+              Browse all
+              <ArrowRightIcon className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {featured.map((event) => (
+              <EventCard key={event.id} event={event} initialSaved={savedIds.has(event.id)} />
+            ))}
+          </div>
+
+          <Link
+            href="/events"
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border border-wire bg-panel px-6 py-3.5 text-sm font-semibold text-ink-muted transition-all hover:border-wire-bright hover:bg-panel-raised hover:text-ink"
+          >
+            Browse all {browseCount > 0 ? `${browseCount}+` : ''} events across APAC
+            <ArrowRightIcon className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
+    )
+  }
+
+  // ── Full directory mode (events page) ─────────────────────────────────────
   const rows = ROW_DEFS
     .map((def) => {
       const raw =
@@ -210,7 +263,7 @@ export function EventsSection({
 
   return (
     <section className="relative pb-24 pt-4">
-      <div className="container-page space-y-16">
+      <div className="container-page space-y-10 md:space-y-16">
         {rows.map((row, index) => (
           <div key={row.key}>
             <SportRow row={row} savedIds={savedIds} />
@@ -226,7 +279,7 @@ export function EventsSection({
 
 function MembershipNudge() {
   return (
-    <div className="mt-10 flex flex-col items-start justify-between gap-4 rounded-2xl border border-mint/20 bg-mint/5 px-6 py-5 sm:flex-row sm:items-center">
+    <div className="mt-8 flex flex-col items-start justify-between gap-4 rounded-2xl border border-mint/20 bg-mint/5 px-5 py-4 sm:flex-row sm:items-center sm:px-6 sm:py-5">
       <div className="flex items-start gap-3">
         <span className="mt-0.5 text-xl leading-none" aria-hidden>❤️</span>
         <div>
@@ -254,7 +307,7 @@ type BuiltRow = RowDef & { events: Event[] }
 function SportRow({ row, savedIds }: { row: BuiltRow; savedIds: Set<string> }) {
   return (
     <div>
-      <div className="mb-6 flex items-end justify-between">
+      <div className="mb-5 flex items-end justify-between md:mb-6">
         <div>
           <p
             className="section-eyebrow mb-1.5"
@@ -275,13 +328,13 @@ function SportRow({ row, savedIds }: { row: BuiltRow; savedIds: Set<string> }) {
         </Link>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 md:gap-4">
         {row.events.map((event) => (
           <EventCard key={event.id} event={event} initialSaved={savedIds.has(event.id)} />
         ))}
       </div>
 
-      <div className="mt-5 sm:hidden">
+      <div className="mt-4 sm:hidden">
         <Link
           href={row.filterHref}
           className="flex items-center gap-1.5 text-sm font-medium text-ink-muted hover:text-ink"
@@ -300,7 +353,7 @@ function EventCard({ event, initialSaved }: { event: Event; initialSaved: boolea
   const style = SPORT_STYLES[event.sport] ?? defaultStyle
 
   return (
-    <div className="group relative flex flex-col gap-5 overflow-hidden rounded-2xl border border-wire bg-panel p-6 transition-all duration-300 hover:border-wire-bright hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30">
+    <div className="group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-wire bg-panel p-4 transition-all duration-300 hover:border-wire-bright hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30 md:gap-5 md:p-6">
       {/* Badge + save + date */}
       <div className="flex items-center justify-between gap-3">
         <span

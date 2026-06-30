@@ -9,24 +9,20 @@ const FOOTER_LINKS = {
   ],
   Sports: [
     { label: 'HYROX',         href: '/events?discipline=HYROX' },
-    { label: 'CrossFit',      href: '/events?discipline=CrossFit' },
-    { label: 'Deka Fit',      href: '/events?discipline=Deka+Fit' },
     { label: 'Spartan Race',  href: '/events?discipline=Spartan+Race' },
-    { label: 'Tough Mudder',  href: '/events?discipline=Tough+Mudder' },
     { label: 'Ironman',       href: '/events?discipline=Ironman' },
-    { label: 'Marathon',      href: '/events?discipline=Marathon' },
-    { label: 'Road Racing',   href: '/events?discipline=Road+Racing' },
     { label: 'Trail Running', href: '/events?discipline=Trail+Running' },
+    { label: 'Marathon',      href: '/events?discipline=Marathon' },
   ],
 }
 
 export function HomeFooter() {
   return (
     <footer className="border-t border-wire bg-canvas">
-      <div className="container-page py-16">
+      <div className="container-page py-12 md:py-16">
 
         {/* Main grid */}
-        <div className="grid grid-cols-2 gap-10 md:grid-cols-3 lg:gap-16">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:gap-16">
 
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
@@ -37,7 +33,7 @@ export function HomeFooter() {
               </span>
             </Link>
             <p className="mt-4 text-sm leading-relaxed text-ink-muted">
-              The home of endurance sports across Asia-Pacific. Discover, plan and race.
+              APAC&apos;s home for endurance athletes. Discover, plan and race.
             </p>
           </div>
 
@@ -47,7 +43,7 @@ export function HomeFooter() {
               <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-ink">
                 {heading}
               </h3>
-              <ul className="space-y-3">
+              <ul className="space-y-2.5">
                 {links.map((link) => (
                   <li key={link.href}>
                     <Link
@@ -64,11 +60,11 @@ export function HomeFooter() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-wire pt-8 sm:flex-row">
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-wire pt-8 sm:flex-row md:mt-14">
           <p className="text-xs text-ink-muted">
             © {new Date().getFullYear()} RaceRadar HQ. All rights reserved.
           </p>
-          <div className="flex items-center gap-5">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-5">
             {[
               { label: 'About',            href: '/about' },
               { label: 'Privacy Policy',   href: '/privacy' },

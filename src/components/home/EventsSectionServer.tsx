@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { EventsSection } from './EventsSection'
 
-export async function EventsSectionServer() {
+export async function EventsSectionServer({ featuredOnly = false }: { featuredOnly?: boolean }) {
   const supabase = await createClient()
   const today = new Date().toISOString().split('T')[0]
 
@@ -37,6 +37,8 @@ export async function EventsSectionServer() {
       error={error?.message}
       savedIds={savedIds}
       isLoggedIn={!!user}
+      featuredOnly={featuredOnly}
+      totalCount={data?.length ?? 0}
     />
   )
 }
