@@ -1914,7 +1914,7 @@ function ConversionCTAsSection({
                     href={`/signup?next=/events/${event.slug}`}
                     className="btn-primary w-full justify-center"
                   >
-                    <Heart className="h-4 w-4" /> Start My Season
+                    <Heart className="h-4 w-4" /> Build My Season
                   </Link>
                   <p className="text-xs text-ink-muted">Create your free account in less than 30 seconds.</p>
                 </>

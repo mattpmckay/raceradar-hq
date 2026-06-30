@@ -188,7 +188,7 @@ export function Header({ user }: { user: HeaderUser | null }) {
                 href="/signup"
                 className="rounded-lg bg-mint px-4 py-2 text-sm font-semibold text-canvas transition-all duration-200 hover:bg-mint-300 hover:shadow-md hover:shadow-mint/20 hover:-translate-y-px"
               >
-                Start My Season
+                Build My Season
               </Link>
             </div>
           )}
@@ -209,7 +209,7 @@ export function Header({ user }: { user: HeaderUser | null }) {
                 className="rounded-full bg-mint px-3.5 py-1.5 text-xs font-semibold text-canvas transition-all duration-200 hover:bg-mint-300 active:scale-95"
                 onClick={() => setMenuOpen(false)}
               >
-                Start My Season
+                Build My Season
               </Link>
             )}
             <button

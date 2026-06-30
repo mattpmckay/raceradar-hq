@@ -134,7 +134,7 @@ export function SignupForm() {
       )}
 
       <Button type="submit" className="w-full justify-center" disabled={loading}>
-        {loading ? 'Creating account…' : 'Create account'}
+        {loading ? 'Building your season…' : 'Build My Season'}
       </Button>
     </form>
   )

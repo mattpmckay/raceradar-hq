@@ -120,7 +120,7 @@ export function MobileSeasonCta({
                 className="btn-primary w-full justify-center py-3 text-base"
                 onClick={() => setSheetOpen(false)}
               >
-                Start My Season
+                Build My Season
               </Link>
               <p className="text-center text-xs text-ink-muted">Create your free account in less than 30 seconds.</p>
               <Link

@@ -23,11 +23,11 @@ export async function generateMetadata({
       ? `${params.discipline} Events | RaceRadar HQ`
       : params.country
       ? `Events in ${params.country} | RaceRadar HQ`
-      : 'Events — Fitness Races Across Asia Pacific | RaceRadar HQ'
+      : 'Events for Your Season — Fitness Racing Across Asia Pacific | RaceRadar HQ'
 
   const description = params.discipline
     ? `Find upcoming ${params.discipline} events${params.country ? ` in ${params.country}` : ' across Asia Pacific'} — race dates, categories, entry fees and venue guides.`
-    : 'Browse upcoming HYROX, Spartan Race, Ironman, Marathon, Trail Running and Deka Fit events across Asia Pacific. Find your next race.'
+    : 'Find the events that belong in your season. Browse HYROX, Spartan Race, Ironman, Marathon, Trail Running and more across Asia Pacific. Save your picks and build your 2026 race calendar.'
 
   return { title: { absolute: title }, description }
 }
@@ -289,7 +289,7 @@ function buildTitle(params: { discipline?: string; country?: string; q?: string 
   if (discipline)            return `${discipline} Events`
   if (country)               return `Events · ${country}`
   if (q)                     return 'Events'
-  return 'Fitness Events'
+  return 'Events for Your Season'
 }
 
 function buildSubtitle(
@@ -311,5 +311,5 @@ function buildSubtitle(
   if (discipline)            return `${showing} ${discipline} events across Asia Pacific${windowLabel}`
   if (country)               return `${showing} events in ${country}${windowLabel}`
   if (q)                     return `${showing} events matching "${q}"${windowLabel}`
-  return `${showing} fitness races across Asia Pacific${windowLabel}`
+  return `${showing} events to add to your season${windowLabel}`
 }
