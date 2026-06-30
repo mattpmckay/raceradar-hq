@@ -21,11 +21,13 @@ export function HeartButton({
       }}
       disabled={loading}
       aria-label={saved ? 'Remove from saved' : 'Save event'}
-      className="flex h-7 w-7 items-center justify-center rounded-full border border-wire bg-canvas/80 backdrop-blur-sm transition-all duration-200 hover:border-red-400/50 hover:bg-red-500/10 disabled:opacity-50"
+      className="flex h-7 w-7 items-center justify-center rounded-full border border-wire bg-canvas/80 backdrop-blur-sm transition-all duration-150 hover:border-red-400/50 hover:bg-red-500/10 active:scale-90 disabled:opacity-50"
     >
       <Heart
-        className={`h-3.5 w-3.5 transition-all duration-200 ${
-          saved ? 'fill-red-400 text-red-400 scale-110' : 'text-ink-muted'
+        className={`h-3.5 w-3.5 transition-all duration-150 ${
+          saved
+            ? 'fill-red-400 text-red-400 scale-125'
+            : 'text-ink-muted hover:text-red-400'
         }`}
       />
     </button>

@@ -17,7 +17,8 @@ const SPORTS = [
   'Trail Running',
 ]
 
-const COUNTRIES = [
+// Named LOCATIONS for forward-compatibility: will eventually include states, regions, cities
+const LOCATIONS = [
   'Australia',
   'New Zealand',
   'Singapore',
@@ -31,15 +32,15 @@ const COUNTRIES = [
 
 export function HeroSearchBar() {
   const router = useRouter()
-  const [sport,   setSport]   = useState('')
-  const [country, setCountry] = useState('')
-  const [query,   setQuery]   = useState('')
+  const [sport,    setSport]    = useState('')
+  const [location, setLocation] = useState('')
+  const [query,    setQuery]    = useState('')
 
   const handleSearch = () => {
     const params = new URLSearchParams()
-    if (sport)   params.set('discipline', sport)
-    if (country) params.set('country',    country)
-    if (query)   params.set('q',          query)
+    if (sport)    params.set('discipline', sport)
+    if (location) params.set('country',    location)
+    if (query)    params.set('q',          query)
     router.push(`/events${params.size ? `?${params}` : ''}`)
   }
 
@@ -55,19 +56,19 @@ export function HeroSearchBar() {
               className="flex-1 min-w-0 appearance-none rounded-xl border border-wire bg-canvas/60 px-3 py-2 text-sm font-medium text-ink-muted focus:border-mint/50 focus:outline-none focus:text-ink cursor-pointer"
               aria-label="Select event type"
             >
-              <option value="">🏁 Any Event</option>
+              <option value="">🏁 Any Event Type</option>
               {SPORTS.map((s) => (
                 <option key={s} value={s} className="bg-panel text-ink">{s}</option>
               ))}
             </select>
             <select
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
               className="flex-1 min-w-0 appearance-none rounded-xl border border-wire bg-canvas/60 px-3 py-2 text-sm font-medium text-ink-muted focus:border-mint/50 focus:outline-none focus:text-ink cursor-pointer"
-              aria-label="Select country"
+              aria-label="Select location"
             >
-              <option value="">🌏 Any Country</option>
-              {COUNTRIES.map((c) => (
+              <option value="">🌏 Any Location</option>
+              {LOCATIONS.map((c) => (
                 <option key={c} value={c} className="bg-panel text-ink">{c}</option>
               ))}
             </select>
@@ -95,23 +96,23 @@ export function HeroSearchBar() {
               className="w-full appearance-none bg-transparent px-4 py-3 text-sm font-medium text-ink-muted focus:outline-none focus:text-ink cursor-pointer hover:text-ink transition-colors"
               aria-label="Select event type"
             >
-              <option value="">Any Event</option>
+              <option value="">Any Event Type</option>
               {SPORTS.map((s) => (
                 <option key={s} value={s} className="bg-panel text-ink">{s}</option>
               ))}
             </select>
           </div>
 
-          {/* Country select */}
+          {/* Location select */}
           <div className="flex-1 min-w-0">
             <select
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
               className="w-full appearance-none bg-transparent px-4 py-3 text-sm font-medium text-ink-muted focus:outline-none focus:text-ink cursor-pointer hover:text-ink transition-colors"
-              aria-label="Select country"
+              aria-label="Select location"
             >
-              <option value="">Any Country</option>
-              {COUNTRIES.map((c) => (
+              <option value="">Any Location</option>
+              {LOCATIONS.map((c) => (
                 <option key={c} value={c} className="bg-panel text-ink">{c}</option>
               ))}
             </select>

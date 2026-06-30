@@ -10,6 +10,7 @@ export type SupabaseEvent = {
   slug: string
   discipline: string | null
   start_date: string
+  created_at: string
   city: string | null
   country: string | null
   is_featured: boolean | null
@@ -25,6 +26,7 @@ type Event = {
   city: string
   country: string
   flag: string
+  isNew: boolean
 }
 
 // ─── Data maps ────────────────────────────────────────────────────────────────
@@ -76,6 +78,8 @@ const defaultStyle = { bg: 'rgba(107,122,141,0.12)', text: '#8896A8' }
 
 function toDisplayEvent(e: SupabaseEvent): Event {
   const d = new Date(e.start_date)
+  const cutoff = new Date()
+  cutoff.setDate(cutoff.getDate() - 21)
   return {
     id:      e.id,
     slug:    e.slug,
@@ -86,6 +90,7 @@ function toDisplayEvent(e: SupabaseEvent): Event {
     city:    e.city    ?? '',
     country: e.country ?? '',
     flag:    COUNTRY_FLAGS[e.country ?? ''] ?? '',
+    isNew:   e.created_at ? new Date(e.created_at) >= cutoff : false,
   }
 }
 
@@ -120,6 +125,7 @@ export function EventsSection({
   featuredOnly = false,
   totalCount,
   happeningSoon = [],
+  newEvents = [],
 }: {
   events: SupabaseEvent[]
   error?: string
@@ -128,6 +134,7 @@ export function EventsSection({
   featuredOnly?: boolean
   totalCount?: number
   happeningSoon?: SupabaseEvent[]
+  newEvents?: SupabaseEvent[]
 }) {
   if (error) {
     return (
@@ -147,9 +154,10 @@ export function EventsSection({
   if (featuredOnly) {
     const featured      = events.filter((e) => e.is_featured).slice(0, 3).map(toDisplayEvent)
     const soonEvents    = happeningSoon.slice(0, 3).map(toDisplayEvent)
+    const justAdded     = newEvents.slice(0, 3).map(toDisplayEvent)
     const browseCount   = totalCount ?? events.length
 
-    if (featured.length === 0 && soonEvents.length === 0) return null
+    if (featured.length === 0 && soonEvents.length === 0 && justAdded.length === 0) return null
 
     return (
       <section className="relative pb-4 pt-3">
@@ -200,6 +208,30 @@ export function EventsSection({
               </div>
               <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
                 {soonEvents.map((event) => (
+                  <EventCard key={event.id} event={event} initialSaved={savedIds.has(event.id)} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Just Added */}
+          {justAdded.length > 0 && (
+            <div>
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <h2 className="font-heading text-xl font-bold tracking-tight text-ink sm:text-2xl">
+                    Just Added
+                  </h2>
+                  <span className="rounded-full bg-mint/10 px-2 py-0.5 text-[11px] font-semibold text-mint">
+                    Last 3 weeks
+                  </span>
+                </div>
+                <Link href="/events" className="hidden items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink sm:flex">
+                  View all <ArrowRightIcon className="h-4 w-4" />
+                </Link>
+              </div>
+              <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+                {justAdded.map((event) => (
                   <EventCard key={event.id} event={event} initialSaved={savedIds.has(event.id)} />
                 ))}
               </div>
@@ -329,15 +361,22 @@ function EventCard({ event, initialSaved }: { event: Event; initialSaved: boolea
   const style = SPORT_STYLES[event.sport] ?? defaultStyle
 
   return (
-    <div className="group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-wire bg-panel p-4 transition-all duration-300 hover:border-wire-bright hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30">
+    <div className="group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-wire bg-panel p-4 transition-all duration-200 hover:border-wire-bright hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30 active:scale-[0.98] active:duration-75">
       {/* Badge + save + date */}
       <div className="flex items-center justify-between gap-3">
-        <span
-          className="rounded-full px-2.5 py-1 text-xs font-semibold"
-          style={{ background: style.bg, color: style.text }}
-        >
-          {event.sport}
-        </span>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span
+            className="rounded-full px-2.5 py-1 text-xs font-semibold"
+            style={{ background: style.bg, color: style.text }}
+          >
+            {event.sport}
+          </span>
+          {event.isNew && (
+            <span className="rounded-full bg-mint/15 px-2 py-0.5 text-[10px] font-bold tracking-wide text-mint">
+              NEW
+            </span>
+          )}
+        </div>
         <div className="relative z-10 flex items-center gap-2">
           <HeartButton eventId={event.id} initialSaved={initialSaved} />
           <div className="text-right">
