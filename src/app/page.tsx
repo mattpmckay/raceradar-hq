@@ -5,6 +5,7 @@ import { Header }                from '@/components/layout/Header'
 import { HeroSection }           from '@/components/home/HeroSection'
 import { EventsSectionServer }   from '@/components/home/EventsSectionServer'
 import { EventsSectionSkeleton } from '@/components/home/EventsSectionSkeleton'
+import { MemberValueSection }    from '@/components/home/MemberValueSection'
 import { RaceGuides }            from '@/components/home/RaceGuides'
 import { EmailCapture }          from '@/components/home/EmailCapture'
 import { HomeFooter }            from '@/components/home/HomeFooter'
@@ -13,7 +14,7 @@ import type { HeaderUser }       from '@/components/layout/Header'
 export const metadata: Metadata = {
   title: 'RaceRadar HQ — Every Major Fitness Event Across Asia Pacific',
   description:
-    'Discover HYROX, Spartan, Ironman, Triathlon, obstacle races, trail runs and endurance events across Asia Pacific. One platform to find, plan and travel to every race.',
+    'Discover HYROX, Spartan, Ironman, Triathlon, trail running and endurance events across Asia-Pacific. Browse free. Join free. Never miss a race.',
 }
 
 export default async function HomePage() {
@@ -48,6 +49,7 @@ export default async function HomePage() {
         <Suspense fallback={<EventsSectionSkeleton />}>
           <EventsSectionServer />
         </Suspense>
+        <MemberValueSection isLoggedIn={!!user} />
         <RaceGuides />
         <EmailCapture />
       </main>

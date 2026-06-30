@@ -73,7 +73,7 @@ export async function HeroSection() {
 
           {/* Subheading */}
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-ink-muted sm:text-xl animate-fade-up [animation-delay:150ms]">
-            One platform to discover, compare and plan every race — from your first HYROX to your next Ironman.
+            Discover, compare and plan endurance events across APAC — from your first HYROX to your next Ironman.
           </p>
 
           {/* Live stats */}
@@ -94,6 +94,12 @@ export async function HeroSection() {
           <div className="animate-fade-up [animation-delay:450ms]">
             <HeroDisciplinePills />
           </div>
+
+          {/* Trust line */}
+          <p className="mt-8 text-sm text-ink-subtle animate-fade-up [animation-delay:550ms]">
+            Free to browse. Free to join.{' '}
+            <span className="text-ink-muted">No credit card.</span>
+          </p>
 
         </div>
       </div>

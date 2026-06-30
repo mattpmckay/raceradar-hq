@@ -165,9 +165,9 @@ export function Header({ user }: { user: HeaderUser | null }) {
               </Link>
               <Link
                 href="/signup"
-                className="rounded-lg border border-wire bg-panel px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-wire-bright hover:bg-panel-raised"
+                className="rounded-lg bg-mint px-4 py-2 text-sm font-semibold text-canvas transition-all duration-200 hover:bg-mint-300 hover:shadow-md hover:shadow-mint/20 hover:-translate-y-px"
               >
-                Sign up
+                Join free
               </Link>
             </div>
           )}
@@ -268,10 +268,10 @@ export function Header({ user }: { user: HeaderUser | null }) {
               </Link>
               <Link
                 href="/signup"
-                className="block rounded-lg border border-wire bg-panel px-4 py-3 text-center text-sm font-semibold text-ink transition-colors hover:border-wire-bright"
+                className="block rounded-lg bg-mint px-4 py-3 text-center text-sm font-semibold text-canvas transition-all duration-200 hover:bg-mint-300"
                 onClick={() => setMenuOpen(false)}
               >
-                Sign up free
+                Join free
               </Link>
             </div>
           )}

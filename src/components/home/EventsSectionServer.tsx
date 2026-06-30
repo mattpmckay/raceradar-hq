@@ -36,6 +36,7 @@ export async function EventsSectionServer() {
       events={data ?? []}
       error={error?.message}
       savedIds={savedIds}
+      isLoggedIn={!!user}
     />
   )
 }

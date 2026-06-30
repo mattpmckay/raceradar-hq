@@ -37,7 +37,7 @@ export function HomeFooter() {
               </span>
             </Link>
             <p className="mt-4 text-sm leading-relaxed text-ink-muted">
-              The home of fitness racing across Asia Pacific. Discover, plan and travel to every major event.
+              The home of endurance sports across Asia-Pacific. Discover, plan and race.
             </p>
           </div>
 

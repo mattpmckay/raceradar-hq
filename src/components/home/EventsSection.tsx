@@ -165,10 +165,12 @@ export function EventsSection({
   events,
   error,
   savedIds = new Set(),
+  isLoggedIn = false,
 }: {
   events: SupabaseEvent[]
   error?: string
   savedIds?: Set<string>
+  isLoggedIn?: boolean
 }) {
   if (error) {
     return (
@@ -209,11 +211,39 @@ export function EventsSection({
   return (
     <section className="relative pb-24 pt-4">
       <div className="container-page space-y-16">
-        {rows.map((row) => (
-          <SportRow key={row.key} row={row} savedIds={savedIds} />
+        {rows.map((row, index) => (
+          <div key={row.key}>
+            <SportRow row={row} savedIds={savedIds} />
+            {!isLoggedIn && index === 0 && <MembershipNudge />}
+          </div>
         ))}
       </div>
     </section>
+  )
+}
+
+// ─── Membership nudge ─────────────────────────────────────────────────────────
+
+function MembershipNudge() {
+  return (
+    <div className="mt-10 flex flex-col items-start justify-between gap-4 rounded-2xl border border-mint/20 bg-mint/5 px-6 py-5 sm:flex-row sm:items-center">
+      <div className="flex items-start gap-3">
+        <span className="mt-0.5 text-xl leading-none" aria-hidden>❤️</span>
+        <div>
+          <p className="text-sm font-semibold text-ink">Save events you&apos;re interested in</p>
+          <p className="mt-0.5 text-sm text-ink-muted">
+            Free members get a personal dashboard, race countdowns and personalised alerts.
+          </p>
+        </div>
+      </div>
+      <Link
+        href="/signup"
+        className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-mint px-4 py-2.5 text-sm font-semibold text-canvas transition-all duration-200 hover:bg-mint-300 hover:-translate-y-px hover:shadow-md hover:shadow-mint/20"
+      >
+        Join free
+        <ArrowRightIcon className="h-3.5 w-3.5" />
+      </Link>
+    </div>
   )
 }
 

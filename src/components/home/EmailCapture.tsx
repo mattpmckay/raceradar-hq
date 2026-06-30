@@ -76,6 +76,15 @@ export function EmailCapture() {
               </div>
               <p className="font-semibold text-ink">Got it — you&apos;re on the list!</p>
               <p className="text-sm text-ink-muted">We&apos;ll be in touch when the 2026 calendar is ready.</p>
+              <div className="mt-2 rounded-xl border border-wire bg-panel/60 px-5 py-4 text-center">
+                <p className="text-sm text-ink-muted">
+                  While you wait,{' '}
+                  <a href="/signup" className="font-medium text-mint hover:underline">
+                    create a free account
+                  </a>{' '}
+                  to save events and get personalised alerts.
+                </p>
+              </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="mt-8">
