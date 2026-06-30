@@ -52,8 +52,8 @@ export default async function HomePage() {
         <Suspense fallback={null}>
           <BrowseByType />
         </Suspense>
-        <MemberValueSection isLoggedIn={!!user} />
         <EmailCapture />
+        <MemberValueSection isLoggedIn={!!user} />
       </main>
       <HomeFooter />
     </div>

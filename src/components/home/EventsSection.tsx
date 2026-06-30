@@ -166,6 +166,10 @@ export function EventsSection({
           {/* Featured Events */}
           {featured.length > 0 && (
             <div>
+              {/* Bridge from hero — subtle thread into discovery */}
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
+                What&apos;s on this season
+              </p>
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="font-heading text-xl font-bold tracking-tight text-ink sm:text-2xl">
                   Featured Events
@@ -243,7 +247,7 @@ export function EventsSection({
             href="/events"
             className="flex w-full items-center justify-center gap-2 rounded-xl border border-wire bg-panel px-6 py-3.5 text-sm font-semibold text-ink-muted transition-all hover:border-wire-bright hover:bg-panel-raised hover:text-ink"
           >
-            Browse all {browseCount > 0 ? `${browseCount}+` : ''} events across APAC
+            Explore all {browseCount > 0 ? `${browseCount}+` : ''} events across Asia Pacific
             <ArrowRightIcon className="h-4 w-4" />
           </Link>
 

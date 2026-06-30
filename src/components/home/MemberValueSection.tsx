@@ -1,17 +1,17 @@
 import Link from 'next/link'
 
 const LIVE_BENEFITS = [
-  { icon: '❤️', label: 'Save races to your season plan' },
-  { icon: '🔔', label: 'Get notified before registrations open' },
-  { icon: '📅', label: 'Build your personal race calendar' },
-  { icon: '🏁', label: 'Count down to race day' },
+  { icon: '❤️', label: 'Your race calendar, always up to date' },
+  { icon: '🔔', label: 'Reminders before registrations sell out' },
+  { icon: '📅', label: 'Build a season that actually happens' },
+  { icon: '🏁', label: 'Count down to your next start line' },
 ]
 
 const SOON_BENEFITS = [
-  { icon: '📊', label: 'Track races you\'ve completed' },
-  { icon: '💰', label: 'Get early bird and price alerts' },
-  { icon: '🎯', label: 'Discover races you\'ll love' },
-  { icon: '📈', label: 'View your full race history' },
+  { icon: '📊', label: 'Track every event you\'ve completed' },
+  { icon: '💰', label: 'Price alerts before early bird ends' },
+  { icon: '🎯', label: 'Events you\'ll love, recommended for you' },
+  { icon: '📈', label: 'Your full event history, in one place' },
 ]
 
 interface Props {
@@ -63,7 +63,7 @@ export function MemberValueSection({ isLoggedIn }: Props) {
               </h2>
 
               <p className="mt-3 text-sm leading-relaxed text-ink-muted sm:text-base">
-                Save races to your season plan, get registration reminders and never miss an event you care about.
+                Keep your entire season in one place. Save events, get registration reminders and never miss another start line.
               </p>
 
               <div className="mt-6 sm:mt-8">

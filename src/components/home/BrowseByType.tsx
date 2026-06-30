@@ -38,13 +38,18 @@ export async function BrowseByType() {
     <section className="py-4 md:py-6">
       <div className="container-page">
 
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-heading text-xl font-bold tracking-tight text-ink sm:text-2xl">
-            Browse by Event Type
-          </h2>
+        <div className="mb-4 flex items-start justify-between gap-4">
+          <div>
+            <h2 className="font-heading text-xl font-bold tracking-tight text-ink sm:text-2xl">
+              Find your next challenge
+            </h2>
+            <p className="mt-1 text-sm text-ink-muted">
+              Discover upcoming events by discipline and find what fits your season.
+            </p>
+          </div>
           <Link
             href="/events"
-            className="hidden items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink sm:flex"
+            className="hidden shrink-0 items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink sm:flex"
           >
             View all
             <ArrowRightIcon className="h-4 w-4" />
