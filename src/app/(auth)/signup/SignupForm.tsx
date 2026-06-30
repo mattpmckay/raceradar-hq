@@ -27,11 +27,17 @@ export function SignupForm() {
 
     setLoading(true)
     const supabase = createClient()
+
+    // Preserve ?next so the auth callback can auto-save the event on signup
+    const nextParam = new URLSearchParams(window.location.search).get('next') ?? ''
+    const safeNext = nextParam.startsWith('/') ? nextParam : ''
+    const callbackUrl = `${window.location.origin}/auth/callback${safeNext ? `?next=${encodeURIComponent(safeNext)}` : ''}`
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: callbackUrl,
         data: {
           first_name: firstName.trim(),
           last_name:  lastName.trim(),

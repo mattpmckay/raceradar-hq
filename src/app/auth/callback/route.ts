@@ -30,6 +30,29 @@ export async function GET(request: NextRequest) {
 
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
+      // If the user signed up from an event page, auto-save that event to My Season
+      const eventSlugMatch = next.match(/^\/events\/([^/?#]+)/)
+      if (eventSlugMatch) {
+        const slug = eventSlugMatch[1]
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { data: event } = await supabase
+            .from('events')
+            .select('id')
+            .eq('slug', slug)
+            .eq('is_published', true)
+            .single()
+          if (event) {
+            await supabase.from('favourites').insert({
+              user_id: user.id,
+              entity_type: 'event',
+              entity_id: event.id,
+            })
+            // Silently ignore duplicate (user already had it saved)
+          }
+        }
+      }
+
       return NextResponse.redirect(`${origin}${next}`)
     }
   }

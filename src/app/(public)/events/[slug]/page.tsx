@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/Badge'
 import { SaveButton } from '@/components/events/SaveButton'
 import { ReminderSignup } from '@/components/events/ReminderSignup'
 import { CalendarCtaInline } from '@/components/events/CalendarCtaInline'
+import { MobileSeasonCta } from '@/components/events/MobileSeasonCta'
 import { formatDate } from '@/lib/utils'
 import type { Metadata } from 'next'
 
@@ -701,28 +702,17 @@ export default async function EventDetailPage({ params }: PageProps) {
         hasUser={!!user}
       />
 
-      {/* Sticky mobile CTA */}
-      {event.website_url && (
-        <div
-          className="fixed bottom-0 left-0 right-0 z-50 border-t border-wire bg-canvas/95 backdrop-blur-sm lg:hidden"
-          style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
-        >
-          <div className="flex items-center gap-3 px-4 py-3">
-            <div className="min-w-0 flex-1">
-              <p className="text-xs text-ink-muted">{isTBC ? 'Date TBC' : formatDate(event.start_date)} · {event.discipline}</p>
-              <p className="truncate text-sm font-semibold text-ink">{event.title}</p>
-            </div>
-            <a
-              href={event.website_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary shrink-0"
-            >
-              Register Now
-            </a>
-          </div>
-        </div>
-      )}
+      {/* Sticky mobile CTA — My Season */}
+      <MobileSeasonCta
+        eventId={event.id}
+        slug={event.slug}
+        initialSaved={isSaved}
+        hasUser={!!user}
+        eventTitle={event.title}
+        startDate={event.start_date}
+        discipline={event.discipline}
+        isTBC={isTBC}
+      />
     </>
   )
 }
@@ -1897,10 +1887,10 @@ function ConversionCTAsSection({
       <div className="container-page py-16 md:py-20">
         <div className="mb-12 text-center">
           <h2 className="font-heading text-2xl font-bold text-ink md:text-3xl">
-            Make this race happen
+            Build your season
           </h2>
           <p className="mt-3 text-ink-muted max-w-xl mx-auto">
-            Save it to your race list, grab the full APAC race calendar, or get notified the moment registrations open.
+            Save this event to My Season, grab the full APAC calendar, or get notified when registrations open.
           </p>
         </div>
 
@@ -1910,25 +1900,28 @@ function ConversionCTAsSection({
           <div className="card flex flex-col items-center gap-5 p-8 text-center">
             <span className="text-4xl" aria-hidden>❤️</span>
             <div className="space-y-2">
-              <h3 className="font-heading text-lg font-bold text-ink">Save this event</h3>
+              <h3 className="font-heading text-lg font-bold text-ink">Build My Season</h3>
               <p className="text-sm text-ink-muted leading-relaxed">
-                Build your race wishlist. Save events, track your season and never lose a date.
+                Build your season one event at a time. Save events, track registration dates and keep your entire season organised in one place.
               </p>
             </div>
             <div className="mt-auto w-full space-y-2">
               {hasUser ? (
                 <SaveButton eventId={event.id} initialSaved={isSaved} />
               ) : (
-                <Link
-                  href={`/signup?next=/events/${event.slug}`}
-                  className="btn-secondary w-full justify-center"
-                >
-                  <Heart className="h-4 w-4" /> Create free account
-                </Link>
+                <>
+                  <Link
+                    href={`/signup?next=/events/${event.slug}`}
+                    className="btn-primary w-full justify-center"
+                  >
+                    <Heart className="h-4 w-4" /> Start My Season
+                  </Link>
+                  <p className="text-xs text-ink-muted">Create your free account in less than 30 seconds.</p>
+                </>
               )}
               {saveCount > 0 && (
                 <p className="text-xs text-ink-muted">
-                  {saveCount.toLocaleString()} athlete{saveCount !== 1 ? 's' : ''} saved this event
+                  Join {saveCount.toLocaleString()} athlete{saveCount !== 1 ? 's' : ''} planning their season with RaceRadarHQ.
                 </p>
               )}
             </div>

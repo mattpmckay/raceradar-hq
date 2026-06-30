@@ -7,9 +7,9 @@ import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 
 const navItems = [
-  { href: '/dashboard',            label: 'Overview',   icon: LayoutDashboard },
-  { href: '/dashboard/favourites', label: 'Favourites', icon: Heart },
-  { href: '/dashboard/profile',    label: 'Profile',    icon: Settings },
+  { href: '/dashboard',            label: 'My Season',   icon: LayoutDashboard },
+  { href: '/dashboard/favourites', label: 'Saved Events', icon: Heart },
+  { href: '/dashboard/profile',    label: 'Profile',     icon: Settings },
 ]
 
 export function DashboardNav() {

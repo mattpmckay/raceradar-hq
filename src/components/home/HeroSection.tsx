@@ -51,16 +51,16 @@ export async function HeroSection() {
 
           {/* Headline */}
           <h1 className="font-heading text-[1.85rem] font-bold leading-[1.05] tracking-tight text-ink animate-fade-up sm:text-6xl lg:text-[80px]">
-            Every Major Fitness Event{' '}
-            <span className="sm:block">Across <span className="text-mint">Asia Pacific.</span></span>
+            Plan your{' '}
+            <span className="sm:block"><span className="text-mint">event season.</span></span>
           </h1>
 
           {/* Subheading — shorter on mobile */}
           <p className="mt-1 text-sm leading-snug animate-fade-up sm:mt-6 sm:text-xl sm:leading-relaxed [animation-delay:150ms]">
-            <span className="sm:hidden font-semibold text-ink">Plan your race season across APAC.</span>
-            <span className="hidden sm:inline">
-              <span className="font-semibold text-ink">Plan your race season.</span>{' '}
-              <span className="text-ink-muted">Discover events, save races, get registration reminders and build your personal race calendar.</span>
+            <span className="sm:hidden text-ink-muted">Discover events, save your picks and build your season across Asia Pacific.</span>
+            <span className="hidden sm:inline text-ink-muted">
+              Discover HYROX, Spartan, Ironman, Marathon, Trail and more across Asia Pacific.{' '}
+              Save events, track registrations and keep your entire season organised in one place.
             </span>
           </p>
 

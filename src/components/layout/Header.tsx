@@ -95,6 +95,19 @@ export function Header({ user }: { user: HeaderUser | null }) {
                 {link.label}
               </Link>
             ))}
+            {user && (
+              <Link
+                href="/dashboard"
+                className={cn(
+                  'rounded-lg px-4 py-2 text-sm font-semibold transition-colors',
+                  pathname.startsWith('/dashboard')
+                    ? 'text-mint'
+                    : 'text-mint/70 hover:text-mint',
+                )}
+              >
+                My Season
+              </Link>
+            )}
           </nav>
 
           {/* Desktop right — authenticated */}
@@ -136,7 +149,7 @@ export function Header({ user }: { user: HeaderUser | null }) {
                     {/* Links */}
                     <div className="p-1.5">
                       <DropdownLink href="/dashboard" icon={<LayoutDashboard className="h-4 w-4" />} onClick={() => setAccountOpen(false)}>
-                        Dashboard
+                        My Season
                       </DropdownLink>
                       <DropdownLink href="/dashboard/profile" icon={<Settings className="h-4 w-4" />} onClick={() => setAccountOpen(false)}>
                         Profile Settings
@@ -175,7 +188,7 @@ export function Header({ user }: { user: HeaderUser | null }) {
                 href="/signup"
                 className="rounded-lg bg-mint px-4 py-2 text-sm font-semibold text-canvas transition-all duration-200 hover:bg-mint-300 hover:shadow-md hover:shadow-mint/20 hover:-translate-y-px"
               >
-                Join free
+                Start My Season
               </Link>
             </div>
           )}
@@ -196,7 +209,7 @@ export function Header({ user }: { user: HeaderUser | null }) {
                 className="rounded-full bg-mint px-3.5 py-1.5 text-xs font-semibold text-canvas transition-all duration-200 hover:bg-mint-300 active:scale-95"
                 onClick={() => setMenuOpen(false)}
               >
-                Join free
+                Start My Season
               </Link>
             )}
             <button
@@ -225,6 +238,20 @@ export function Header({ user }: { user: HeaderUser | null }) {
 
           {/* Nav links */}
           <nav aria-label="Mobile navigation" className="space-y-0.5">
+            {user && (
+              <Link
+                href="/dashboard"
+                className={cn(
+                  'flex items-center rounded-xl px-4 py-3.5 text-[15px] font-semibold transition-colors',
+                  pathname.startsWith('/dashboard')
+                    ? 'bg-mint/10 text-mint'
+                    : 'text-mint hover:bg-mint/10',
+                )}
+                onClick={() => setMenuOpen(false)}
+              >
+                ❤️ My Season
+              </Link>
+            )}
             {MOBILE_NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
@@ -259,7 +286,7 @@ export function Header({ user }: { user: HeaderUser | null }) {
                   onClick={() => setMenuOpen(false)}
                 >
                   <LayoutDashboard className="h-4 w-4 shrink-0 text-mint" />
-                  Dashboard
+                  My Season
                 </Link>
                 <Link
                   href="/dashboard/profile"

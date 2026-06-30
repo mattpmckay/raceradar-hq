@@ -19,7 +19,7 @@ export function SaveButton({
       className={`btn-secondary w-full justify-center transition-colors${saved ? ' border-mint/40 text-mint hover:border-mint/60 hover:text-mint' : ''}`}
     >
       <Heart className={`h-4 w-4 transition-all${saved ? ' fill-mint text-mint' : ''}`} />
-      {saved ? 'Saved' : 'Save Event'}
+      {saved ? 'In My Season' : 'Add to My Season'}
     </button>
   )
 }

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { Calendar, Heart, Trophy, Search, MapPin } from 'lucide-react'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: 'Dashboard' }
+export const metadata: Metadata = { title: 'My Season' }
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -15,12 +15,12 @@ export default async function DashboardPage() {
     .eq('id', user!.id)
     .single()
 
-  const { count: favouriteCount } = await supabase
+  const { count: savedCount } = await supabase
     .from('favourites')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', user!.id)
 
-  const saved = favouriteCount ?? 0
+  const saved = savedCount ?? 0
   const firstName = profile?.first_name ?? profile?.full_name?.trim().split(' ')[0] ?? user!.email
   const isProfileIncomplete = !profile?.first_name
 
@@ -30,9 +30,13 @@ export default async function DashboardPage() {
       {/* Welcome */}
       <div>
         <h1 className="font-heading text-2xl font-bold text-ink">
-          Welcome back, {firstName}!
+          {saved > 0 ? `Your season, ${firstName}` : `Welcome, ${firstName}`}
         </h1>
-        <p className="mt-1 text-sm text-ink-muted">Here&apos;s your event overview.</p>
+        <p className="mt-1 text-sm text-ink-muted">
+          {saved > 0
+            ? 'Your saved events and upcoming season at a glance.'
+            : 'Start planning your season — save events, track registrations and stay organised.'}
+        </p>
       </div>
 
       {/* Complete profile prompt */}
@@ -55,15 +59,15 @@ export default async function DashboardPage() {
         <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">Quick Actions</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            { emoji: '🔍', label: 'Find Events',  href: '/events' },
-            { emoji: '❤️', label: 'Favourites',   href: '/dashboard/favourites' },
-            { emoji: '🏆', label: 'Series',        href: '/championships' },
-            { emoji: '📍', label: 'Near Me',       href: '/events' },
+            { emoji: '🔍', label: 'Find Events',   href: '/events' },
+            { emoji: '❤️', label: 'Saved Events',  href: '/dashboard/favourites' },
+            { emoji: '🏆', label: 'Series',         href: '/championships' },
+            { emoji: '📍', label: 'Near Me',        href: '/events' },
           ].map(({ emoji, label, href }) => (
             <Link
               key={label}
               href={href}
-              className="card flex flex-col items-center gap-2 py-4 text-center hover:border-mint/40 transition-colors"
+              className="card flex flex-col items-center gap-2 py-4 text-center transition-colors hover:border-mint/40"
             >
               <span className="text-2xl leading-none" aria-hidden="true">{emoji}</span>
               <span className="text-xs font-medium text-ink-muted">{label}</span>
@@ -75,56 +79,56 @@ export default async function DashboardPage() {
       {/* Stat cards */}
       <div className="grid gap-3 sm:grid-cols-3">
 
-        {/* Saved Favourites */}
+        {/* Saved events */}
         {saved > 0 ? (
-          <Link href="/dashboard/favourites" className="card hover:border-mint/40 transition-colors">
-            <Heart className="h-5 w-5 text-mint mb-3" />
+          <Link href="/dashboard/favourites" className="card transition-colors hover:border-mint/40">
+            <Heart className="mb-3 h-5 w-5 text-mint" />
             <div className="text-2xl font-bold text-ink">{saved}</div>
-            <div className="text-sm text-ink-muted">Saved Favourites</div>
+            <div className="text-sm text-ink-muted">Saved {saved === 1 ? 'Event' : 'Events'}</div>
           </Link>
         ) : (
           <div className="card flex flex-col">
-            <Heart className="h-5 w-5 text-mint mb-3" />
-            <div className="text-sm font-medium text-ink mb-1">Saved Favourites</div>
-            <p className="text-xs text-ink-muted flex-1">Save events to quickly find them later.</p>
-            <Link href="/events" className="mt-4 text-xs font-semibold text-mint hover:text-mint/80 transition-colors">
+            <Heart className="mb-3 h-5 w-5 text-mint" />
+            <div className="mb-1 text-sm font-medium text-ink">Saved Events</div>
+            <p className="flex-1 text-xs text-ink-muted">Add events to your season to track them here.</p>
+            <Link href="/events" className="mt-4 text-xs font-semibold text-mint transition-colors hover:text-mint/80">
               Browse Events →
             </Link>
           </div>
         )}
 
-        {/* Upcoming Events */}
+        {/* Upcoming */}
         <div className="card flex flex-col">
-          <Calendar className="h-5 w-5 text-mint mb-3" />
-          <div className="text-sm font-medium text-ink mb-1">Upcoming Events</div>
-          <p className="text-xs text-ink-muted flex-1">No upcoming events.</p>
-          <Link href="/events" className="mt-4 text-xs font-semibold text-mint hover:text-mint/80 transition-colors">
+          <Calendar className="mb-3 h-5 w-5 text-mint" />
+          <div className="mb-1 text-sm font-medium text-ink">Upcoming Events</div>
+          <p className="flex-1 text-xs text-ink-muted">No upcoming events yet.</p>
+          <Link href="/events" className="mt-4 text-xs font-semibold text-mint transition-colors hover:text-mint/80">
             Browse Events →
           </Link>
         </div>
 
         {/* Series */}
         <div className="card flex flex-col">
-          <Trophy className="h-5 w-5 text-mint mb-3" />
-          <div className="text-sm font-medium text-ink mb-1">Series</div>
-          <p className="text-xs text-ink-muted flex-1">No series followed yet.</p>
-          <Link href="/championships" className="mt-4 text-xs font-semibold text-mint hover:text-mint/80 transition-colors">
+          <Trophy className="mb-3 h-5 w-5 text-mint" />
+          <div className="mb-1 text-sm font-medium text-ink">Series</div>
+          <p className="flex-1 text-xs text-ink-muted">No series followed yet.</p>
+          <Link href="/championships" className="mt-4 text-xs font-semibold text-mint transition-colors hover:text-mint/80">
             Explore Series →
           </Link>
         </div>
       </div>
 
-      {/* Getting Started — only shown when dashboard is empty */}
+      {/* Getting started — only shown when season is empty */}
       {saved === 0 && (
         <section className="card">
-          <h2 className="font-semibold text-ink mb-1">Getting Started</h2>
-          <p className="text-sm text-ink-muted mb-4">Make the most of RaceRadar HQ.</p>
+          <h2 className="mb-1 font-semibold text-ink">Start planning your season</h2>
+          <p className="mb-4 text-sm text-ink-muted">Everything you need to plan your event year.</p>
           <ul className="space-y-2">
             {[
-              { icon: Search,  label: 'Browse Events',                   href: '/events' },
-              { icon: MapPin,  label: 'Find events near me',             href: '/events' },
-              { icon: Trophy,  label: 'Follow your favourite series',    href: '/championships' },
-              { icon: Heart,   label: 'Save events to your dashboard',   href: '/events' },
+              { icon: Search, label: 'Browse upcoming events',                href: '/events' },
+              { icon: MapPin, label: 'Find events near me',                   href: '/events' },
+              { icon: Trophy, label: 'Follow your favourite series',          href: '/championships' },
+              { icon: Heart,  label: 'Add events to My Season',               href: '/events' },
             ].map(({ icon: Icon, label, href }) => (
               <li key={label}>
                 <Link
