@@ -1,98 +1,17 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Calendar, MapPin, Globe, ArrowLeft, Flag, CheckCircle, Clock, Train, Car, Users, Thermometer } from 'lucide-react'
+import Image from 'next/image'
+import {
+  Calendar, MapPin, Globe, ArrowLeft, Flag, CheckCircle, Clock,
+  Train, Users, Thermometer, Heart,
+} from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { Badge } from '@/components/ui/Badge'
 import { SaveButton } from '@/components/events/SaveButton'
+import { ReminderSignup } from '@/components/events/ReminderSignup'
+import { CalendarCtaInline } from '@/components/events/CalendarCtaInline'
 import { formatDate } from '@/lib/utils'
 import type { Metadata } from 'next'
-
-// ─── Schema helpers ───────────────────────────────────────────────────────────
-
-const COUNTRY_CODES: Record<string, string> = {
-  'Australia':   'AU',
-  'New Zealand': 'NZ',
-  'Singapore':   'SG',
-  'Japan':       'JP',
-  'South Korea': 'KR',
-  'Thailand':    'TH',
-  'Indonesia':   'ID',
-  'Hong Kong':   'HK',
-  'China':       'CN',
-}
-
-function buildEventSchema(event: {
-  title: string
-  slug: string
-  discipline: string
-  city: string | null
-  country: string | null
-  start_date: string
-  end_date: string | null
-  website_url: string | null
-  organiser: string | null
-  description: string | null
-}) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://raceradar.com.au'
-  const venueName = event.description?.match(/^Venue:\s*(.+)/i)?.[1]?.trim()
-
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'SportsEvent',
-    name: event.title,
-    url: `${siteUrl}/events/${event.slug}`,
-    ...(event.start_date !== '2099-01-01' ? { startDate: event.start_date } : {}),
-    ...(event.end_date && event.start_date !== '2099-01-01' ? { endDate: event.end_date } : {}),
-    eventStatus: event.start_date === '2099-01-01'
-      ? 'https://schema.org/EventPostponed'
-      : 'https://schema.org/EventScheduled',
-    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-    sport: event.discipline,
-    location: {
-      '@type': 'Place',
-      ...(venueName ? { name: venueName } : {}),
-      address: {
-        '@type': 'PostalAddress',
-        ...(event.city    ? { addressLocality: event.city }                                  : {}),
-        ...(event.country ? { addressCountry: COUNTRY_CODES[event.country] ?? event.country } : {}),
-      },
-    },
-    ...(event.organiser || event.discipline
-      ? {
-          organizer: {
-            '@type': 'Organization',
-            name: event.organiser ?? event.discipline,
-          },
-        }
-      : {}),
-    ...(event.website_url ? { sameAs: event.website_url } : {}),
-  }
-}
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface PageProps {
-  params: Promise<{ slug: string }>
-}
-
-type EventRow = {
-  id: string
-  title: string
-  slug: string
-  discipline: string
-  event_type: string
-  city: string | null
-  region: string | null
-  country: string | null
-  start_date: string
-  end_date: string | null
-  registration_deadline: string | null
-  registration_status: 'open' | 'closing_soon' | 'sold_out' | 'coming_soon' | null
-  website_url: string | null
-  description: string | null
-  organiser: string | null
-  is_featured: boolean
-}
 
 // ─── Discipline constants ─────────────────────────────────────────────────────
 
@@ -142,340 +61,6 @@ const SPARTAN_FORMATS = [
   { name: 'Spartan Ultra',   distance: '~50 km',  obstacles: '60+', level: 'Elite / Ultra-endurance' },
   { name: 'Stadion',         distance: '~5 km',   obstacles: '20+', level: 'Stadium / flat course' },
 ]
-
-// ─── Metadata ─────────────────────────────────────────────────────────────────
-
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params
-  const supabase = await createClient()
-  const { data: event } = await supabase
-    .from('events')
-    .select('title, description, discipline, city, country')
-    .eq('slug', slug)
-    .eq('is_published', true)
-    .single()
-
-  if (!event) return { title: 'Event not found' }
-
-  const location = [event.city, event.country].filter(Boolean).join(', ')
-  const metaDesc =
-    event.description && !event.description.startsWith('Venue:')
-      ? event.description
-      : `${event.title} — ${event.discipline} event in ${location}. Dates, categories, entry fees, venue information and race guide.`
-
-  return {
-    title: `${event.title} — ${event.discipline} Race Guide`,
-    description: metaDesc,
-    openGraph: {
-      title: `${event.title} — Race Guide`,
-      description: metaDesc,
-    },
-  }
-}
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
-export default async function EventDetailPage({ params }: PageProps) {
-  const { slug } = await params
-  const supabase = await createClient()
-
-  const [{ data: event }, { data: relatedRaw }, { data: { user } }] = await Promise.all([
-    supabase
-      .from('events')
-      .select('id, title, slug, discipline, event_type, city, region, country, start_date, end_date, registration_deadline, registration_status, website_url, description, organiser, is_featured')
-      .eq('slug', slug)
-      .eq('is_published', true)
-      .single(),
-    supabase
-      .from('events')
-      .select('title, slug, city, country, start_date, discipline')
-      .eq('is_published', true)
-      .neq('slug', slug)
-      .order('start_date', { ascending: true })
-      .limit(20),
-    supabase.auth.getUser(),
-  ])
-
-  if (!event) notFound()
-
-  const [isSaved, saveCount] = await Promise.all([
-    user
-      ? supabase
-          .from('favourites')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('entity_type', 'event')
-          .eq('entity_id', event.id)
-          .single()
-          .then(({ data }) => !!data)
-      : Promise.resolve(false),
-    supabase
-      .rpc('get_event_save_count', { p_event_id: event.id })
-      .then(({ data }) => (data as number | null) ?? 0),
-  ])
-
-  const today = new Date().toISOString().split('T')[0]
-  const related = (relatedRaw ?? [])
-    .filter((e) => e.discipline === event.discipline && e.start_date >= today)
-    .slice(0, 4)
-
-  const venue = extractVenue(event.description)
-  const location = [event.city, event.region, event.country].filter(Boolean).join(', ')
-  const isTBC = event.start_date === '2099-01-01'
-  const eventSchema = buildEventSchema(event)
-
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
-      />
-    <div className={`container-page py-10${event.website_url ? ' pb-28 lg:pb-10' : ''}`}>
-      <Link href="/events" className="btn-ghost mb-6 inline-flex px-0 text-ink-muted">
-        <ArrowLeft className="h-4 w-4" /> Back to Events
-      </Link>
-
-      <div className="grid gap-10 lg:grid-cols-3">
-
-        {/* ── Main content ───────────────────────────────────────────── */}
-        <div className="lg:col-span-2 space-y-10">
-
-          {/* Header */}
-          <div>
-            <div className="flex flex-wrap gap-2 mb-4">
-              <Badge variant="brand">{event.discipline}</Badge>
-              <Badge variant="outline">{event.event_type}</Badge>
-              {event.is_featured && <Badge variant="warning">Featured</Badge>}
-            </div>
-            <h1 className="page-title">{event.title}</h1>
-            {location && (
-              <p className="mt-3 text-ink-muted text-lg">
-                {venue ?? location}
-                {event.city && venue ? ` · ${event.city}, ${event.country}` : ''}
-                {' · '}
-                {isTBC ? 'Date TBC' : formatDate(event.start_date)}
-                {!isTBC && event.end_date && event.end_date !== event.start_date
-                  ? ` – ${formatDate(event.end_date)}`
-                  : ''}
-              </p>
-            )}
-          </div>
-
-          {/* About — discipline editorial */}
-          <AboutSection discipline={event.discipline} event={event} />
-
-          {/* Discipline-specific content */}
-          {event.discipline === 'HYROX' && <HYROXSections />}
-          {event.discipline === 'Spartan Race' && <SpartanSections />}
-          {(event.discipline === 'Ironman' || event.discipline === 'Ironman 70.3') && (
-            <IronmanSections discipline={event.discipline} />
-          )}
-          {(event.discipline === 'Marathon' || event.discipline === 'Trail Running') && (
-            <RunningSection discipline={event.discipline} />
-          )}
-          {event.discipline === 'Deka Fit' && <DekaSections />}
-
-          {/* Venue */}
-          <section>
-            <SectionHeading>Venue &amp; Location</SectionHeading>
-            <div className="card space-y-3">
-              {venue && <h3 className="font-semibold text-ink">{venue}</h3>}
-              <p className="text-ink text-sm">{location}</p>
-              {!venue && (
-                <p className="text-ink-muted text-sm">
-                  Venue details will be confirmed closer to the event. Check the official website
-                  for the most up-to-date information.
-                </p>
-              )}
-            </div>
-          </section>
-
-          {/* Entry Fees */}
-          <EntryFeesSection discipline={event.discipline} />
-
-          {/* Tips */}
-          <WeekendTipsSection />
-
-          {/* Plan Your Trip */}
-          <PlanYourTripSection event={event} venue={venue} />
-
-          {/* FAQs */}
-          <FaqSection discipline={event.discipline} />
-
-        </div>
-
-        {/* ── Sidebar ────────────────────────────────────────────────── */}
-        <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
-
-          {/* Event details */}
-          <div className="card space-y-4">
-            <h2 className="font-heading font-semibold text-ink">Event Details</h2>
-            <div className="space-y-3 text-sm">
-              <div className="flex items-start gap-3">
-                <Calendar className="h-4 w-4 text-mint mt-0.5 shrink-0" />
-                <div>
-                  <div className="font-medium text-ink">
-                    {isTBC ? 'Date TBC' : formatDate(event.start_date)}
-                  </div>
-                  {!isTBC && event.end_date && event.end_date !== event.start_date && (
-                    <div className="text-ink-muted">to {formatDate(event.end_date)}</div>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <MapPin className="h-4 w-4 text-mint mt-0.5 shrink-0" />
-                <div>
-                  {venue && <div className="font-medium text-ink">{venue}</div>}
-                  <div className="text-ink-muted">{location}</div>
-                </div>
-              </div>
-              {event.organiser && (
-                <div className="flex items-start gap-3">
-                  <Flag className="h-4 w-4 text-mint mt-0.5 shrink-0" />
-                  <div>
-                    <div className="text-ink-muted text-xs">Organiser</div>
-                    <div className="font-medium text-ink">{event.organiser}</div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Registration status */}
-            {event.registration_status && (
-              <RegistrationStatusBadge status={event.registration_status} />
-            )}
-
-            {/* Countdown */}
-            {!isTBC && (() => {
-              const days = getDaysUntil(event.start_date)
-              if (days < 0) return null
-              return (
-                <div className="rounded-lg bg-panel-raised px-4 py-3 text-center">
-                  <div className="tabular-nums font-heading text-3xl font-bold text-mint leading-none">
-                    {days === 0 ? 'Today' : days}
-                  </div>
-                  <div className="mt-1 text-xs font-medium uppercase tracking-widest text-ink-muted">
-                    {days === 0 ? 'Race day!' : days === 1 ? 'day to race day' : 'days to race day'}
-                  </div>
-                </div>
-              )
-            })()}
-
-            {event.registration_deadline && (
-              <div className="rounded-lg bg-mint/10 border border-mint/20 px-3 py-2.5 text-sm">
-                <span className="text-mint font-medium">Registration closes</span>
-                <div className="text-ink">{formatDate(event.registration_deadline)}</div>
-              </div>
-            )}
-
-            {event.website_url && (
-              <a
-                href={event.website_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-primary w-full justify-center"
-              >
-                <Globe className="h-4 w-4" /> Register Now
-              </a>
-            )}
-
-            <a
-              href={`/api/events/${event.slug}/ical`}
-              className="btn-secondary w-full justify-center"
-            >
-              <Calendar className="h-4 w-4" /> Add to Calendar
-            </a>
-
-            <SaveButton eventId={event.id} initialSaved={isSaved} />
-
-            {saveCount > 0 && (
-              <p className="text-center text-xs text-ink-subtle">
-                {saveCount} {saveCount === 1 ? 'athlete' : 'athletes'} saved this event
-              </p>
-            )}
-          </div>
-
-          {/* Quick facts */}
-          <QuickFactsSidebar discipline={event.discipline} />
-
-          {/* Related events */}
-          {related.length > 0 && (
-            <div className="card space-y-3 text-sm">
-              <h2 className="font-heading font-semibold text-ink">More {event.discipline} Events</h2>
-              <ul className="space-y-2 text-ink-muted">
-                {related.map((e) => (
-                  <li key={e.slug}>
-                    <Link href={`/events/${e.slug}`} className="hover:text-ink transition-colors">
-                      {e.title} →
-                    </Link>
-                    <div className="text-ink-muted text-xs mt-0.5">
-                      {e.city}, {e.country} · {formatDate(e.start_date)}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href={`/events?discipline=${encodeURIComponent(event.discipline)}`}
-                className="text-mint hover:text-mint-300 transition-colors text-xs"
-              >
-                View all {event.discipline} events →
-              </Link>
-            </div>
-          )}
-
-        </aside>
-      </div>
-    </div>
-
-    {/* Sticky mobile CTA — hidden on lg where sidebar is visible */}
-    {event.website_url && (
-      <div
-        className="fixed bottom-0 left-0 right-0 z-50 border-t border-wire bg-canvas/95 backdrop-blur-sm lg:hidden"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
-      >
-        <div className="flex items-center gap-3 px-4 py-3">
-          <div className="min-w-0 flex-1">
-            <p className="text-xs text-ink-muted">{isTBC ? 'Date TBC' : formatDate(event.start_date)} · {event.discipline}</p>
-            <p className="truncate text-sm font-semibold text-ink">{event.title}</p>
-          </div>
-          <a
-            href={event.website_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-primary shrink-0"
-          >
-            Register Now
-          </a>
-        </div>
-      </div>
-    )}
-    </>
-  )
-}
-
-// ─── Shared primitives ────────────────────────────────────────────────────────
-
-function SectionHeading({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className="mb-5 border-b border-wire pb-3 font-heading text-xl font-bold text-ink">
-      {children}
-    </h2>
-  )
-}
-
-function extractVenue(description: string | null): string | null {
-  if (!description) return null
-  const match = description.match(/^Venue:\s*(.+)/i)
-  return match ? match[1].trim() : null
-}
-
-function getDaysUntil(dateStr: string): number {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const event = new Date(dateStr + 'T00:00:00')
-  event.setHours(0, 0, 0, 0)
-  return Math.round((event.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-}
 
 // ─── City travel data ─────────────────────────────────────────────────────────
 
@@ -613,8 +198,8 @@ const CITY_DATA: Record<string, CityEntry> = {
     },
   },
   'Taupo': {
-    airport: 'Taupo Airport (TUO) for regional flights, or Hamilton Airport (HLZ, 130 km) or Rotorua Airport (ROT, 80 km) for more connections',
-    transport: 'Car hire is strongly recommended — Taupo has very limited public transport. From Auckland, it\'s a 4 hr drive on SH1. From Rotorua, 1 hr on SH5.',
+    airport: "Taupo Airport (TUO) for regional flights, or Hamilton Airport (HLZ, 130 km) or Rotorua Airport (ROT, 80 km) for more connections",
+    transport: "Car hire is strongly recommended — Taupo has very limited public transport. From Auckland, it's a 4 hr drive on SH1. From Rotorua, 1 hr on SH5.",
     climate: {
       1:  'Warm, 13–24°C. Summer. Great conditions for IRONMAN Taupo.',
       2:  'Warm, 13–23°C. Consistent summer conditions.',
@@ -727,219 +312,745 @@ const MONTH_NAMES = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ]
 
-// ─── About section (discipline-aware editorial) ───────────────────────────────
+const COUNTRY_CODES: Record<string, string> = {
+  'Australia':   'AU',
+  'New Zealand': 'NZ',
+  'Singapore':   'SG',
+  'Japan':       'JP',
+  'South Korea': 'KR',
+  'Thailand':    'TH',
+  'Indonesia':   'ID',
+  'Hong Kong':   'HK',
+  'China':       'CN',
+}
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface PageProps {
+  params: Promise<{ slug: string }>
+}
+
+type EventRow = {
+  id: string
+  title: string
+  slug: string
+  discipline: string
+  event_type: string
+  city: string | null
+  region: string | null
+  country: string | null
+  start_date: string
+  end_date: string | null
+  registration_deadline: string | null
+  registration_opens_date: string | null
+  registration_status: 'open' | 'closing_soon' | 'sold_out' | 'coming_soon' | null
+  website_url: string | null
+  description: string | null
+  format_notes: string | null
+  whats_included: string[] | null
+  difficulty: number | null
+  organiser: string | null
+  is_featured: boolean
+  hero_image_url: string | null
+  entry_fee_from: number | null
+  entry_fee_to: number | null
+  entry_fee_currency: string
+  venue_name: string | null
+  venue_address: string | null
+  latitude: number | null
+  longitude: number | null
+  transport_notes: string | null
+  accommodation_notes: string | null
+  series_slug: string | null
+}
+
+type EventCategory = {
+  id: string
+  name: string
+  distance_label: string | null
+  entry_fee: number | null
+  cutoff_minutes: number | null
+  max_participants: number | null
+  is_sold_out: boolean
+  sort_order: number
+}
+
+// ─── Schema ───────────────────────────────────────────────────────────────────
+
+function buildEventSchema(event: EventRow, venue: string | null) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://raceradar.com.au'
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'SportsEvent',
+    name: event.title,
+    url: `${siteUrl}/events/${event.slug}`,
+    ...(event.start_date !== '2099-01-01' ? { startDate: event.start_date } : {}),
+    ...(event.end_date && event.start_date !== '2099-01-01' ? { endDate: event.end_date } : {}),
+    eventStatus: event.start_date === '2099-01-01'
+      ? 'https://schema.org/EventPostponed'
+      : 'https://schema.org/EventScheduled',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    sport: event.discipline,
+    location: {
+      '@type': 'Place',
+      ...(venue ? { name: venue } : {}),
+      ...(event.venue_address ? { address: { '@type': 'PostalAddress', streetAddress: event.venue_address, ...(event.city ? { addressLocality: event.city } : {}), ...(event.country ? { addressCountry: COUNTRY_CODES[event.country] ?? event.country } : {}) } } : {
+        address: {
+          '@type': 'PostalAddress',
+          ...(event.city ? { addressLocality: event.city } : {}),
+          ...(event.country ? { addressCountry: COUNTRY_CODES[event.country] ?? event.country } : {}),
+        },
+      }),
+    },
+    ...(event.organiser || event.discipline
+      ? { organizer: { '@type': 'Organization', name: event.organiser ?? event.discipline } }
+      : {}),
+    ...(event.website_url ? { sameAs: event.website_url } : {}),
+  }
+}
+
+// ─── Metadata ─────────────────────────────────────────────────────────────────
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params
+  const supabase = await createClient()
+  const { data: event } = await supabase
+    .from('events')
+    .select('title, description, discipline, city, country, venue_name, hero_image_url')
+    .eq('slug', slug)
+    .eq('is_published', true)
+    .single()
+
+  if (!event) return { title: 'Event not found' }
+
+  const location = [event.city, event.country].filter(Boolean).join(', ')
+  const metaDesc =
+    event.description && !event.description.startsWith('Venue:')
+      ? event.description
+      : `${event.title} — ${event.discipline} in ${location}. Dates, categories, entry fees, venue and race guide.`
+
+  return {
+    title: `${event.title} — ${event.discipline} Race Guide`,
+    description: metaDesc,
+    openGraph: {
+      title: `${event.title} — Race Guide`,
+      description: metaDesc,
+      ...(event.hero_image_url ? { images: [{ url: event.hero_image_url }] } : {}),
+    },
+  }
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+export default async function EventDetailPage({ params }: PageProps) {
+  const { slug } = await params
+  const supabase = await createClient()
+
+  const [{ data: rawEvent }, { data: { user } }] = await Promise.all([
+    supabase
+      .from('events')
+      .select(
+        'id, title, slug, discipline, event_type, city, region, country, start_date, end_date,' +
+        'registration_deadline, registration_opens_date, registration_status,' +
+        'website_url, description, format_notes, whats_included, difficulty,' +
+        'organiser, is_featured, hero_image_url,' +
+        'entry_fee_from, entry_fee_to, entry_fee_currency,' +
+        'venue_name, venue_address, latitude, longitude,' +
+        'transport_notes, accommodation_notes, series_slug',
+      )
+      .eq('slug', slug)
+      .eq('is_published', true)
+      .single(),
+    supabase.auth.getUser(),
+  ])
+
+  if (!rawEvent) notFound()
+  const event = rawEvent as unknown as EventRow
+
+  const today = new Date().toISOString().split('T')[0]
+  const isTBC = event.start_date === '2099-01-01'
+  const venue = event.venue_name ?? extractVenue(event.description)
+  const location = [event.city, event.region, event.country].filter(Boolean).join(', ')
+
+  const [categories, relatedRaw, isSaved, saveCount] = await Promise.all([
+    supabase
+      .from('event_categories')
+      .select('id, name, distance_label, entry_fee, cutoff_minutes, max_participants, is_sold_out, sort_order')
+      .eq('event_id', event.id)
+      .order('sort_order')
+      .then(({ data }) => (data ?? []) as EventCategory[]),
+    supabase
+      .from('events')
+      .select('title, slug, city, country, start_date, discipline')
+      .eq('is_published', true)
+      .neq('slug', slug)
+      .order('start_date', { ascending: true })
+      .limit(20)
+      .then(({ data }) => data ?? []),
+    user
+      ? supabase
+          .from('favourites')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('entity_type', 'event')
+          .eq('entity_id', event.id)
+          .single()
+          .then(({ data }) => !!data)
+      : Promise.resolve(false),
+    supabase
+      .rpc('get_event_save_count', { p_event_id: event.id })
+      .then(({ data }) => (data as number | null) ?? 0),
+  ])
+
+  const related = relatedRaw
+    .filter((e) => e.discipline === event.discipline && e.start_date >= today)
+    .slice(0, 4)
+
+  const eventSchema = buildEventSchema(event, venue)
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
+      />
+
+      {/* Hero */}
+      <HeroSection event={event} isTBC={isTBC} venue={venue} />
+
+      <div className={`container-page pt-6 pb-10${event.website_url ? ' pb-32 lg:pb-10' : ''}`}>
+        <Link href="/events" className="btn-ghost mb-6 inline-flex px-0 text-ink-muted">
+          <ArrowLeft className="h-4 w-4" /> Back to Events
+        </Link>
+
+        <div className="grid gap-10 lg:grid-cols-3">
+
+          {/* ── Main content ─────────────────────────────────── */}
+          <div className="lg:col-span-2 space-y-10">
+
+            {/* About */}
+            <AboutSection discipline={event.discipline} event={event} />
+
+            {/* Race format (discipline-specific stations / distances) */}
+            {event.discipline === 'HYROX' && <HYROXRaceFormat />}
+            {event.discipline === 'Deka Fit' && <DekaRaceFormat />}
+            {(event.discipline === 'Ironman' || event.discipline === 'Ironman 70.3') && (
+              <IronmanDistances discipline={event.discipline} />
+            )}
+
+            {/* Event categories — DB-driven, discipline fallback */}
+            <EventCategoriesSection categories={categories} discipline={event.discipline} />
+
+            {/* Who should enter — discipline-specific */}
+            {event.discipline === 'HYROX' && <HYROXWhoShouldEnter />}
+            {event.discipline === 'Spartan Race' && <SpartanWhoShouldEnter />}
+            {(event.discipline === 'Ironman' || event.discipline === 'Ironman 70.3') && (
+              <IronmanWhoShouldEnter discipline={event.discipline} />
+            )}
+            {(event.discipline === 'Marathon' || event.discipline === 'Trail Running') && (
+              <RunningWhoShouldEnter discipline={event.discipline} />
+            )}
+
+            {/* Registration information */}
+            <RegistrationSection event={event} />
+
+            {/* Entry fees */}
+            <EntryFeesSection event={event} categories={categories} />
+
+            {/* Difficulty */}
+            {event.difficulty !== null && <DifficultySection difficulty={event.difficulty} />}
+
+            {/* What's included */}
+            {(event.whats_included?.length ?? 0) > 0 && (
+              <WhatsIncludedSection items={event.whats_included!} />
+            )}
+
+            {/* Venue */}
+            <VenueSection event={event} venue={venue} />
+
+            {/* Travel & logistics */}
+            <TravelLogisticsSection event={event} isTBC={isTBC} />
+
+            {/* Race weekend tips */}
+            <WeekendTipsSection />
+
+            {/* FAQs */}
+            <FaqSection discipline={event.discipline} />
+          </div>
+
+          {/* ── Sidebar ──────────────────────────────────────── */}
+          <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+
+            <div className="card space-y-4">
+              <h2 className="font-heading font-semibold text-ink">Event Details</h2>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-start gap-3">
+                  <Calendar className="h-4 w-4 text-mint mt-0.5 shrink-0" />
+                  <div>
+                    <div className="font-medium text-ink">
+                      {isTBC ? 'Date TBC' : formatDate(event.start_date)}
+                    </div>
+                    {!isTBC && event.end_date && event.end_date !== event.start_date && (
+                      <div className="text-ink-muted">to {formatDate(event.end_date)}</div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-4 w-4 text-mint mt-0.5 shrink-0" />
+                  <div>
+                    {venue && <div className="font-medium text-ink">{venue}</div>}
+                    <div className="text-ink-muted">{location}</div>
+                  </div>
+                </div>
+                {event.organiser && (
+                  <div className="flex items-start gap-3">
+                    <Flag className="h-4 w-4 text-mint mt-0.5 shrink-0" />
+                    <div>
+                      <div className="text-ink-muted text-xs">Organiser</div>
+                      <div className="font-medium text-ink">{event.organiser}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {event.registration_status && (
+                <RegistrationStatusBadge status={event.registration_status} />
+              )}
+
+              {!isTBC && (() => {
+                const days = getDaysUntil(event.start_date)
+                if (days < 0) return null
+                return (
+                  <div className="rounded-lg bg-panel-raised px-4 py-3 text-center">
+                    <div className="tabular-nums font-heading text-3xl font-bold text-mint leading-none">
+                      {days === 0 ? 'Today' : days}
+                    </div>
+                    <div className="mt-1 text-xs font-medium uppercase tracking-widest text-ink-muted">
+                      {days === 0 ? 'Race day!' : days === 1 ? 'day to race day' : 'days to race day'}
+                    </div>
+                  </div>
+                )
+              })()}
+
+              {event.registration_deadline && (
+                <div className="rounded-lg bg-mint/10 border border-mint/20 px-3 py-2.5 text-sm">
+                  <span className="text-mint font-medium">Registration closes</span>
+                  <div className="text-ink">{formatDate(event.registration_deadline)}</div>
+                </div>
+              )}
+
+              {event.website_url && (
+                <a
+                  href={event.website_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary w-full justify-center"
+                >
+                  <Globe className="h-4 w-4" /> Register Now
+                </a>
+              )}
+
+              <a href={`/api/events/${event.slug}/ical`} className="btn-secondary w-full justify-center">
+                <Calendar className="h-4 w-4" /> Add to Calendar
+              </a>
+
+              <SaveButton eventId={event.id} initialSaved={isSaved} />
+
+              {saveCount > 0 && (
+                <p className="text-center text-xs text-ink-subtle">
+                  {saveCount} {saveCount === 1 ? 'athlete' : 'athletes'} saved this event
+                </p>
+              )}
+            </div>
+
+            <QuickFactsSidebar discipline={event.discipline} />
+
+            {related.length > 0 && (
+              <div className="card space-y-3 text-sm">
+                <h2 className="font-heading font-semibold text-ink">More {event.discipline} Events</h2>
+                <ul className="space-y-2 text-ink-muted">
+                  {related.map((e) => (
+                    <li key={e.slug}>
+                      <Link href={`/events/${e.slug}`} className="hover:text-ink transition-colors">
+                        {e.title} →
+                      </Link>
+                      <div className="text-ink-muted text-xs mt-0.5">
+                        {e.city}, {e.country} · {formatDate(e.start_date)}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href={`/events?discipline=${encodeURIComponent(event.discipline)}`}
+                  className="text-mint hover:text-mint-300 transition-colors text-xs"
+                >
+                  View all {event.discipline} events →
+                </Link>
+              </div>
+            )}
+          </aside>
+        </div>
+      </div>
+
+      {/* Conversion CTAs */}
+      <ConversionCTAsSection
+        event={event}
+        isSaved={isSaved}
+        saveCount={saveCount}
+        hasUser={!!user}
+      />
+
+      {/* Sticky mobile CTA */}
+      {event.website_url && (
+        <div
+          className="fixed bottom-0 left-0 right-0 z-50 border-t border-wire bg-canvas/95 backdrop-blur-sm lg:hidden"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        >
+          <div className="flex items-center gap-3 px-4 py-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs text-ink-muted">{isTBC ? 'Date TBC' : formatDate(event.start_date)} · {event.discipline}</p>
+              <p className="truncate text-sm font-semibold text-ink">{event.title}</p>
+            </div>
+            <a
+              href={event.website_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary shrink-0"
+            >
+              Register Now
+            </a>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
+// ─── Shared helpers ───────────────────────────────────────────────────────────
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="mb-5 border-b border-wire pb-3 font-heading text-xl font-bold text-ink">
+      {children}
+    </h2>
+  )
+}
+
+function extractVenue(description: string | null): string | null {
+  if (!description) return null
+  const match = description.match(/^Venue:\s*(.+)/i)
+  return match ? match[1].trim() : null
+}
+
+function getDaysUntil(dateStr: string): number {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const target = new Date(dateStr + 'T00:00:00')
+  target.setHours(0, 0, 0, 0)
+  return Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+}
+
+// ─── Hero section ─────────────────────────────────────────────────────────────
+
+function HeroSection({ event, isTBC, venue }: { event: EventRow; isTBC: boolean; venue: string | null }) {
+  const dateStr = isTBC ? 'Date TBC' : formatDate(event.start_date)
+  const endStr =
+    !isTBC && event.end_date && event.end_date !== event.start_date
+      ? ` – ${formatDate(event.end_date)}`
+      : ''
+  const heroLocation = [venue ?? event.city, event.country].filter(Boolean).join(', ')
+
+  const content = (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2">
+        <Badge variant="brand">{event.discipline}</Badge>
+        <Badge variant="outline">{event.event_type}</Badge>
+        {event.is_featured && <Badge variant="warning">Featured</Badge>}
+      </div>
+      <h1 className="font-heading text-3xl font-bold text-white leading-tight md:text-4xl">
+        {event.title}
+      </h1>
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-slate-300">
+        {heroLocation && (
+          <span className="flex items-center gap-1.5">
+            <MapPin className="h-4 w-4 text-mint shrink-0" />
+            {heroLocation}
+          </span>
+        )}
+        <span className="flex items-center gap-1.5">
+          <Calendar className="h-4 w-4 text-mint shrink-0" />
+          {dateStr}{endStr}
+        </span>
+      </div>
+      {event.website_url && (
+        <div className="pt-2">
+          <a
+            href={event.website_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary"
+          >
+            <Globe className="h-4 w-4" /> Register Now
+          </a>
+        </div>
+      )}
+    </div>
+  )
+
+  if (event.hero_image_url) {
+    return (
+      <div className="relative min-h-72 overflow-hidden bg-slate-950 flex items-end md:min-h-96">
+        <Image
+          src={event.hero_image_url}
+          alt={event.title}
+          fill
+          className="object-cover opacity-40"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-900/40 to-transparent" />
+        <div className="relative container-page pb-10 pt-8 w-full">{content}</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="border-b border-wire bg-gradient-to-b from-panel to-canvas">
+      <div className="container-page py-12 md:py-16">{content}</div>
+    </div>
+  )
+}
+
+// ─── About section ────────────────────────────────────────────────────────────
 
 function AboutSection({ discipline, event }: { discipline: string; event: EventRow }) {
   const location = [event.city, event.country].filter(Boolean).join(', ')
 
-  const copy: Record<string, React.ReactNode> = {
+  const editorialCopy: Record<string, React.ReactNode> = {
     'CrossFit': (
       <>
-        <p>
-          CrossFit competitions test athletes across weightlifting, gymnastics and metabolic
-          conditioning in constantly varied workouts (WODs) scored for time, load or reps.
-          Events range from local box throwdowns and regional invitationals to Licensed Sanctional
-          competitions that qualify athletes for the CrossFit Games — the world&apos;s premier test
-          of fitness.
-        </p>
-        <p>
-          The CrossFit Open, held annually in February and March, is the world&apos;s largest online
-          fitness competition with hundreds of thousands of athletes from every country. The top
-          finishers progress to the Quarterfinals, Semifinals and ultimately the CrossFit Games.
-          Local throwdowns and team competitions run throughout the year at affiliate boxes,
-          providing competitive opportunities at every fitness level.
-        </p>
-        <p>
-          CrossFit competitions typically span one or two days and include multiple WODs announced
-          at or shortly before the event. Unlike standardised race formats, every CrossFit event
-          is different — the element of the unknown is central to the competitive experience.
-          Most events offer RX (prescribed), Scaled and Masters divisions, making competition
-          accessible for athletes at every stage of their CrossFit journey.
-        </p>
+        <p>CrossFit competitions test athletes across weightlifting, gymnastics and metabolic conditioning in constantly varied workouts (WODs) scored for time, load or reps. Events range from local box throwdowns and regional invitationals to Licensed Sanctional competitions that qualify athletes for the CrossFit Games.</p>
+        <p>The CrossFit Open, held annually in February and March, is the world&apos;s largest online fitness competition. The top finishers progress to the Quarterfinals, Semifinals and ultimately the CrossFit Games. Local throwdowns run throughout the year, providing competitive opportunities at every fitness level.</p>
+        <p>CrossFit competitions typically span one or two days and include multiple WODs announced at or shortly before the event. Most events offer RX, Scaled and Masters divisions, making competition accessible for athletes at every stage of their CrossFit journey.</p>
       </>
     ),
     'HYROX': (
       <>
-        <p>
-          HYROX is the world&apos;s fastest-growing fitness race — a standardised format that
-          combines 8 × 1 km runs with 8 functional workout stations under a single roof. Created
-          in Hamburg in 2017, every HYROX event worldwide uses the exact same stations, distances
-          and weights, meaning your finish time in {location} is directly comparable to athletes
-          who raced in London, Tokyo or New York.
-        </p>
-        <p>
-          The event attracts athletes of all levels: recreational gym-goers chasing their first
-          completion race side-by-side with competitive athletes targeting a HYROX World
-          Championships qualification. With Open, Pro, Doubles and Relay divisions, there is a
-          format for everyone from first-timers to elite competitors.
-        </p>
-        <p>
-          HYROX events are held indoors, which means spectators get an unobstructed view of the
-          full race floor — every workout station and every running lap — from the same vantage
-          point. This makes HYROX one of the most spectator-friendly fitness races on the planet.
-        </p>
+        <p>HYROX is the world&apos;s fastest-growing fitness race — a standardised format that combines 8 × 1 km runs with 8 functional workout stations under a single roof. Every HYROX event worldwide uses the exact same stations, distances and weights, meaning your finish time in {location} is directly comparable to athletes who raced in London, Tokyo or New York.</p>
+        <p>The event attracts athletes of all levels: recreational gym-goers chasing their first completion race side-by-side with competitive athletes targeting a HYROX World Championships qualification. With Open, Pro, Doubles and Relay divisions, there is a format for everyone.</p>
+        <p>HYROX events are held indoors, which means spectators get an unobstructed view of the full race floor — every workout station and every running lap — making HYROX one of the most spectator-friendly fitness races on the planet.</p>
       </>
     ),
     'Spartan Race': (
       <>
-        <p>
-          Spartan Race is the world&apos;s largest obstacle course race series, with over 200 events
-          annually across 40+ countries. Races are held on rugged, natural terrain — mountains,
-          farms and open land — and include a mix of running and purpose-built obstacles including
-          rope climbs, barbed wire crawls, bucket carries, spear throws and heavy carries.
-        </p>
-        <p>
-          Unlike road races, Spartan events are held on private property and often involve
-          significant elevation gain. The course changes from year to year at most venues,
-          and race distances are approximate — actual course length can vary based on terrain.
-          Athletes who fail an obstacle must complete a 30-burpee penalty before continuing.
-        </p>
-        <p>
-          Multiple race formats mean that whether you&apos;re a first-time obstacle racer or a
-          seasoned ultra-endurance competitor, there is a Spartan distance suited to your fitness
-          level. The Trifecta challenge — completing a Sprint, Super and Beast in one season — is
-          one of the most popular multi-race goals in the sport.
-        </p>
+        <p>Spartan Race is the world&apos;s largest obstacle course race series, with over 200 events annually across 40+ countries. Races are held on rugged, natural terrain — mountains, farms and open land — and include a mix of running and purpose-built obstacles including rope climbs, barbed wire crawls, bucket carries, spear throws and heavy carries.</p>
+        <p>Unlike road races, Spartan events are held on private property and often involve significant elevation gain. Athletes who fail an obstacle must complete a 30-burpee penalty before continuing.</p>
+        <p>Multiple race formats mean that whether you&apos;re a first-time obstacle racer or a seasoned ultra-endurance competitor, there is a Spartan distance suited to your fitness level.</p>
       </>
     ),
     'Ironman': (
       <>
-        <p>
-          IRONMAN is the pinnacle of long-course triathlon: a continuous 3.86 km swim, 180.25 km
-          bike ride and 42.2 km marathon run, completed in a single day. Athletes must finish
-          within a 17-hour cut-off. It is widely regarded as one of the most demanding one-day
-          endurance challenges in sport.
-        </p>
-        <p>
-          The Asia Pacific circuit includes events in New Zealand, Australia, Malaysia and Japan —
-          each with its own character in terms of course terrain, water conditions and crowd
-          atmosphere. All IRONMAN events offer Kona and World Championship qualification slots
-          distributed across age groups, making them competitive for serious triathletes.
-        </p>
+        <p>IRONMAN is the pinnacle of long-course triathlon: a continuous 3.86 km swim, 180.25 km bike ride and 42.2 km marathon run, completed in a single day within a 17-hour cut-off. It is widely regarded as one of the most demanding one-day endurance challenges in sport.</p>
+        <p>The Asia Pacific circuit includes events in New Zealand, Australia, Malaysia and Japan — each with its own character in terms of course terrain, water conditions and crowd atmosphere. All IRONMAN events offer Kona and World Championship qualification slots distributed across age groups.</p>
       </>
     ),
     'Ironman 70.3': (
       <>
-        <p>
-          IRONMAN 70.3 — named after the total race distance in miles — combines a 1.93 km swim,
-          90.12 km bike and 21.1 km run (half marathon). The 8-hour 30-minute cut-off makes it
-          the natural progression from sprint and Olympic-distance triathlon, and the most popular
-          long-course format for athletes preparing for a full IRONMAN.
-        </p>
-        <p>
-          IRONMAN 70.3 events qualify athletes for the annual 70.3 World Championship. The Asia
-          Pacific circuit offers multiple 70.3 options across Australia, New Zealand and Southeast
-          Asia — each with distinct course profiles suited to different athlete strengths.
-        </p>
+        <p>IRONMAN 70.3 — named after the total race distance in miles — combines a 1.93 km swim, 90.12 km bike and 21.1 km run. The 8:30 cut-off makes it the natural progression from sprint and Olympic-distance triathlon, and the most popular long-course format for athletes preparing for a full IRONMAN.</p>
+        <p>IRONMAN 70.3 events qualify athletes for the annual 70.3 World Championship. The Asia Pacific circuit offers multiple 70.3 options across Australia, New Zealand and Southeast Asia.</p>
       </>
     ),
     'Marathon': (
       <>
-        <p>
-          The marathon — 42.195 km — is one of the oldest and most celebrated distance running
-          events in the world. Whether you&apos;re running your first marathon or targeting a
-          qualifying time, road marathons remain the benchmark distance goal for long-distance
-          runners at every level.
-        </p>
-        <p>
-          Marathons in the Asia Pacific region range from flat, fast city courses ideal for
-          personal bests to scenic coastal and mountain routes designed for the experience over
-          the clock. Most events also offer half marathon and shorter distances for runners at
-          different stages of their training.
-        </p>
+        <p>The marathon — 42.195 km — is one of the oldest and most celebrated distance running events in the world. Whether you&apos;re running your first marathon or targeting a qualifying time, road marathons remain the benchmark distance goal for long-distance runners at every level.</p>
+        <p>Marathons in the Asia Pacific region range from flat, fast city courses ideal for personal bests to scenic coastal and mountain routes designed for the experience over the clock.</p>
       </>
     ),
     'Trail Running': (
       <>
-        <p>
-          Trail running takes the marathon concept off-road — onto mountain paths, forest tracks
-          and natural terrain where elevation, surface and distance combine to challenge athletes
-          in entirely different ways to road racing. Events range from 10 km social trail runs to
-          100+ km ultra-distance races that take place over multiple days.
-        </p>
-        <p>
-          Asia Pacific&apos;s trail running scene spans some of the world&apos;s most spectacular terrain —
-          from Japan&apos;s volcanic mountain trails to New Zealand&apos;s alpine wilderness and Australia&apos;s
-          rugged national parks. Distances are often approximate due to terrain variability, and
-          mandatory gear requirements are common for longer distances.
-        </p>
+        <p>Trail running takes the marathon concept off-road — onto mountain paths, forest tracks and natural terrain where elevation, surface and distance combine to challenge athletes in entirely different ways to road racing. Events range from 10 km social trail runs to 100+ km ultra-distance races.</p>
+        <p>Asia Pacific&apos;s trail running scene spans some of the world&apos;s most spectacular terrain — from Japan&apos;s volcanic mountain trails to New Zealand&apos;s alpine wilderness and Australia&apos;s rugged national parks.</p>
       </>
     ),
     'Deka Fit': (
       <>
-        <p>
-          Deka Fit is an indoor fitness race that blends the HYROX concept with its own unique
-          station format: 10 × 500 m runs alternating with 10 workout stations — including Ski
-          Erg, Sled Push, Sled Pull, Burpee Jumps, Row Erg, Farmer&apos;s Carry, Sandbag Lunges,
-          Wall Balls, Box Jumps and Battle Ropes.
-        </p>
-        <p>
-          Like HYROX, Deka Fit uses a standardised global format so all results are directly
-          comparable. The race is held indoors, spectator-friendly, and offers divisions for
-          athletes of all fitness backgrounds. It is an excellent complementary event for
-          athletes who compete in both HYROX and functional fitness formats.
-        </p>
+        <p>Deka Fit is an indoor fitness race that blends the HYROX concept with its own unique format: 10 × 500 m runs alternating with 10 workout stations — Ski Erg, Sled Push, Sled Pull, Burpee Jumps, Row Erg, Farmer&apos;s Carry, Sandbag Lunges, Wall Balls, Box Jumps and Battle Ropes.</p>
+        <p>Like HYROX, Deka Fit uses a standardised global format so all results are directly comparable. The race is held indoors, spectator-friendly, and offers divisions for athletes of all fitness backgrounds.</p>
       </>
     ),
   }
 
-  const fallback = event.description && !event.description.startsWith('Venue:')
+  const hasDescription = event.description && !event.description.startsWith('Venue:')
+  const fallback = hasDescription
     ? <p>{event.description}</p>
-    : (
-      <p>
-        {event.title} is a {discipline} event in {location}. Visit the official website for
-        full event details, course information and registration.
-      </p>
-    )
+    : <p>{event.title} is a {discipline} event in {location}. Visit the official website for full event details, course information and registration.</p>
 
   return (
     <section>
       <SectionHeading>About the Event</SectionHeading>
       <div className="space-y-4 text-ink leading-relaxed text-[0.9375rem]">
-        {copy[discipline] ?? fallback}
+        {editorialCopy[discipline] ?? fallback}
+        {event.format_notes && (
+          <div className="mt-4 rounded-xl border border-wire bg-panel px-5 py-4 text-sm text-ink-muted leading-relaxed">
+            <span className="block text-xs font-semibold uppercase tracking-wider text-ink-subtle mb-2">Format Notes</span>
+            {event.format_notes}
+          </div>
+        )}
       </div>
     </section>
   )
 }
 
-// ─── HYROX sections ───────────────────────────────────────────────────────────
+// ─── HYROX race format ────────────────────────────────────────────────────────
 
-function HYROXSections() {
+function HYROXRaceFormat() {
   return (
-    <>
-      <section>
-        <SectionHeading>Race Format</SectionHeading>
-        <p className="text-ink-muted mb-6">
-          8 rounds. Each round: 1 km run → workout station. Total running: 8 km.
-          Workout volume is fixed across all divisions — only weights and vest requirements differ.
-        </p>
-        <div className="overflow-x-auto rounded-xl border border-wire">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-wire bg-panel">
-                <th className="text-left px-4 py-3 text-ink-muted font-medium w-8">#</th>
-                <th className="text-left px-4 py-3 text-ink-muted font-medium">Station</th>
-                <th className="text-left px-4 py-3 text-ink-muted font-medium">Distance / Reps</th>
-                <th className="text-left px-4 py-3 text-ink-muted font-medium hidden sm:table-cell">Notes</th>
+    <section>
+      <SectionHeading>Race Format</SectionHeading>
+      <p className="text-ink-muted mb-6">
+        8 rounds. Each round: 1 km run → workout station. Total running: 8 km.
+        Workout volume is fixed across all divisions — only weights and vest requirements differ.
+      </p>
+      <div className="overflow-x-auto rounded-xl border border-wire">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-wire bg-panel">
+              <th className="w-8 px-4 py-3 text-left text-ink-muted font-medium">#</th>
+              <th className="px-4 py-3 text-left text-ink-muted font-medium">Station</th>
+              <th className="px-4 py-3 text-left text-ink-muted font-medium">Distance / Reps</th>
+              <th className="hidden px-4 py-3 text-left text-ink-muted font-medium sm:table-cell">Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {HYROX_STATIONS.map((s, i) => (
+              <tr key={s.order} className={`border-b border-wire last:border-0 ${i % 2 === 0 ? '' : 'bg-panel/40'}`}>
+                <td className="px-4 py-3 text-mint font-bold">{s.order}</td>
+                <td className="px-4 py-3 text-ink font-medium">{s.name}</td>
+                <td className="px-4 py-3 text-ink">{s.distance}</td>
+                <td className="hidden px-4 py-3 text-ink-muted sm:table-cell">{s.note}</td>
               </tr>
-            </thead>
-            <tbody>
-              {HYROX_STATIONS.map((s, i) => (
-                <tr key={s.order} className={`border-b border-wire last:border-0 ${i % 2 === 0 ? '' : 'bg-panel/40'}`}>
-                  <td className="px-4 py-3 text-mint font-bold">{s.order}</td>
-                  <td className="px-4 py-3 text-ink font-medium">{s.name}</td>
-                  <td className="px-4 py-3 text-ink">{s.distance}</td>
-                  <td className="px-4 py-3 text-ink-muted hidden sm:table-cell">{s.note}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="mt-3 text-xs text-ink-muted">
-          Pro division distances and weights may vary — confirm with the official HYROX race guide.
-        </p>
-      </section>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-3 text-xs text-ink-muted">
+        Pro division distances and weights may vary — confirm with the official HYROX race guide.
+      </p>
+    </section>
+  )
+}
 
+// ─── Deka race format ─────────────────────────────────────────────────────────
+
+function DekaRaceFormat() {
+  return (
+    <section>
+      <SectionHeading>Race Format</SectionHeading>
+      <p className="text-ink-muted mb-6">
+        10 rounds. Each round: 500 m run → workout station. Total running: 5 km.
+        All results are globally comparable — every Deka Fit event uses the same format.
+      </p>
+      <div className="overflow-x-auto rounded-xl border border-wire">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-wire bg-panel">
+              <th className="w-8 px-4 py-3 text-left text-ink-muted font-medium">#</th>
+              <th className="px-4 py-3 text-left text-ink-muted font-medium">Station</th>
+              <th className="px-4 py-3 text-left text-ink-muted font-medium">Distance / Reps</th>
+            </tr>
+          </thead>
+          <tbody>
+            {DEKA_STATIONS.map((s, i) => (
+              <tr key={s.order} className={`border-b border-wire last:border-0 ${i % 2 === 0 ? '' : 'bg-panel/40'}`}>
+                <td className="px-4 py-3 text-mint font-bold">{s.order}</td>
+                <td className="px-4 py-3 text-ink font-medium">{s.name}</td>
+                <td className="px-4 py-3 text-ink">{s.distance}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  )
+}
+
+// ─── Ironman race distances ────────────────────────────────────────────────────
+
+function IronmanDistances({ discipline }: { discipline: string }) {
+  const d = IRONMAN_DISTANCES[discipline]
+  if (!d) return null
+  return (
+    <section>
+      <SectionHeading>Race Distances</SectionHeading>
+      <div className="overflow-x-auto rounded-xl border border-wire">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-wire bg-panel">
+              <th className="px-4 py-3 text-left text-ink-muted font-medium">Leg</th>
+              <th className="px-4 py-3 text-left text-ink-muted font-medium">Distance</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              { leg: 'Swim', dist: d.swim },
+              { leg: 'Bike', dist: d.bike },
+              { leg: 'Run',  dist: d.run  },
+              { leg: 'Total', dist: d.total },
+            ].map((row, i) => (
+              <tr key={row.leg} className={`border-b border-wire last:border-0 ${i % 2 === 0 ? '' : 'bg-panel/40'}`}>
+                <td className={`px-4 py-3 font-medium ${row.leg === 'Total' ? 'text-mint' : 'text-ink'}`}>{row.leg}</td>
+                <td className="px-4 py-3 text-ink">{row.dist}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  )
+}
+
+// ─── Event categories ─────────────────────────────────────────────────────────
+
+function EventCategoriesSection({ categories, discipline }: { categories: EventCategory[]; discipline: string }) {
+  if (categories.length > 0) {
+    return (
+      <section>
+        <SectionHeading>Event Categories</SectionHeading>
+        <div className="space-y-3">
+          {categories.map((cat) => (
+            <div key={cat.id} className="card flex items-start justify-between gap-4">
+              <div className="min-w-0 space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="font-semibold text-ink">{cat.name}</h3>
+                  {cat.is_sold_out && <Badge variant="danger">Sold Out</Badge>}
+                </div>
+                {cat.distance_label && (
+                  <p className="text-sm text-ink-muted">{cat.distance_label}</p>
+                )}
+                <div className="flex flex-wrap gap-4 text-xs text-ink-muted mt-1">
+                  {cat.cutoff_minutes !== null && (
+                    <span>Cutoff: {Math.floor(cat.cutoff_minutes / 60)}h {cat.cutoff_minutes % 60 > 0 ? `${cat.cutoff_minutes % 60}m` : ''}</span>
+                  )}
+                  {cat.max_participants !== null && (
+                    <span>Max {cat.max_participants.toLocaleString()} participants</span>
+                  )}
+                </div>
+              </div>
+              {cat.entry_fee !== null && (
+                <div className="shrink-0 text-right">
+                  <div className="text-lg font-bold text-ink">${cat.entry_fee.toLocaleString('en-AU', { minimumFractionDigits: 0 })}</div>
+                  <div className="text-xs text-ink-muted">AUD</div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  if (discipline === 'HYROX') {
+    return (
       <section>
         <SectionHeading>Event Categories</SectionHeading>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -959,49 +1070,24 @@ function HYROXSections() {
           ))}
         </div>
       </section>
+    )
+  }
 
-      <section>
-        <SectionHeading>Who Should Enter?</SectionHeading>
-        <div className="space-y-4">
-          {[
-            { title: 'Beginner',      cta: 'Target finish: 90–120 min', desc: 'Can run 5 km and has 3–6 months of gym training. HYROX Open is well within reach with a 12–16 week prep block.' },
-            { title: 'Intermediate',  cta: 'Target finish: 75–90 min',  desc: 'Regular gym-goer with solid cardio. Focus on your running pace between stations — that\'s where most athletes lose time.' },
-            { title: 'Competitive',   cta: 'Target finish: Sub-75 min (Open) / Sub-60 min (Pro)', desc: 'CrossFit, triathlon or elite running background. Consider the Pro division if you\'re targeting a top-10 age-group result.' },
-          ].map((level) => (
-            <div key={level.title} className="card flex gap-4">
-              <CheckCircle className="h-5 w-5 text-mint mt-0.5 shrink-0" />
-              <div>
-                <h3 className="font-semibold text-ink mb-1">{level.title}</h3>
-                <p className="text-sm text-ink-muted leading-relaxed">{level.desc}</p>
-                <p className="mt-2 text-xs font-medium text-mint">{level.cta}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-    </>
-  )
-}
-
-// ─── Spartan sections ─────────────────────────────────────────────────────────
-
-function SpartanSections() {
-  return (
-    <>
+  if (discipline === 'Spartan Race') {
+    return (
       <section>
         <SectionHeading>Race Types</SectionHeading>
-        <p className="text-ink-muted mb-6">
-          Most Spartan events offer multiple race formats on the same weekend. Distances are
-          approximate — actual course length depends on terrain.
+        <p className="text-ink-muted mb-6 text-sm">
+          Most Spartan events offer multiple race formats on the same weekend. Distances are approximate — actual course length depends on terrain.
         </p>
         <div className="overflow-x-auto rounded-xl border border-wire">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-wire bg-panel">
-                <th className="text-left px-4 py-3 text-ink-muted font-medium">Format</th>
-                <th className="text-left px-4 py-3 text-ink-muted font-medium">Distance</th>
-                <th className="text-left px-4 py-3 text-ink-muted font-medium">Obstacles</th>
-                <th className="text-left px-4 py-3 text-ink-muted font-medium hidden sm:table-cell">Level</th>
+                <th className="px-4 py-3 text-left text-ink-muted font-medium">Format</th>
+                <th className="px-4 py-3 text-left text-ink-muted font-medium">Distance</th>
+                <th className="px-4 py-3 text-left text-ink-muted font-medium">Obstacles</th>
+                <th className="hidden px-4 py-3 text-left text-ink-muted font-medium sm:table-cell">Level</th>
               </tr>
             </thead>
             <tbody>
@@ -1010,7 +1096,7 @@ function SpartanSections() {
                   <td className="px-4 py-3 text-ink font-medium">{f.name}</td>
                   <td className="px-4 py-3 text-ink">{f.distance}</td>
                   <td className="px-4 py-3 text-ink">{f.obstacles}</td>
-                  <td className="px-4 py-3 text-ink-muted hidden sm:table-cell">{f.level}</td>
+                  <td className="hidden px-4 py-3 text-ink-muted sm:table-cell">{f.level}</td>
                 </tr>
               ))}
             </tbody>
@@ -1018,70 +1104,25 @@ function SpartanSections() {
         </div>
         <p className="mt-3 text-xs text-ink-muted">
           Check the event registration page to confirm which formats are available at this specific event.
-          Not all events offer every distance.
         </p>
       </section>
+    )
+  }
 
-      <section>
-        <SectionHeading>Who Should Enter?</SectionHeading>
-        <div className="space-y-4">
-          {[
-            { title: 'First-timers',   desc: 'The Spartan Sprint (~5 km) is designed as an accessible entry point. You need basic running fitness and a willingness to get muddy — no prior obstacle experience required.', cta: 'Start with: Spartan Sprint' },
-            { title: 'Intermediate',   desc: 'If you\'ve completed a Sprint and want more challenge, the Super (~10 km) is the natural next step. Comfortable with 10 km trail runs and basic strength training.', cta: 'Aim for: Spartan Super or Trifecta' },
-            { title: 'Experienced',    desc: 'The Beast and Ultra formats demand serious endurance base and obstacle proficiency. Expect significant elevation gain and time on feet of 4–12+ hours.', cta: 'Push for: Spartan Beast or Ultra' },
-          ].map((level) => (
-            <div key={level.title} className="card flex gap-4">
-              <CheckCircle className="h-5 w-5 text-mint mt-0.5 shrink-0" />
-              <div>
-                <h3 className="font-semibold text-ink mb-1">{level.title}</h3>
-                <p className="text-sm text-ink-muted leading-relaxed">{level.desc}</p>
-                <p className="mt-2 text-xs font-medium text-mint">{level.cta}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-    </>
-  )
+  return null
 }
 
-// ─── Ironman sections ─────────────────────────────────────────────────────────
+// ─── Who should enter ─────────────────────────────────────────────────────────
 
-function IronmanSections({ discipline }: { discipline: string }) {
-  const d = IRONMAN_DISTANCES[discipline]
-  if (!d) return null
-
+function HYROXWhoShouldEnter() {
   return (
     <section>
-      <SectionHeading>Race Distances</SectionHeading>
-      <div className="overflow-x-auto rounded-xl border border-wire mb-4">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-wire bg-panel">
-              <th className="text-left px-4 py-3 text-ink-muted font-medium">Leg</th>
-              <th className="text-left px-4 py-3 text-ink-muted font-medium">Distance</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              { leg: 'Swim',  dist: d.swim },
-              { leg: 'Bike',  dist: d.bike },
-              { leg: 'Run',   dist: d.run  },
-              { leg: 'Total', dist: d.total },
-            ].map((row, i) => (
-              <tr key={row.leg} className={`border-b border-wire last:border-0 ${i % 2 === 0 ? '' : 'bg-panel/40'}`}>
-                <td className={`px-4 py-3 font-medium ${row.leg === 'Total' ? 'text-mint' : 'text-ink'}`}>{row.leg}</td>
-                <td className="px-4 py-3 text-ink">{row.dist}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <SectionHeading>Who Should Enter?</SectionHeading>
       <div className="space-y-4">
         {[
-          { title: 'Beginners',   desc: `${discipline} is a serious long-course commitment. Athletes new to triathlon should start with a sprint or Olympic-distance event before targeting a ${discipline}. A minimum of 12–18 months of structured triathlon training is recommended.`, cta: discipline === 'Ironman' ? 'Minimum base: 12–18 months triathlon training' : 'Minimum base: 6–12 months triathlon training' },
-          { title: 'Intermediate', desc: 'Solid swim, bike and run base across all three disciplines. You\'ve completed Olympic-distance triathlon and can comfortably train 10–15 hours per week.', cta: 'Build a 20–24 week specific training block' },
-          { title: 'Experienced',  desc: `You've completed a ${discipline === 'Ironman 70.3' ? 'full IRONMAN or multiple 70.3s' : 'prior full IRONMAN'} and are targeting a competitive finish or Kona/World Champs qualification.`, cta: 'Focus: race-specific pacing and nutrition strategy' },
+          { title: 'Beginner',    cta: 'Target finish: 90–120 min', desc: "Can run 5 km and has 3–6 months of gym training. HYROX Open is well within reach with a 12–16 week prep block." },
+          { title: 'Intermediate', cta: 'Target finish: 75–90 min', desc: "Regular gym-goer with solid cardio. Focus on your running pace between stations — that's where most athletes lose time." },
+          { title: 'Competitive', cta: 'Target finish: Sub-75 min (Open) / Sub-60 min (Pro)', desc: 'CrossFit, triathlon or elite running background. Consider the Pro division if targeting a top-10 age-group result.' },
         ].map((level) => (
           <div key={level.title} className="card flex gap-4">
             <CheckCircle className="h-5 w-5 text-mint mt-0.5 shrink-0" />
@@ -1097,9 +1138,67 @@ function IronmanSections({ discipline }: { discipline: string }) {
   )
 }
 
-// ─── Running section (Marathon + Trail) ───────────────────────────────────────
+function SpartanWhoShouldEnter() {
+  return (
+    <section>
+      <SectionHeading>Who Should Enter?</SectionHeading>
+      <div className="space-y-4">
+        {[
+          { title: 'First-timers', desc: "The Spartan Sprint (~5 km) is designed as an accessible entry point. You need basic running fitness and a willingness to get muddy — no prior obstacle experience required.", cta: 'Start with: Spartan Sprint' },
+          { title: 'Intermediate', desc: "If you've completed a Sprint and want more challenge, the Super (~10 km) is the natural next step. Comfortable with 10 km trail runs and basic strength training.", cta: 'Aim for: Spartan Super or Trifecta' },
+          { title: 'Experienced',  desc: 'The Beast and Ultra formats demand serious endurance base and obstacle proficiency. Expect significant elevation gain and time on feet of 4–12+ hours.', cta: 'Push for: Spartan Beast or Ultra' },
+        ].map((level) => (
+          <div key={level.title} className="card flex gap-4">
+            <CheckCircle className="h-5 w-5 text-mint mt-0.5 shrink-0" />
+            <div>
+              <h3 className="font-semibold text-ink mb-1">{level.title}</h3>
+              <p className="text-sm text-ink-muted leading-relaxed">{level.desc}</p>
+              <p className="mt-2 text-xs font-medium text-mint">{level.cta}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
 
-function RunningSection({ discipline }: { discipline: string }) {
+function IronmanWhoShouldEnter({ discipline }: { discipline: string }) {
+  return (
+    <section>
+      <SectionHeading>Who Should Enter?</SectionHeading>
+      <div className="space-y-4">
+        {[
+          {
+            title: 'Beginners',
+            desc: `${discipline} is a serious long-course commitment. Athletes new to triathlon should start with a sprint or Olympic-distance event first. A minimum of ${discipline === 'Ironman' ? '12–18 months' : '6–12 months'} of structured triathlon training is recommended.`,
+            cta: `Minimum base: ${discipline === 'Ironman' ? '12–18 months' : '6–12 months'} triathlon training`,
+          },
+          {
+            title: 'Intermediate',
+            desc: "Solid swim, bike and run base across all three disciplines. You've completed Olympic-distance triathlon and can comfortably train 10–15 hours per week.",
+            cta: 'Build a 20–24 week specific training block',
+          },
+          {
+            title: 'Experienced',
+            desc: `You've completed a ${discipline === 'Ironman 70.3' ? 'full IRONMAN or multiple 70.3s' : 'prior full IRONMAN'} and are targeting a competitive finish or World Champs qualification.`,
+            cta: 'Focus: race-specific pacing and nutrition strategy',
+          },
+        ].map((level) => (
+          <div key={level.title} className="card flex gap-4">
+            <CheckCircle className="h-5 w-5 text-mint mt-0.5 shrink-0" />
+            <div>
+              <h3 className="font-semibold text-ink mb-1">{level.title}</h3>
+              <p className="text-sm text-ink-muted leading-relaxed">{level.desc}</p>
+              <p className="mt-2 text-xs font-medium text-mint">{level.cta}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function RunningWhoShouldEnter({ discipline }: { discipline: string }) {
   const isTrail = discipline === 'Trail Running'
   return (
     <section>
@@ -1116,14 +1215,14 @@ function RunningSection({ discipline }: { discipline: string }) {
           {
             title: 'Intermediate',
             desc: isTrail
-              ? 'Comfortable on technical terrain and can run 20+ km on trails. Look for 25–50 km events with moderate elevation gain to progress from shorter distances.'
-              : 'You\'ve completed a half marathon and have 3–4 days of running per week. Focus on your long run progression and race-day pacing strategy.',
+              ? 'Comfortable on technical terrain and can run 20+ km on trails. Look for 25–50 km events with moderate elevation gain.'
+              : "You've completed a half marathon and have 3–4 days of running per week. Focus on your long run progression and race-day pacing strategy.",
             cta: isTrail ? 'Target distance: 25–50 km' : 'Target finish: 3:30–4:30',
           },
           {
             title: 'Experienced',
             desc: isTrail
-              ? 'Ultra trail events (50 km+) require serious endurance base, mandatory gear, nutrition strategy and experience navigating night sections. Not for first-timers.'
+              ? 'Ultra trail events (50 km+) require serious endurance base, mandatory gear, nutrition strategy and experience navigating night sections.'
               : 'Targeting a personal best or Boston Qualifier. Focus on tempo runs, threshold work and negative-split race execution.',
             cta: isTrail ? 'Tackle an ultra: 50–100 km+' : 'Target finish: Sub-3:30',
           },
@@ -1142,50 +1241,153 @@ function RunningSection({ discipline }: { discipline: string }) {
   )
 }
 
-// ─── Deka Fit sections ────────────────────────────────────────────────────────
+// ─── Registration information ─────────────────────────────────────────────────
 
-function DekaSections() {
+function RegistrationSection({ event }: { event: EventRow }) {
+  if (!event.registration_opens_date && !event.registration_deadline && !event.registration_status) {
+    return null
+  }
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  function daysFrom(dateStr: string): number {
+    const d = new Date(dateStr + 'T00:00:00')
+    d.setHours(0, 0, 0, 0)
+    return Math.round((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+  }
+
+  const opensIn = event.registration_opens_date ? daysFrom(event.registration_opens_date) : null
+  const closesIn = event.registration_deadline ? daysFrom(event.registration_deadline) : null
+
   return (
     <section>
-      <SectionHeading>Race Format</SectionHeading>
-      <p className="text-ink-muted mb-6">
-        10 rounds. Each round: 500 m run → workout station. Total running: 5 km.
-        All results are globally comparable — every Deka Fit event uses the same format.
-      </p>
-      <div className="overflow-x-auto rounded-xl border border-wire">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-wire bg-panel">
-              <th className="text-left px-4 py-3 text-ink-muted font-medium w-8">#</th>
-              <th className="text-left px-4 py-3 text-ink-muted font-medium">Station</th>
-              <th className="text-left px-4 py-3 text-ink-muted font-medium">Distance / Reps</th>
-            </tr>
-          </thead>
-          <tbody>
-            {DEKA_STATIONS.map((s, i) => (
-              <tr key={s.order} className={`border-b border-wire last:border-0 ${i % 2 === 0 ? '' : 'bg-panel/40'}`}>
-                <td className="px-4 py-3 text-mint font-bold">{s.order}</td>
-                <td className="px-4 py-3 text-ink font-medium">{s.name}</td>
-                <td className="px-4 py-3 text-ink">{s.distance}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <SectionHeading>Registration</SectionHeading>
+      <div className="card space-y-5">
+        {event.registration_status && (
+          <RegistrationStatusBadge status={event.registration_status} />
+        )}
+
+        <div className="space-y-4 text-sm">
+          {event.registration_opens_date && (
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-0.5">Registrations Open</div>
+                <div className="font-medium text-ink">{formatDate(event.registration_opens_date)}</div>
+              </div>
+              {opensIn !== null && (
+                <div className={`shrink-0 text-right text-xs font-medium ${opensIn > 0 ? 'text-ink-subtle' : 'text-mint'}`}>
+                  {opensIn > 0 ? `Opens in ${opensIn} day${opensIn !== 1 ? 's' : ''}` : opensIn === 0 ? 'Opens today' : 'Now open'}
+                </div>
+              )}
+            </div>
+          )}
+
+          {event.registration_deadline && (
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-0.5">Registrations Close</div>
+                <div className="font-medium text-ink">{formatDate(event.registration_deadline)}</div>
+              </div>
+              {closesIn !== null && (
+                <div className={`shrink-0 text-right text-xs font-medium ${
+                  closesIn < 0 ? 'text-ink-subtle line-through' :
+                  closesIn <= 7 ? 'text-amber-400' :
+                  'text-ink-subtle'
+                }`}>
+                  {closesIn < 0 ? 'Closed' :
+                   closesIn === 0 ? 'Closes today!' :
+                   `Closes in ${closesIn} day${closesIn !== 1 ? 's' : ''}`}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <p className="text-xs text-ink-muted border-t border-wire pt-4">
+          Always verify registration details on the{' '}
+          {event.website_url ? (
+            <a href={event.website_url} target="_blank" rel="noopener noreferrer" className="text-mint hover:underline">
+              official event website
+            </a>
+          ) : (
+            'official event website'
+          )}
+          {' '}before committing.
+        </p>
       </div>
     </section>
   )
 }
 
-// ─── Entry fees (discipline-aware) ────────────────────────────────────────────
+// ─── Entry fees ───────────────────────────────────────────────────────────────
 
-function EntryFeesSection({ discipline }: { discipline: string }) {
+function EntryFeesSection({ event, categories }: { event: EventRow; categories: EventCategory[] }) {
+  const currency = event.entry_fee_currency ?? 'AUD'
+  const fmt = (n: number) =>
+    `${currency} $${n.toLocaleString('en-AU', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+
+  const categoriesWithFees = categories.filter((c) => c.entry_fee !== null)
+
+  if (categoriesWithFees.length > 0) {
+    return (
+      <section>
+        <SectionHeading>Entry Fees</SectionHeading>
+        <div className="card overflow-hidden p-0">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-wire bg-panel">
+                <th className="px-5 py-3 text-left text-ink-muted font-medium">Category</th>
+                <th className="px-5 py-3 text-left text-ink-muted font-medium">Fee</th>
+              </tr>
+            </thead>
+            <tbody>
+              {categories.map((cat, i) => (
+                <tr key={cat.id} className={`border-b border-wire last:border-0 ${i % 2 === 0 ? '' : 'bg-panel/40'}`}>
+                  <td className="px-5 py-3.5 text-ink font-medium">{cat.name}</td>
+                  <td className="px-5 py-3.5 text-ink">
+                    {cat.entry_fee !== null ? fmt(cat.entry_fee) : '—'}
+                    {cat.is_sold_out && <span className="ml-2 text-xs text-red-400">Sold out</span>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-3 text-xs text-ink-muted">Check the official website for current pricing.</p>
+      </section>
+    )
+  }
+
+  if (event.entry_fee_from !== null || event.entry_fee_to !== null) {
+    const rangeStr =
+      event.entry_fee_from !== null && event.entry_fee_to !== null
+        ? `${fmt(event.entry_fee_from)} – ${fmt(event.entry_fee_to)}`
+        : event.entry_fee_from !== null
+        ? `From ${fmt(event.entry_fee_from)}`
+        : `Up to ${fmt(event.entry_fee_to!)}`
+
+    return (
+      <section>
+        <SectionHeading>Entry Fees</SectionHeading>
+        <div className="card">
+          <div className="text-2xl font-bold text-ink">{rangeStr}</div>
+          <p className="mt-1.5 text-sm text-ink-muted">Entry fee range across all categories.</p>
+        </div>
+        <p className="mt-3 text-xs text-ink-muted">
+          Fees may increase as the event approaches. Check the official website for current pricing.
+        </p>
+      </section>
+    )
+  }
+
   type Fee = { category: string; price: string }
-  const fees: Record<string, Fee[]> = {
+  const disciplineEstimates: Record<string, Fee[]> = {
     'CrossFit': [
-      { category: 'Individual (RX)',       price: '~AUD $80–180' },
-      { category: 'Individual (Scaled)',   price: '~AUD $60–150' },
-      { category: 'Masters divisions',     price: '~AUD $60–150' },
-      { category: 'Team (3–5 athletes)',   price: '~AUD $200–400 per team' },
+      { category: 'Individual (RX)',     price: '~AUD $80–180' },
+      { category: 'Individual (Scaled)', price: '~AUD $60–150' },
+      { category: 'Masters divisions',   price: '~AUD $60–150' },
+      { category: 'Team (3–5)',          price: '~AUD $200–400 per team' },
     ],
     'HYROX': [
       { category: 'Open Individual', price: '~AUD $175–195' },
@@ -1200,27 +1402,27 @@ function EntryFeesSection({ discipline }: { discipline: string }) {
       { category: 'Trifecta Bundle', price: '~AUD $250–350' },
     ],
     'Ironman': [
-      { category: 'Full IRONMAN',        price: '~AUD $800–1,100' },
-      { category: 'Relay team (3)',       price: '~AUD $400–600 per team' },
+      { category: 'Full IRONMAN',  price: '~AUD $800–1,100' },
+      { category: 'Relay team (3)', price: '~AUD $400–600 per team' },
     ],
     'Ironman 70.3': [
-      { category: 'IRONMAN 70.3 Individual', price: '~AUD $350–550' },
-      { category: 'Relay team (3)',           price: '~AUD $250–400 per team' },
+      { category: 'IRONMAN 70.3', price: '~AUD $350–550' },
+      { category: 'Relay team (3)', price: '~AUD $250–400 per team' },
     ],
     'Marathon': [
-      { category: 'Full Marathon',  price: '~AUD $80–150' },
-      { category: 'Half Marathon',  price: '~AUD $60–100' },
+      { category: 'Full Marathon', price: '~AUD $80–150' },
+      { category: 'Half Marathon', price: '~AUD $60–100' },
     ],
     'Trail Running': [
-      { category: 'Short distance (10–21 km)', price: '~AUD $60–120' },
-      { category: 'Long distance (42–100 km)', price: '~AUD $150–350' },
+      { category: 'Short (10–21 km)', price: '~AUD $60–120' },
+      { category: 'Long (42–100 km)', price: '~AUD $150–350' },
     ],
     'Deka Fit': [
       { category: 'Deka Fit Individual', price: '~AUD $100–140' },
     ],
   }
 
-  const rows = fees[discipline]
+  const rows = disciplineEstimates[event.discipline]
   if (!rows) return null
 
   return (
@@ -1230,8 +1432,8 @@ function EntryFeesSection({ discipline }: { discipline: string }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-wire bg-panel">
-              <th className="text-left px-5 py-3 text-ink-muted font-medium">Category</th>
-              <th className="text-left px-5 py-3 text-ink-muted font-medium">Approx. Price</th>
+              <th className="px-5 py-3 text-left text-ink-muted font-medium">Category</th>
+              <th className="px-5 py-3 text-left text-ink-muted font-medium">Approx. Price</th>
             </tr>
           </thead>
           <tbody>
@@ -1245,49 +1447,58 @@ function EntryFeesSection({ discipline }: { discipline: string }) {
         </table>
       </div>
       <p className="mt-3 text-xs text-ink-muted">
-        Prices are approximate and based on early-bird rates. Fees increase as the event approaches.
-        Check the official website for current pricing before registering.
+        Prices are approximate based on typical early-bird rates. Fees increase as the event approaches — check the official website for current pricing.
       </p>
     </section>
   )
 }
 
-// ─── Weekend tips (generic) ───────────────────────────────────────────────────
+// ─── Difficulty rating ────────────────────────────────────────────────────────
 
-function WeekendTipsSection() {
+function DifficultySection({ difficulty }: { difficulty: number }) {
+  const levels: Record<number, { label: string; desc: string; color: string }> = {
+    1: { label: 'Beginner Friendly', desc: 'Suitable for first-time participants with basic fitness. No prior experience required.', color: 'text-green-400' },
+    2: { label: 'Moderate', desc: 'Some training required. Most recreational athletes with a consistent gym or running routine can complete this.', color: 'text-mint' },
+    3: { label: 'Challenging', desc: 'A solid training base is required. Expect to push your limits. 3–4 months of focused prep recommended.', color: 'text-amber-400' },
+    4: { label: 'Hard', desc: 'For experienced athletes with a strong base in the discipline. Not for beginners.', color: 'text-orange-400' },
+    5: { label: 'Elite / Extreme', desc: 'Serious competition-level fitness required. Multi-year training background assumed.', color: 'text-red-400' },
+  }
+
+  const cfg = levels[Math.min(5, Math.max(1, Math.round(difficulty)))]
+  if (!cfg) return null
+
   return (
     <section>
-      <SectionHeading>Race Weekend Tips</SectionHeading>
-      <div className="grid gap-4 sm:grid-cols-2">
-        {[
-          { icon: <Clock className="h-4 w-4" />, title: 'Arrival', body: 'Arrive at least 90 minutes before your start time. Allow time for bag drop, warm-up and reaching your start corral. Late arrivals risk losing their slot.' },
-          { icon: <Train className="h-4 w-4" />, title: 'Public Transport', body: 'Where available, public transport is strongly recommended over driving on event days. Check the venue\'s transport page for specific routes and services.' },
-          { icon: <Car className="h-4 w-4" />, title: 'Parking', body: 'Parking fills quickly at large events. Book in advance if available, or use ride-share services to avoid the stress of finding a space close to the venue.' },
-          { icon: <Users className="h-4 w-4" />, title: 'Spectators', body: 'Check whether spectators need tickets. Indoor events like HYROX and Deka Fit typically offer free spectator entry; outdoor events may have different policies.' },
-        ].map((tip) => (
-          <div key={tip.title} className="card space-y-3">
-            <div className="flex items-center gap-2 text-mint font-medium text-sm">
-              {tip.icon} {tip.title}
-            </div>
-            <p className="text-sm text-ink-muted leading-relaxed">{tip.body}</p>
+      <SectionHeading>Difficulty</SectionHeading>
+      <div className="card">
+        <div className="flex items-center gap-4">
+          <div className="flex gap-1.5" aria-label={`Difficulty: ${difficulty} out of 5`}>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <div
+                key={n}
+                className={`h-3 w-3 rounded-full ${n <= difficulty ? 'bg-mint' : 'bg-wire'}`}
+              />
+            ))}
           </div>
-        ))}
+          <span className={`text-sm font-semibold ${cfg.color}`}>{cfg.label}</span>
+        </div>
+        <p className="mt-3 text-sm text-ink-muted leading-relaxed">{cfg.desc}</p>
       </div>
-      <div className="card mt-4">
-        <h3 className="font-semibold text-ink mb-3">What to Bring</h3>
-        <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-ink-muted">
-          {[
-            'Confirmation email or event app entry',
-            'Appropriate footwear for the discipline',
-            'Race outfit you can move freely in',
-            'Water bottle (refill stations on site at most events)',
-            'Recovery snack for post-race',
-            'Any personal sports nutrition you rely on',
-            'Foam roller or resistance band for warm-up',
-            'Sunscreen and hat for outdoor events',
-          ].map((item) => (
+    </section>
+  )
+}
+
+// ─── What's included ──────────────────────────────────────────────────────────
+
+function WhatsIncludedSection({ items }: { items: string[] }) {
+  return (
+    <section>
+      <SectionHeading>What&apos;s Included</SectionHeading>
+      <div className="card">
+        <ul className="grid gap-x-6 gap-y-2.5 text-sm text-ink-muted sm:grid-cols-2">
+          {items.map((item) => (
             <li key={item} className="flex items-start gap-2">
-              <CheckCircle className="h-3.5 w-3.5 text-mint mt-0.5 shrink-0" />
+              <CheckCircle className="h-4 w-4 text-mint mt-0.5 shrink-0" />
               {item}
             </li>
           ))}
@@ -1297,228 +1508,81 @@ function WeekendTipsSection() {
   )
 }
 
-// ─── FAQs (discipline-aware) ──────────────────────────────────────────────────
+// ─── Venue details ────────────────────────────────────────────────────────────
 
-function FaqSection({ discipline }: { discipline: string }) {
-  type Faq = { q: string; a: string }
-  const faqs: Record<string, Faq[]> = {
-    'CrossFit': [
-      { q: 'What is a CrossFit throwdown?', a: 'A CrossFit throwdown is a local or regional competition held at a CrossFit affiliate box or external venue. Athletes complete a series of WODs (workouts of the day) over one or two days, scored for time, load or reps. Unlike sanctional events, throwdowns are community-organised and the format varies by event.' },
-      { q: 'What is the CrossFit Open?', a: 'The CrossFit Open is an annual online qualifier held each February–March. Athletes complete three or four workouts over consecutive weeks and submit their scores online. It is the first stage of the CrossFit Games season and the largest online fitness competition in the world — open to all fitness levels.' },
-      { q: 'What divisions are available at CrossFit competitions?', a: 'Most CrossFit competitions offer RX (prescribed — standard weights and movements), Scaled (reduced weights and movement modifications), and Masters divisions by age group (35+, 40+, 45+, 50+, 55+, 60+). Many events also include Team categories (3–5 athletes) and Adaptive divisions.' },
-      { q: 'What does RX mean?', a: 'RX means "as prescribed" — the athlete completes every movement at the specified weight and standard without any modifications. Scaled divisions allow athletes to reduce weights or substitute movements, making competition accessible for athletes who are still building strength or technique in movements like muscle-ups or heavy barbell lifts.' },
-      { q: 'Do I need to be a CrossFit member to compete?', a: 'No — most CrossFit competitions are open to all athletes regardless of gym affiliation. A CrossFit membership is not required to register. However, if you\'re new to CrossFit movements, training at a CrossFit box before competing will help you learn the standardised movements safely.' },
-      { q: 'How are workouts announced at CrossFit competitions?', a: 'Workouts at local throwdowns are typically announced on the event day or the evening before. At larger sanctional events, some workouts may be announced in advance to allow preparation. The element of the unknown — not knowing your workout until close to competition — is fundamental to CrossFit\'s competitive philosophy.' },
-    ],
-    'HYROX': [
-      { q: 'What exactly is HYROX?', a: 'HYROX is a standardised global fitness race: 8 × 1 km runs alternating with 8 workout stations — SkiErg, Sled Push, Sled Pull, Burpee Broad Jumps, Rowing, Farmer\'s Carry, Sandbag Lunges and Wall Balls. Because the format never changes, every finish time is globally comparable.' },
-      { q: 'Do I need prior experience to enter?', a: 'No. The Open division is designed for recreational athletes of all fitness levels. If you can run 5 km and have a few months of gym training, you have the base fitness to complete HYROX.' },
-      { q: 'What is the difference between Open and Pro?', a: 'Pro athletes must wear a weight vest (10 kg men / 6 kg women) for the entire race and some stations have shorter distances. Pro is self-seeded — you don\'t need to qualify, but expect a harder race.' },
-      { q: 'Can I race with a friend or team?', a: 'Yes. Doubles pairs two athletes who alternate stations and running. Relay allows teams of up to four. Both formats are available at most HYROX events.' },
-      { q: 'What should I specifically train for?', a: 'Prioritise your running — 8 km of running between heavy stations is harder than it sounds. Then train the specific movements: SkiErg/Row for pulling endurance, Sled work for leg drive, Wall Balls for shoulder stamina, and Sandbag Lunges for single-leg strength.' },
-      { q: 'When are results published?', a: 'Results are typically published within 24–48 hours of the event closing. HYROX uses chip timing and all results count toward your global HYROX ranking.' },
-    ],
-    'Spartan Race': [
-      { q: 'What happens if I fail an obstacle?', a: 'Athletes who fail an obstacle must complete a 30-burpee penalty before moving on. There are no skips or bypasses in the competitive waves — burpees are mandatory.' },
-      { q: 'What should I wear for a Spartan Race?', a: 'Wear clothes you\'re happy to destroy. Expect mud, water, barbed wire and rope burns. Trail shoes are essential. Many athletes wear compression gear to protect their skin.' },
-      { q: 'Can I run with a team?', a: 'Yes — many athletes enter as a group and run together. However, timing is individual unless you enter an official team relay format. Helping teammates with obstacles is encouraged and part of the Spartan culture.' },
-      { q: 'Is the Trifecta worth it?', a: 'The Spartan Trifecta — completing a Sprint, Super and Beast in one calendar year — is one of the most popular goals in obstacle racing. You receive a unique Trifecta medal and patch for completing all three. Highly recommended for athletes who want a season-long challenge.' },
-      { q: 'Are there cut-off times?', a: 'Most Spartan events have a course cut-off. Athletes who don\'t reach a checkpoint by the cut-off time may be pulled from the course. Cut-off times vary by event and distance — check your specific event details.' },
-      { q: 'What is mandatory gear?', a: 'Sprint and Super events typically have minimal mandatory gear. Beast and Ultra events may require a pack with water, emergency blanket and other safety items. Check the mandatory gear list for your specific event before race day.' },
-    ],
-    'Ironman': [
-      { q: 'What is the time limit for an IRONMAN?', a: 'IRONMAN has a 17-hour cut-off from the race start. Individual cut-offs also apply to each leg: typically 2:20 swim, ~10:30 combined swim+bike, and midnight for the run finish.' },
-      { q: 'Do I need to qualify for an IRONMAN?', a: 'No qualifying is required to enter most IRONMAN events — registration is first-come, first-served or via ballot. Qualification is only required for Kona (IRONMAN World Championship).' },
-      { q: 'How long should I train for?', a: 'Most first-timers follow a 20–30 week specific training plan. You need a solid base in all three disciplines before starting structured IRONMAN prep.' },
-      { q: 'Can I use a wetsuit?', a: 'Wetsuit rules depend on water temperature. IRONMAN uses a temperature limit — wetsuits are allowed below 24.5 °C (76.1 °F) in competition. Above that, wetsuits are optional but you won\'t be eligible for age-group awards.' },
-      { q: 'What should I eat on race day?', a: 'IRONMAN is too long to race on pre-race fuelling alone. Most athletes consume 60–90+ grams of carbohydrate per hour on the bike and run. Practice your nutrition strategy in training — don\'t try anything new on race day.' },
-      { q: 'Are there Kona qualification slots at Asia Pacific events?', a: 'Yes. All IRONMAN events distribute Kona and World Championship qualification slots across age groups. The number of slots depends on race participation numbers. Check the official IRONMAN website for slot allocation details.' },
-    ],
-    'Ironman 70.3': [
-      { q: 'What is the time limit for an IRONMAN 70.3?', a: 'IRONMAN 70.3 has an 8-hour 30-minute cut-off. Individual cut-offs apply to the swim (~1:10) and bike (~5:30 combined). Check your specific event for exact cut-off times.' },
-      { q: 'Is 70.3 a good first triathlon?', a: 'Not typically — a sprint or Olympic-distance triathlon first is strongly recommended. IRONMAN 70.3 is best approached after completing shorter-distance events and building at least 6–12 months of structured triathlon training.' },
-      { q: 'Does a 70.3 qualify me for the 70.3 World Championship?', a: 'Yes. IRONMAN 70.3 events distribute World Championship slots across age groups. Slots are awarded by roll-down at the post-race awards ceremony.' },
-      { q: 'How do I prepare for the open water swim?', a: 'Practice in open water before race day. Pool fitness translates, but sighting, mass starts and wetsuit swimming require specific adaptation. Aim for at least 4–6 open water sessions during your build.' },
-      { q: 'What transition do most athletes lose the most time in?', a: 'Most age-group athletes lose avoidable time in T1 (swim to bike). Arriving with a rehearsed routine — helmet, shoes, nutrition — can save 2–5 minutes compared to a disorganised transition.' },
-      { q: 'Can I walk the run leg?', a: 'Yes — run-walk strategies are widely used and completely valid. Many athletes follow a run/walk interval plan for their first 70.3. Finishing is the goal.' },
-    ],
-    'Marathon': [
-      { q: 'How long does it take to train for a marathon?', a: 'Most first-timers need 16–20 weeks of structured training with a running base of at least 30–40 km per week before starting. Experienced runners may use a 12–16 week peak block.' },
-      { q: 'What is a good first marathon time?', a: 'Finishing is a great time. Most first-time marathoners aim for 4:00–5:30. Focus on completing the distance comfortably before chasing a specific time goal.' },
-      { q: 'Should I run the whole marathon or use run-walk?', a: 'Run-walk intervals are a proven strategy for first-timers and can result in faster finish times than running continuously and hitting the wall. The Galloway method is one popular approach.' },
-      { q: 'What should I eat the night before and morning of?', a: 'Carbohydrate-rich dinner the night before (pasta, rice, bread). Light, familiar breakfast 2–3 hours before the start. Nothing new on race morning — eat what you\'ve practised in training.' },
-      { q: 'How do I avoid hitting the wall?', a: 'The wall (glycogen depletion around the 30–32 km mark) is caused by starting too fast and under-fuelling. Start conservatively, take gels or sports drink every 30–45 minutes from early in the race, and practise your nutrition strategy in your long runs.' },
-      { q: 'What shoes should I wear?', a: 'Race in the shoes you\'ve trained in — never debut new shoes on race day. Many runners choose a lighter racing shoe for the event, but it must have been broken in over several training runs first.' },
-    ],
-    'Trail Running': [
-      { q: 'What makes trail running different from road running?', a: 'Trail running involves unpredictable terrain — rocks, roots, mud, elevation change — which demands more from ankles, hips and core than road running. Pace is less relevant than time on feet, and navigation or course-marking awareness is often required.' },
-      { q: 'What shoes should I use for trail running?', a: 'Trail-specific shoes with lugged outsoles are essential for grip on loose or wet terrain. The level of cushioning and protection you need depends on the course surface and distance.' },
-      { q: 'Are poles allowed in trail races?', a: 'Many trail and ultra-distance events allow trekking poles. Some races require them as mandatory gear for steep mountain events. Check your specific event rules — some shorter trail races prohibit poles.' },
-      { q: 'What is mandatory gear?', a: 'Longer trail and ultra events typically require a minimum pack with water capacity, emergency blanket, whistle, first aid kit and sometimes a mobile phone. The specific list is published in the race rulebook — check well in advance.' },
-      { q: 'How do I train for a hilly trail race?', a: 'Prioritise vertical — total elevation gain in training matters more than flat kilometre volume. Hill repeats, stair climbing and hiking on technical terrain all contribute. Train on similar surfaces to your race where possible.' },
-      { q: 'Can I eat real food during an ultra trail event?', a: 'Yes — and for longer ultras, you should. Most ultra events have aid stations stocked with real food (bananas, broth, sandwiches, potatoes). Real food is often easier to stomach than gels after 6+ hours on feet.' },
-    ],
-    'Deka Fit': [
-      { q: 'What is Deka Fit?', a: 'Deka Fit is an indoor fitness race: 10 × 500 m runs alternating with 10 workout stations. The format is standardised globally, making all results directly comparable.' },
-      { q: 'How does Deka Fit compare to HYROX?', a: 'Both are indoor fitness races with a standardised run-station format. Deka has 10 stations (versus HYROX\'s 8), shorter run intervals (500 m vs 1 km), and includes Box Jumps and Battle Ropes not found in HYROX. Total running is 5 km versus HYROX\'s 8 km.' },
-      { q: 'Do I need prior experience?', a: 'No. Deka Fit is open to athletes of all fitness levels. If you can run 5 km and have a gym training base, you have the foundation to complete the event.' },
-      { q: 'Are results globally ranked?', a: 'Yes. All Deka Fit results are entered into the global Deka ranking system, similar to HYROX\'s global leaderboard.' },
-      { q: 'What should I train for Deka Fit?', a: 'Train all 10 station movements: Ski Erg, Sled Push/Pull, Burpee Jumps, Row Erg, Farmer\'s Carry, Sandbag Lunges, Wall Balls, Box Jumps and Battle Ropes. Running fitness matters — 5 km of run intervals between heavy stations accumulates quickly.' },
-      { q: 'When are results published?', a: 'Results are typically available within 24–48 hours of the event. Chip timing captures individual splits at each station.' },
-    ],
-  }
+function VenueSection({ event, venue }: { event: EventRow; venue: string | null }) {
+  const mapsUrl =
+    event.latitude !== null && event.longitude !== null
+      ? `https://www.google.com/maps?q=${event.latitude},${event.longitude}`
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+          [event.venue_address ?? venue ?? event.city, event.country].filter(Boolean).join(', '),
+        )}`
 
-  const rows = faqs[discipline]
-  if (!rows) return null
+  const location = [event.city, event.region, event.country].filter(Boolean).join(', ')
 
   return (
     <section>
-      <SectionHeading>Frequently Asked Questions</SectionHeading>
-      <div className="space-y-4">
-        {rows.map((faq) => (
-          <div key={faq.q} className="card">
-            <h3 className="font-semibold text-ink mb-2">{faq.q}</h3>
-            <p className="text-sm text-ink-muted leading-relaxed">{faq.a}</p>
-          </div>
-        ))}
+      <SectionHeading>Venue &amp; Location</SectionHeading>
+      <div className="card space-y-3">
+        {venue && <h3 className="font-semibold text-ink">{venue}</h3>}
+        {event.venue_address && (
+          <p className="text-sm text-ink-muted">{event.venue_address}</p>
+        )}
+        {location && <p className="text-sm text-ink-muted">{location}</p>}
+        {!venue && !event.venue_address && (
+          <p className="text-sm text-ink-muted">
+            Venue details will be confirmed closer to the event. Check the official website for the most up-to-date information.
+          </p>
+        )}
+        <a
+          href={mapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-secondary inline-flex"
+        >
+          <MapPin className="h-4 w-4" /> Open in Google Maps
+        </a>
       </div>
     </section>
   )
 }
 
-// ─── Quick facts sidebar (discipline-aware) ───────────────────────────────────
+// ─── Travel & logistics ───────────────────────────────────────────────────────
 
-function QuickFactsSidebar({ discipline }: { discipline: string }) {
-  type Fact = { label: string; value: string }
-  const facts: Record<string, Fact[]> = {
-    'CrossFit': [
-      { label: 'Format',          value: 'Multiple WODs (workouts of the day)' },
-      { label: 'Scoring',         value: 'Time, load, or reps' },
-      { label: 'Divisions',       value: 'RX, Scaled, Masters, Team, Adaptive' },
-      { label: 'Duration',        value: '1–2 days' },
-      { label: 'WODs per event',  value: '3–6 workouts typical' },
-      { label: 'Spectators',      value: 'Free entry at most events' },
-    ],
-    'HYROX': [
-      { label: 'Total running',   value: '8 km' },
-      { label: 'Stations',        value: '8 workout stations' },
-      { label: 'Format',          value: 'Run → Station × 8' },
-      { label: 'Divisions',       value: 'Open, Pro, Doubles, Relay' },
-      { label: 'Min. age',        value: '16 years' },
-      { label: 'Timing',          value: 'Chip timed, global ranking' },
-      { label: 'Spectators',      value: 'Free, all welcome' },
-    ],
-    'Spartan Race': [
-      { label: 'Formats',         value: 'Sprint, Super, Beast, Ultra, Stadion' },
-      { label: 'Distances',       value: '5 km – 50+ km' },
-      { label: 'Obstacles',       value: '20–60+ per race' },
-      { label: 'Penalty',         value: '30 burpees per failed obstacle' },
-      { label: 'Timing',          value: 'Chip timed' },
-      { label: 'Min. age',        value: '14 years (Sprint), 18 (Ultra)' },
-    ],
-    'Ironman': [
-      { label: 'Swim',            value: '3.86 km' },
-      { label: 'Bike',            value: '180.25 km' },
-      { label: 'Run',             value: '42.2 km (marathon)' },
-      { label: 'Total',           value: '226.3 km' },
-      { label: 'Cut-off',         value: '17 hours' },
-      { label: 'Kona slots',      value: 'Yes — by age group' },
-    ],
-    'Ironman 70.3': [
-      { label: 'Swim',            value: '1.93 km' },
-      { label: 'Bike',            value: '90.12 km' },
-      { label: 'Run',             value: '21.1 km (half marathon)' },
-      { label: 'Total',           value: '113.0 km' },
-      { label: 'Cut-off',         value: '8 hr 30 min' },
-      { label: 'Worlds slots',    value: 'Yes — 70.3 World Champs' },
-    ],
-    'Marathon': [
-      { label: 'Distance',        value: '42.195 km' },
-      { label: 'Average finish',  value: '4:00–4:30 (recreational)' },
-      { label: 'Qualifying',      value: 'Most open to all — check event' },
-    ],
-    'Trail Running': [
-      { label: 'Distances',       value: 'Varies — 10 km to 100+ km' },
-      { label: 'Terrain',         value: 'Off-road, natural surface' },
-      { label: 'Mandatory gear',  value: 'Required for longer events' },
-      { label: 'Poles',           value: 'Allowed at most events (check)' },
-    ],
-    'Deka Fit': [
-      { label: 'Total running',   value: '5 km' },
-      { label: 'Stations',        value: '10 workout stations' },
-      { label: 'Format',          value: 'Run → Station × 10' },
-      { label: 'Timing',          value: 'Chip timed, global ranking' },
-      { label: 'Min. age',        value: '16 years' },
-      { label: 'Spectators',      value: 'Free, all welcome' },
-    ],
-  }
-
-  const rows = facts[discipline]
-  if (!rows) return null
-
-  return (
-    <div className="card space-y-3 text-sm">
-      <h2 className="font-semibold text-ink">Quick Facts</h2>
-      {rows.map((fact) => (
-        <div key={fact.label} className="flex justify-between gap-4">
-          <span className="text-ink-muted">{fact.label}</span>
-          <span className="text-ink text-right">{fact.value}</span>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-// ─── Plan Your Trip ───────────────────────────────────────────────────────────
-
-function PlanYourTripSection({ event, venue }: { event: EventRow; venue: string | null }) {
+function TravelLogisticsSection({ event, isTBC }: { event: EventRow; isTBC: boolean }) {
   const month = new Date(event.start_date + 'T00:00:00').getMonth() + 1
   const monthName = MONTH_NAMES[month - 1]
   const cityData = event.city ? CITY_DATA[event.city] : undefined
-  const climate = cityData?.climate[month]
-
-  const mapsQuery = encodeURIComponent(
-    [venue, event.city, event.country].filter(Boolean).join(', '),
-  )
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`
-
+  const climate = !isTBC && cityData ? cityData.climate[month] : undefined
   const isIndoor = ['HYROX', 'CrossFit', 'Deka Fit'].includes(event.discipline)
-  const arrivalTime = isIndoor ? '90 minutes' : '2 hours'
+
+  const hasTransport = event.transport_notes || cityData
+  const hasAccommodation = event.accommodation_notes
+  const hasAnything = hasTransport || hasAccommodation || climate
+
+  if (!hasAnything) return null
 
   return (
     <section>
-      <SectionHeading>Plan Your Trip</SectionHeading>
+      <SectionHeading>Travel &amp; Logistics</SectionHeading>
       <div className="space-y-4">
 
-        {/* Venue + Maps */}
-        <div className="card space-y-3">
-          <div className="flex items-center gap-2 text-sm font-semibold text-ink">
-            <MapPin className="h-4 w-4 text-mint shrink-0" />
-            Venue &amp; Location
-          </div>
-          <p className="text-sm text-ink-muted">
-            {venue && <span className="font-medium text-ink">{venue} — </span>}
-            {[event.city, event.region, event.country].filter(Boolean).join(', ')}
-          </p>
-          <a
-            href={mapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-secondary inline-flex"
-          >
-            <MapPin className="h-4 w-4" />
-            Open in Google Maps
-          </a>
-        </div>
-
-        {/* Getting there */}
-        {cityData ? (
-          <div className="card space-y-4">
+        {/* Transport — DB notes take priority over city data */}
+        {event.transport_notes ? (
+          <div className="card space-y-2">
             <div className="flex items-center gap-2 text-sm font-semibold text-ink">
               <Train className="h-4 w-4 text-mint shrink-0" />
               Getting There
             </div>
-            <div className="space-y-3 text-sm text-ink-muted">
+            <p className="text-sm text-ink-muted leading-relaxed">{event.transport_notes}</p>
+          </div>
+        ) : cityData ? (
+          <div className="card space-y-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-ink">
+              <Train className="h-4 w-4 text-mint shrink-0" />
+              Getting There
+            </div>
+            <div className="space-y-2 text-sm text-ink-muted">
               <div>
                 <span className="font-medium text-ink">Nearest airport — </span>
                 {cityData.airport}.
@@ -1529,16 +1593,22 @@ function PlanYourTripSection({ event, venue }: { event: EventRow; venue: string 
               </div>
             </div>
           </div>
-        ) : (
+        ) : null}
+
+        {/* Accommodation */}
+        {event.accommodation_notes ? (
           <div className="card space-y-2">
             <div className="flex items-center gap-2 text-sm font-semibold text-ink">
-              <Train className="h-4 w-4 text-mint shrink-0" />
-              Getting There
+              <Users className="h-4 w-4 text-mint shrink-0" />
+              Accommodation
             </div>
-            <p className="text-sm text-ink-muted">
-              Check the official event website for transport and parking details specific to this venue.
-              Many race venues restrict parking on event day or operate shuttle services from nearby
-              car parks — confirm the logistics page before race week.
+            <p className="text-sm text-ink-muted leading-relaxed">{event.accommodation_notes}</p>
+          </div>
+        ) : (
+          <div className="card space-y-2 border-mint/20 bg-mint/5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-mint">Accommodation Tip</p>
+            <p className="text-sm text-ink-muted leading-relaxed">
+              Book accommodation as soon as your registration is confirmed. Hotels near major race venues fill months in advance — particularly for multi-day events and IRONMAN weekends. Check whether your event has an official athlete block rate before searching independently.
             </p>
           </div>
         )}
@@ -1561,22 +1631,11 @@ function PlanYourTripSection({ event, venue }: { event: EventRow; venue: string 
             Race Day Arrival
           </div>
           <p className="text-sm text-ink-muted">
-            Plan to arrive at least <span className="font-medium text-ink">{arrivalTime} before your wave start</span>.
-            Allow time for bag drop, bib collection, warm-up and locating your start corral.
+            Plan to arrive at least{' '}
+            <span className="font-medium text-ink">{isIndoor ? '90 minutes' : '2 hours'} before your wave start</span>.
             {isIndoor
-              ? ' Indoor event venues are typically easy to navigate once inside, but entry queues can form during peak wave windows.'
+              ? ' Indoor venues are typically easy to navigate, but entry queues can form during peak wave windows.'
               : ' Outdoor events often use large sites with multiple entry gates — download the venue map in advance.'}
-          </p>
-        </div>
-
-        {/* Travel tip */}
-        <div className="card space-y-2 border-mint/20 bg-mint/5">
-          <p className="text-xs font-semibold uppercase tracking-widest text-mint">Travel Tip</p>
-          <p className="text-sm text-ink-muted leading-relaxed">
-            Book accommodation as soon as your registration is confirmed. Hotels near major race
-            venues fill months in advance — particularly for multi-day events like IRONMAN and
-            Spartan weekends. Check whether your event has an official accommodation partner or
-            athlete block rates before searching independently.
           </p>
         </div>
 
@@ -1585,12 +1644,211 @@ function PlanYourTripSection({ event, venue }: { event: EventRow; venue: string 
   )
 }
 
+// ─── Race weekend tips ────────────────────────────────────────────────────────
+
+function WeekendTipsSection() {
+  return (
+    <section>
+      <SectionHeading>Race Weekend Tips</SectionHeading>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {[
+          { icon: <Clock className="h-4 w-4" />, title: 'Arrival', body: 'Arrive at least 90 minutes before your start time. Allow time for bag drop, warm-up and reaching your start corral. Late arrivals risk losing their slot.' },
+          { icon: <Train className="h-4 w-4" />, title: 'Public Transport', body: "Where available, public transport is strongly recommended over driving on event days. Check the venue's transport page for specific routes and services." },
+          { icon: <MapPin className="h-4 w-4" />, title: 'Parking', body: 'Parking fills quickly at large events. Book in advance if available, or use ride-share services to avoid the stress of finding a space close to the venue.' },
+          { icon: <Users className="h-4 w-4" />, title: 'Spectators', body: 'Check whether spectators need tickets. Indoor events like HYROX and Deka Fit typically offer free spectator entry; outdoor events may have different policies.' },
+        ].map((tip) => (
+          <div key={tip.title} className="card space-y-3">
+            <div className="flex items-center gap-2 text-sm font-medium text-mint">
+              {tip.icon} {tip.title}
+            </div>
+            <p className="text-sm text-ink-muted leading-relaxed">{tip.body}</p>
+          </div>
+        ))}
+      </div>
+      <div className="card mt-4">
+        <h3 className="font-semibold text-ink mb-3">What to Bring</h3>
+        <ul className="grid gap-x-6 gap-y-2 text-sm text-ink-muted sm:grid-cols-2">
+          {[
+            'Confirmation email or event app entry',
+            'Appropriate footwear for the discipline',
+            'Race outfit you can move freely in',
+            'Water bottle (refill stations on site at most events)',
+            'Recovery snack for post-race',
+            'Any personal sports nutrition you rely on',
+            'Foam roller or resistance band for warm-up',
+            'Sunscreen and hat for outdoor events',
+          ].map((item) => (
+            <li key={item} className="flex items-start gap-2">
+              <CheckCircle className="h-3.5 w-3.5 text-mint mt-0.5 shrink-0" />
+              {item}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )
+}
+
+// ─── FAQs ─────────────────────────────────────────────────────────────────────
+
+function FaqSection({ discipline }: { discipline: string }) {
+  type Faq = { q: string; a: string }
+  const faqs: Record<string, Faq[]> = {
+    'CrossFit': [
+      { q: 'What is a CrossFit throwdown?', a: "A CrossFit throwdown is a local or regional competition held at a CrossFit affiliate box or external venue. Athletes complete a series of WODs over one or two days, scored for time, load or reps. Unlike sanctional events, throwdowns are community-organised and the format varies by event." },
+      { q: 'What is the CrossFit Open?', a: 'The CrossFit Open is an annual online qualifier held each February–March. Athletes complete three or four workouts over consecutive weeks and submit their scores online. It is the first stage of the CrossFit Games season and the largest online fitness competition in the world — open to all fitness levels.' },
+      { q: 'What divisions are available at CrossFit competitions?', a: 'Most CrossFit competitions offer RX (prescribed), Scaled (reduced weights/modifications), and Masters divisions by age group (35+, 40+, 45+, 50+, 55+, 60+). Many events also include Team categories and Adaptive divisions.' },
+      { q: 'What does RX mean?', a: 'RX means "as prescribed" — the athlete completes every movement at the specified weight and standard without modifications. Scaled divisions allow athletes to reduce weights or substitute movements.' },
+      { q: 'Do I need to be a CrossFit member to compete?', a: "No — most CrossFit competitions are open to all athletes regardless of gym affiliation. A CrossFit membership is not required to register." },
+    ],
+    'HYROX': [
+      { q: 'What exactly is HYROX?', a: "HYROX is a standardised global fitness race: 8 × 1 km runs alternating with 8 workout stations — SkiErg, Sled Push, Sled Pull, Burpee Broad Jumps, Rowing, Farmer's Carry, Sandbag Lunges and Wall Balls. Because the format never changes, every finish time is globally comparable." },
+      { q: 'Do I need prior experience to enter?', a: 'No. The Open division is designed for recreational athletes of all fitness levels. If you can run 5 km and have a few months of gym training, you have the base fitness to complete HYROX.' },
+      { q: 'What is the difference between Open and Pro?', a: "Pro athletes must wear a weight vest (10 kg men / 6 kg women) for the entire race and some stations have shorter distances. Pro is self-seeded — you don't need to qualify, but expect a harder race." },
+      { q: 'Can I race with a friend or team?', a: 'Yes. Doubles pairs two athletes who alternate stations and running. Relay allows teams of up to four. Both formats are available at most HYROX events.' },
+      { q: 'What should I specifically train for?', a: "Prioritise your running — 8 km of running between heavy stations is harder than it sounds. Then train the specific movements: SkiErg/Row for pulling endurance, Sled work for leg drive, Wall Balls for shoulder stamina, and Sandbag Lunges for single-leg strength." },
+    ],
+    'Spartan Race': [
+      { q: 'What happens if I fail an obstacle?', a: 'Athletes who fail an obstacle must complete a 30-burpee penalty before moving on. There are no skips or bypasses in the competitive waves — burpees are mandatory.' },
+      { q: 'What should I wear for a Spartan Race?', a: "Wear clothes you're happy to destroy. Expect mud, water, barbed wire and rope burns. Trail shoes are essential. Many athletes wear compression gear to protect their skin." },
+      { q: 'Is the Trifecta worth it?', a: 'The Spartan Trifecta — completing a Sprint, Super and Beast in one calendar year — is one of the most popular goals in obstacle racing. You receive a unique Trifecta medal for completing all three.' },
+      { q: 'Are there cut-off times?', a: "Most Spartan events have a course cut-off. Athletes who don't reach a checkpoint by the cut-off time may be pulled from the course. Check your specific event details." },
+    ],
+    'Ironman': [
+      { q: 'What is the time limit for an IRONMAN?', a: 'IRONMAN has a 17-hour cut-off from the race start. Individual cut-offs also apply to each leg: typically 2:20 swim, ~10:30 combined swim+bike, and midnight for the run finish.' },
+      { q: 'Do I need to qualify for an IRONMAN?', a: 'No qualifying is required to enter most IRONMAN events — registration is first-come, first-served or via ballot. Qualification is only required for Kona (IRONMAN World Championship).' },
+      { q: 'How long should I train for?', a: 'Most first-timers follow a 20–30 week specific training plan. You need a solid base in all three disciplines before starting structured IRONMAN prep.' },
+      { q: 'What should I eat on race day?', a: 'IRONMAN is too long to race on pre-race fuelling alone. Most athletes consume 60–90+ grams of carbohydrate per hour on the bike and run. Practice your nutrition strategy in training — never try anything new on race day.' },
+    ],
+    'Ironman 70.3': [
+      { q: 'What is the time limit for an IRONMAN 70.3?', a: 'IRONMAN 70.3 has an 8-hour 30-minute cut-off. Individual cut-offs apply to the swim (~1:10) and bike (~5:30 combined). Check your specific event for exact cut-off times.' },
+      { q: 'Is 70.3 a good first triathlon?', a: 'Not typically — a sprint or Olympic-distance triathlon first is strongly recommended. IRONMAN 70.3 is best approached after completing shorter-distance events and building 6–12 months of structured training.' },
+      { q: 'Does a 70.3 qualify me for the 70.3 World Championship?', a: 'Yes. IRONMAN 70.3 events distribute World Championship slots across age groups. Slots are awarded by roll-down at the post-race awards ceremony.' },
+      { q: 'How do I prepare for the open water swim?', a: 'Practice in open water before race day. Pool fitness translates, but sighting, mass starts and wetsuit swimming require specific adaptation. Aim for at least 4–6 open water sessions during your build.' },
+    ],
+    'Marathon': [
+      { q: 'How long does it take to train for a marathon?', a: 'Most first-timers need 16–20 weeks of structured training with a running base of at least 30–40 km per week before starting. Experienced runners may use a 12–16 week peak block.' },
+      { q: 'What is a good first marathon time?', a: 'Finishing is a great time. Most first-time marathoners aim for 4:00–5:30. Focus on completing the distance comfortably before chasing a specific time goal.' },
+      { q: 'How do I avoid hitting the wall?', a: 'The wall (glycogen depletion around 30–32 km) is caused by starting too fast and under-fuelling. Start conservatively, take gels or sports drink every 30–45 minutes from early in the race, and practise your nutrition strategy in long runs.' },
+    ],
+    'Trail Running': [
+      { q: 'What makes trail running different from road running?', a: 'Trail running involves unpredictable terrain — rocks, roots, mud, elevation change — which demands more from ankles, hips and core than road running. Pace is less relevant than time on feet, and navigation awareness is often required.' },
+      { q: 'What shoes should I use for trail running?', a: 'Trail-specific shoes with lugged outsoles are essential for grip on loose or wet terrain. The level of cushioning and protection you need depends on the course surface and distance.' },
+      { q: 'What is mandatory gear?', a: 'Longer trail and ultra events typically require a minimum pack with water capacity, emergency blanket, whistle, first aid kit and sometimes a mobile phone. Check the specific event rulebook well in advance.' },
+    ],
+    'Deka Fit': [
+      { q: 'What is Deka Fit?', a: 'Deka Fit is an indoor fitness race: 10 × 500 m runs alternating with 10 workout stations. The format is standardised globally, making all results directly comparable.' },
+      { q: 'How does Deka Fit compare to HYROX?', a: "Both are indoor fitness races with a standardised run-station format. Deka has 10 stations (versus HYROX's 8), shorter run intervals (500 m vs 1 km), and includes Box Jumps and Battle Ropes not found in HYROX. Total running is 5 km versus HYROX's 8 km." },
+      { q: 'Do I need prior experience?', a: 'No. Deka Fit is open to athletes of all fitness levels. If you can run 5 km and have a gym training base, you have the foundation to complete the event.' },
+    ],
+  }
+
+  const rows = faqs[discipline]
+  if (!rows) return null
+
+  return (
+    <section>
+      <SectionHeading>Frequently Asked Questions</SectionHeading>
+      <div className="space-y-4">
+        {rows.map((faq) => (
+          <div key={faq.q} className="card">
+            <h3 className="font-semibold text-ink mb-2">{faq.q}</h3>
+            <p className="text-sm text-ink-muted leading-relaxed">{faq.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+// ─── Quick facts sidebar ──────────────────────────────────────────────────────
+
+function QuickFactsSidebar({ discipline }: { discipline: string }) {
+  type Fact = { label: string; value: string }
+  const facts: Record<string, Fact[]> = {
+    'CrossFit': [
+      { label: 'Format',        value: 'Multiple WODs (workouts of the day)' },
+      { label: 'Scoring',       value: 'Time, load, or reps' },
+      { label: 'Divisions',     value: 'RX, Scaled, Masters, Team' },
+      { label: 'Duration',      value: '1–2 days' },
+      { label: 'Spectators',    value: 'Free entry at most events' },
+    ],
+    'HYROX': [
+      { label: 'Total running', value: '8 km' },
+      { label: 'Stations',      value: '8 workout stations' },
+      { label: 'Format',        value: 'Run → Station × 8' },
+      { label: 'Divisions',     value: 'Open, Pro, Doubles, Relay' },
+      { label: 'Min. age',      value: '16 years' },
+      { label: 'Timing',        value: 'Chip timed, global ranking' },
+      { label: 'Spectators',    value: 'Free, all welcome' },
+    ],
+    'Spartan Race': [
+      { label: 'Formats',       value: 'Sprint, Super, Beast, Ultra, Stadion' },
+      { label: 'Distances',     value: '5 km – 50+ km' },
+      { label: 'Obstacles',     value: '20–60+ per race' },
+      { label: 'Penalty',       value: '30 burpees per failed obstacle' },
+      { label: 'Timing',        value: 'Chip timed' },
+      { label: 'Min. age',      value: '14 years (Sprint), 18 (Ultra)' },
+    ],
+    'Ironman': [
+      { label: 'Swim',          value: '3.86 km' },
+      { label: 'Bike',          value: '180.25 km' },
+      { label: 'Run',           value: '42.2 km (marathon)' },
+      { label: 'Total',         value: '226.3 km' },
+      { label: 'Cut-off',       value: '17 hours' },
+      { label: 'Kona slots',    value: 'Yes — by age group' },
+    ],
+    'Ironman 70.3': [
+      { label: 'Swim',          value: '1.93 km' },
+      { label: 'Bike',          value: '90.12 km' },
+      { label: 'Run',           value: '21.1 km (half marathon)' },
+      { label: 'Total',         value: '113.0 km' },
+      { label: 'Cut-off',       value: '8 hr 30 min' },
+      { label: 'Worlds slots',  value: 'Yes — 70.3 World Champs' },
+    ],
+    'Marathon': [
+      { label: 'Distance',      value: '42.195 km' },
+      { label: 'Average finish', value: '4:00–4:30 (recreational)' },
+      { label: 'Qualifying',    value: 'Most open to all — check event' },
+    ],
+    'Trail Running': [
+      { label: 'Distances',     value: 'Varies — 10 km to 100+ km' },
+      { label: 'Terrain',       value: 'Off-road, natural surface' },
+      { label: 'Mandatory gear', value: 'Required for longer events' },
+      { label: 'Poles',         value: 'Allowed at most events (check)' },
+    ],
+    'Deka Fit': [
+      { label: 'Total running', value: '5 km' },
+      { label: 'Stations',      value: '10 workout stations' },
+      { label: 'Format',        value: 'Run → Station × 10' },
+      { label: 'Timing',        value: 'Chip timed, global ranking' },
+      { label: 'Min. age',      value: '16 years' },
+      { label: 'Spectators',    value: 'Free, all welcome' },
+    ],
+  }
+
+  const rows = facts[discipline]
+  if (!rows) return null
+
+  return (
+    <div className="card space-y-3 text-sm">
+      <h2 className="font-semibold text-ink">Quick Facts</h2>
+      {rows.map((fact) => (
+        <div key={fact.label} className="flex justify-between gap-4">
+          <span className="text-ink-muted">{fact.label}</span>
+          <span className="text-ink text-right">{fact.value}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // ─── Registration status badge ────────────────────────────────────────────────
 
 const REG_STATUS_CONFIG = {
   open:         { label: 'Registration Open',  color: '#22C55E', bg: 'rgba(34,197,94,0.12)',   dot: 'bg-green-400' },
   closing_soon: { label: 'Closing Soon',        color: '#F59E0B', bg: 'rgba(245,158,11,0.12)',  dot: 'bg-amber-400' },
-  sold_out:     { label: 'Sold Out',            color: '#EF4444', bg: 'rgba(239,68,68,0.12)',   dot: 'bg-red-400' },
+  sold_out:     { label: 'Sold Out',            color: '#EF4444', bg: 'rgba(239,68,68,0.12)',   dot: 'bg-red-400'   },
   coming_soon:  { label: 'Coming Soon',         color: '#94A3B8', bg: 'rgba(148,163,184,0.12)', dot: 'bg-slate-400' },
 } as const
 
@@ -1608,5 +1866,102 @@ function RegistrationStatusBadge({
       <span className={`h-2 w-2 rounded-full shrink-0 ${cfg.dot} animate-pulse`} />
       {cfg.label}
     </div>
+  )
+}
+
+// ─── Conversion CTAs ──────────────────────────────────────────────────────────
+
+function ConversionCTAsSection({
+  event,
+  isSaved,
+  saveCount,
+  hasUser,
+}: {
+  event: EventRow
+  isSaved: boolean
+  saveCount: number
+  hasUser: boolean
+}) {
+  const remindLabel =
+    event.registration_status === 'open' || event.registration_status === 'closing_soon'
+      ? 'Notify me next year'
+      : 'Notify me when registrations open'
+
+  const remindDesc =
+    event.registration_status === 'open' || event.registration_status === 'closing_soon'
+      ? "Registration is open now — but if you miss it, we'll remind you when next year's edition opens."
+      : "We'll send you one email the moment registrations open. No spam, no pressure."
+
+  return (
+    <section className="border-t border-wire bg-panel">
+      <div className="container-page py-16 md:py-20">
+        <div className="mb-12 text-center">
+          <h2 className="font-heading text-2xl font-bold text-ink md:text-3xl">
+            Make this race happen
+          </h2>
+          <p className="mt-3 text-ink-muted max-w-xl mx-auto">
+            Save it to your race list, grab the full APAC race calendar, or get notified the moment registrations open.
+          </p>
+        </div>
+
+        <div className="grid gap-6 sm:grid-cols-3">
+
+          {/* Save */}
+          <div className="card flex flex-col items-center gap-5 p-8 text-center">
+            <span className="text-4xl" aria-hidden>❤️</span>
+            <div className="space-y-2">
+              <h3 className="font-heading text-lg font-bold text-ink">Save this event</h3>
+              <p className="text-sm text-ink-muted leading-relaxed">
+                Build your race wishlist. Save events, track your season and never lose a date.
+              </p>
+            </div>
+            <div className="mt-auto w-full space-y-2">
+              {hasUser ? (
+                <SaveButton eventId={event.id} initialSaved={isSaved} />
+              ) : (
+                <Link
+                  href={`/signup?next=/events/${event.slug}`}
+                  className="btn-secondary w-full justify-center"
+                >
+                  <Heart className="h-4 w-4" /> Create free account
+                </Link>
+              )}
+              {saveCount > 0 && (
+                <p className="text-xs text-ink-muted">
+                  {saveCount.toLocaleString()} athlete{saveCount !== 1 ? 's' : ''} saved this event
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Calendar */}
+          <div className="card flex flex-col items-center gap-5 p-8 text-center">
+            <span className="text-4xl" aria-hidden>📅</span>
+            <div className="space-y-2">
+              <h3 className="font-heading text-lg font-bold text-ink">Get the 2026 APAC Race Calendar</h3>
+              <p className="text-sm text-ink-muted leading-relaxed">
+                Every {event.discipline} event across Australia, New Zealand and Asia — one calendar, delivered to your inbox.
+              </p>
+            </div>
+            <div className="mt-auto w-full">
+              <CalendarCtaInline discipline={event.discipline} />
+            </div>
+          </div>
+
+          {/* Reminder */}
+          <div className="card flex flex-col items-center gap-5 p-8 text-center">
+            <span className="text-4xl" aria-hidden>🔔</span>
+            <div className="space-y-2">
+              <h3 className="font-heading text-lg font-bold text-ink">{remindLabel}</h3>
+              <p className="text-sm text-ink-muted leading-relaxed">{remindDesc}</p>
+            </div>
+            <div className="mt-auto w-full">
+              <ReminderSignup slug={event.slug} />
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
   )
 }
