@@ -22,6 +22,14 @@ const NAV_LINKS = [
   { href: '/guides',    label: 'Race Guides' },
 ]
 
+const MOBILE_NAV_LINKS = [
+  { href: '/events',        label: 'Events' },
+  { href: '/championships', label: 'Championships' },
+  { href: '/tracks',        label: 'Tracks' },
+  { href: '/calendar',      label: 'Free Calendar' },
+  { href: '/guides',        label: 'Race Guides' },
+]
+
 export function Header({ user }: { user: HeaderUser | null }) {
   const pathname = usePathname()
   const router   = useRouter()
@@ -57,7 +65,7 @@ export function Header({ user }: { user: HeaderUser | null }) {
   return (
     <header className="sticky top-0 z-50 border-b border-wire bg-canvas/95 backdrop-blur-md">
       <div className="container-page">
-        <div className="flex h-16 items-center justify-between gap-4 md:h-[68px]">
+        <div className="flex h-14 items-center justify-between gap-3 md:h-[68px] md:gap-4">
 
           {/* Logo */}
           <Link
@@ -172,16 +180,35 @@ export function Header({ user }: { user: HeaderUser | null }) {
             </div>
           )}
 
-          {/* Mobile toggle */}
-          <button
-            className="md:hidden rounded-lg p-2 text-ink-muted transition-colors hover:bg-panel hover:text-ink"
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-            aria-expanded={menuOpen}
-            aria-controls="mobile-nav"
-          >
-            {menuOpen ? <XIcon /> : <MenuIcon />}
-          </button>
+          {/* Mobile: persistent right actions */}
+          <div className="flex md:hidden items-center gap-2">
+            {user ? (
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                aria-label="Account menu"
+                className="rounded-full p-0.5 transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint/50"
+              >
+                <Avatar user={user} size="sm" />
+              </button>
+            ) : (
+              <Link
+                href="/signup"
+                className="rounded-full bg-mint px-3.5 py-1.5 text-xs font-semibold text-canvas transition-all duration-200 hover:bg-mint-300 active:scale-95"
+                onClick={() => setMenuOpen(false)}
+              >
+                Join free
+              </Link>
+            )}
+            <button
+              className="rounded-lg p-2 text-ink-muted transition-colors hover:bg-panel hover:text-ink"
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={menuOpen}
+              aria-controls="mobile-nav"
+            >
+              {menuOpen ? <XIcon /> : <MenuIcon />}
+            </button>
+          </div>
 
         </div>
       </div>
@@ -194,15 +221,16 @@ export function Header({ user }: { user: HeaderUser | null }) {
           menuOpen ? 'max-h-[560px] opacity-100' : 'max-h-0 overflow-hidden opacity-0',
         )}
       >
-        <div className="container-page py-4">
+        <div className="container-page py-3">
+
           {/* Nav links */}
-          <nav className="space-y-1">
-            {NAV_LINKS.map((link) => (
+          <nav aria-label="Mobile navigation" className="space-y-0.5">
+            {MOBILE_NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  'block rounded-lg px-4 py-3 text-sm font-medium transition-colors',
+                  'flex items-center rounded-xl px-4 py-3.5 text-[15px] font-medium transition-colors',
                   pathname.startsWith(link.href)
                     ? 'bg-panel text-ink'
                     : 'text-ink-muted hover:bg-panel hover:text-ink',
@@ -212,69 +240,54 @@ export function Header({ user }: { user: HeaderUser | null }) {
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="/calendar"
-              className="block rounded-full bg-fire px-4 py-3 text-center text-sm font-semibold text-white mt-2"
-              onClick={() => setMenuOpen(false)}
-            >
-              Free Calendar
-            </Link>
           </nav>
 
-          {/* Mobile account section */}
-          {user ? (
-            <div className="mt-4 border-t border-wire pt-4 space-y-1">
-              {/* User info */}
-              <div className="flex items-center gap-3 px-4 py-2 mb-2">
-                <Avatar user={user} size="md" />
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-ink">{user.displayName}</p>
-                  <p className="truncate text-xs text-ink-muted">{user.email}</p>
+          {/* Account section */}
+          <div className="mt-3 border-t border-wire pt-3">
+            {user ? (
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-3 px-4 py-3">
+                  <Avatar user={user} size="md" />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-ink">{user.displayName}</p>
+                    <p className="truncate text-xs text-ink-muted">{user.email}</p>
+                  </div>
                 </div>
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-3 rounded-xl px-4 py-3.5 text-[15px] font-medium text-ink-muted transition-colors hover:bg-panel hover:text-ink"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <LayoutDashboard className="h-4 w-4 shrink-0 text-mint" />
+                  Dashboard
+                </Link>
+                <Link
+                  href="/dashboard/profile"
+                  className="flex items-center gap-3 rounded-xl px-4 py-3.5 text-[15px] font-medium text-ink-muted transition-colors hover:bg-panel hover:text-ink"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <Settings className="h-4 w-4 shrink-0 text-mint" />
+                  Profile Settings
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-[15px] font-medium text-red-400 transition-colors hover:bg-red-500/10"
+                >
+                  <LogOut className="h-4 w-4 shrink-0" />
+                  Log out
+                </button>
               </div>
-
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2.5 rounded-lg px-4 py-3 text-sm font-medium text-ink-muted transition-colors hover:bg-panel hover:text-ink"
-                onClick={() => setMenuOpen(false)}
-              >
-                <LayoutDashboard className="h-4 w-4 shrink-0 text-mint" />
-                Dashboard
-              </Link>
-              <Link
-                href="/dashboard/profile"
-                className="flex items-center gap-2.5 rounded-lg px-4 py-3 text-sm font-medium text-ink-muted transition-colors hover:bg-panel hover:text-ink"
-                onClick={() => setMenuOpen(false)}
-              >
-                <Settings className="h-4 w-4 shrink-0 text-mint" />
-                Profile Settings
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="flex w-full items-center gap-2.5 rounded-lg px-4 py-3 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10"
-              >
-                <LogOut className="h-4 w-4 shrink-0" />
-                Log out
-              </button>
-            </div>
-          ) : (
-            <div className="mt-4 border-t border-wire pt-4 space-y-2">
+            ) : (
               <Link
                 href="/login"
-                className="block rounded-lg px-4 py-3 text-center text-sm font-medium text-ink-muted transition-colors hover:bg-panel hover:text-ink"
+                className="flex items-center rounded-xl px-4 py-3.5 text-[15px] font-medium text-ink-muted transition-colors hover:bg-panel hover:text-ink"
                 onClick={() => setMenuOpen(false)}
               >
                 Log in
               </Link>
-              <Link
-                href="/signup"
-                className="block rounded-lg bg-mint px-4 py-3 text-center text-sm font-semibold text-canvas transition-all duration-200 hover:bg-mint-300"
-                onClick={() => setMenuOpen(false)}
-              >
-                Join free
-              </Link>
-            </div>
-          )}
+            )}
+          </div>
+
         </div>
       </div>
     </header>

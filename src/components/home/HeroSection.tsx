@@ -21,7 +21,7 @@ export async function HeroSection() {
   const disciplineCount = 10 // matches DISCIPLINE_PILLS count in HeroDisciplinePills
 
   return (
-    <section className="relative flex min-h-screen items-center overflow-hidden">
+    <section className="relative flex min-h-[78vh] items-center overflow-hidden md:min-h-screen">
 
       {/* Dot-grid texture */}
       <div
@@ -55,7 +55,7 @@ export async function HeroSection() {
       <RadarBackground />
 
       {/* Content */}
-      <div className="container-page relative z-10 pb-24 pt-10">
+      <div className="container-page relative z-10 pb-12 pt-6 md:pb-24 md:pt-10">
         <div className="max-w-4xl">
 
           {/* Sport labels */}
@@ -64,7 +64,7 @@ export async function HeroSection() {
           </p>
 
           {/* Headline */}
-          <h1 className="font-heading text-5xl font-bold leading-[1.08] tracking-tight text-ink sm:text-6xl lg:text-[80px] animate-fade-up">
+          <h1 className="font-heading text-[2.5rem] font-bold leading-[1.08] tracking-tight text-ink sm:text-6xl lg:text-[80px] animate-fade-up">
             Every Major Fitness Event
             <br />
             Across{' '}
@@ -77,7 +77,7 @@ export async function HeroSection() {
           </p>
 
           {/* Live stats */}
-          <div className="mt-10 flex flex-wrap items-end gap-x-10 gap-y-4 animate-fade-up [animation-delay:250ms]">
+          <div className="mt-6 flex flex-wrap items-end gap-x-8 gap-y-3 md:mt-10 md:gap-x-10 animate-fade-up [animation-delay:250ms]">
             <StatItem value={eventCount}      label="upcoming events" />
             <Divider />
             <StatItem value={countryCount}    label="countries" />
@@ -115,7 +115,7 @@ export async function HeroSection() {
 function StatItem({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="tabular-nums font-heading text-4xl font-bold leading-none text-ink sm:text-5xl">
+      <span className="tabular-nums font-heading text-3xl font-bold leading-none text-ink sm:text-5xl">
         {value > 0 ? `${value}+` : '—'}
       </span>
       <span className="text-xs font-medium uppercase tracking-[0.15em] text-ink-muted">{label}</span>

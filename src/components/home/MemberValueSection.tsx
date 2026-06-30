@@ -71,7 +71,7 @@ export function MemberValueSection({ isLoggedIn }: Props) {
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <Link
                   href="/signup"
-                  className="inline-flex items-center justify-center rounded-xl bg-mint px-6 py-3.5 text-sm font-semibold text-canvas transition-all duration-200 hover:bg-mint-300 hover:shadow-lg hover:shadow-mint/20 hover:-translate-y-px"
+                  className="inline-flex w-full items-center justify-center rounded-xl bg-mint px-6 py-4 text-sm font-semibold text-canvas transition-all duration-200 hover:bg-mint-300 hover:shadow-lg hover:shadow-mint/20 hover:-translate-y-px sm:w-auto sm:py-3.5"
                 >
                   Create your free account
                 </Link>
