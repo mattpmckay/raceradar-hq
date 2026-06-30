@@ -1,24 +1,8 @@
-import { createClient } from '@/lib/supabase/server'
-import { HeroSearchBar } from './HeroSearchBar'
-import { HeroDisciplinePills } from './HeroDisciplinePills'
+import Link from 'next/link'
 
-export async function HeroSection() {
-  const supabase = await createClient()
-  const today = new Date().toISOString().split('T')[0]
-
-  const { data: rows } = await supabase
-    .from('events')
-    .select('country, discipline')
-    .eq('is_published', true)
-    .gte('start_date', today)
-    .lt('start_date', '2099-01-01')
-
-  const eventCount      = rows?.length ?? 0
-  const countryCount    = new Set(rows?.map((r) => r.country).filter(Boolean)).size
-  const disciplineCount = 10
-
+export function HeroSection() {
   return (
-    <section className="relative overflow-hidden md:min-h-screen">
+    <section className="relative overflow-hidden">
 
       {/* Dot-grid texture — desktop only */}
       <div
@@ -41,86 +25,50 @@ export async function HeroSection() {
       </div>
 
       {/* Content */}
-      <div className="container-page relative z-10 pb-2 pt-2 md:pb-24 md:pt-10 md:flex md:min-h-screen md:items-center">
-        <div className="max-w-4xl w-full">
-
-          {/* Sport labels — desktop only */}
-          <p className="mb-5 hidden text-xs font-semibold uppercase tracking-[0.2em] text-ink-muted animate-fade-in md:block">
-            HYROX &nbsp;·&nbsp; CrossFit &nbsp;·&nbsp; Spartan &nbsp;·&nbsp; Ironman &nbsp;·&nbsp; Triathlon &nbsp;·&nbsp; OCR &nbsp;·&nbsp; Trail
-          </p>
+      <div className="container-page relative z-10 py-16 md:py-36">
+        <div className="max-w-2xl">
 
           {/* Headline */}
-          <h1 className="font-heading text-[1.85rem] font-bold leading-[1.05] tracking-tight text-ink animate-fade-up sm:text-6xl lg:text-[80px]">
+          <h1 className="font-heading text-[2rem] font-bold leading-[1.05] tracking-tight text-ink animate-fade-up sm:text-6xl lg:text-[80px]">
             Plan your{' '}
             <span className="sm:block"><span className="text-mint">event season.</span></span>
           </h1>
 
-          {/* Subheading — shorter on mobile */}
-          <p className="mt-1 text-sm leading-snug animate-fade-up sm:mt-6 sm:text-xl sm:leading-relaxed [animation-delay:150ms]">
-            <span className="sm:hidden text-ink-muted">Discover events, save your picks and build your season across Asia Pacific.</span>
-            <span className="hidden sm:inline text-ink-muted">
-              Discover HYROX, Spartan, Ironman, Marathon, Trail and more across Asia Pacific.{' '}
-              Save events, track registrations and keep your entire season organised in one place.
-            </span>
+          {/* Subheadline */}
+          <p className="mt-4 text-base leading-relaxed text-ink-muted animate-fade-up sm:mt-6 sm:text-xl sm:leading-relaxed [animation-delay:100ms]">
+            Discover HYROX, Spartan, Ironman, Marathon, Trail and more across Asia Pacific.
+            Save events, track registrations and build your race season in one place.
           </p>
 
-          {/* Live stats — desktop only (shown above search) */}
-          <div className="mt-8 hidden animate-fade-up md:flex flex-wrap items-end gap-x-10 gap-y-3 [animation-delay:250ms]">
-            <StatItem value={eventCount}      label="upcoming events" />
-            <Divider />
-            <StatItem value={countryCount}    label="countries" />
-            <Divider />
-            <StatItem value={disciplineCount} label="disciplines" />
+          {/* CTAs */}
+          <div className="mt-8 animate-fade-up [animation-delay:200ms]">
+            <Link
+              href="/signup"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-mint px-6 py-4 text-base font-semibold text-canvas transition-all duration-200 hover:bg-mint-300 hover:shadow-lg hover:shadow-mint/20 hover:-translate-y-px sm:w-auto"
+            >
+              Build My Season
+            </Link>
+            <p className="mt-3 text-sm text-ink-muted [animation-delay:300ms]">
+              or{' '}
+              <Link
+                href="/events"
+                className="font-medium text-ink-muted underline-offset-2 transition-colors hover:text-ink hover:underline"
+              >
+                find a specific event
+              </Link>
+            </p>
           </div>
-
-          {/* Search — primary action on mobile */}
-          <div className="animate-fade-up [animation-delay:350ms]">
-            <HeroSearchBar />
-          </div>
-
-          {/* Compact stats line — mobile only, below search so it doesn't compete */}
-          <p className="mt-2 text-xs text-ink-subtle animate-fade-up md:hidden [animation-delay:450ms]">
-            {eventCount > 0 ? `${eventCount}+` : '—'} events &middot; {countryCount} countries &middot; {disciplineCount} disciplines
-          </p>
-
-          {/* Discipline pills — desktop only */}
-          <div className="hidden animate-fade-up md:block [animation-delay:450ms]">
-            <HeroDisciplinePills />
-          </div>
-
-          {/* Trust line — desktop only (mobile gets compact stats instead) */}
-          <p className="mt-5 hidden text-sm text-ink-subtle animate-fade-up md:block [animation-delay:550ms]">
-            Free to browse. Free to join.{' '}
-            <span className="text-ink-muted">No credit card.</span>
-          </p>
 
         </div>
       </div>
 
       {/* Bottom fade */}
-      <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-canvas to-transparent md:h-40" />
+      <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-canvas to-transparent md:h-24" />
     </section>
   )
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function StatItem({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="tabular-nums font-heading text-5xl font-bold leading-none text-ink">
-        {value > 0 ? `${value}+` : '—'}
-      </span>
-      <span className="text-xs font-medium uppercase tracking-[0.15em] text-ink-muted">
-        {label}
-      </span>
-    </div>
-  )
-}
-
-function Divider() {
-  return <div className="h-8 w-px bg-wire" />
-}
+// ─── Radar background ─────────────────────────────────────────────────────────
 
 function RadarBackground() {
   return (

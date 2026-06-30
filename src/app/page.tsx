@@ -1,20 +1,19 @@
-import { Suspense }       from 'react'
-import type { Metadata }  from 'next'
-import { createClient }          from '@/lib/supabase/server'
-import { Header }                from '@/components/layout/Header'
-import { HeroSection }           from '@/components/home/HeroSection'
-import { EventsSectionServer }   from '@/components/home/EventsSectionServer'
+import { Suspense }            from 'react'
+import type { Metadata }        from 'next'
+import { createClient }         from '@/lib/supabase/server'
+import { Header }               from '@/components/layout/Header'
+import { HeroSection }          from '@/components/home/HeroSection'
+import { HowItWorksSection }    from '@/components/home/HowItWorksSection'
+import { EventsSectionServer }  from '@/components/home/EventsSectionServer'
 import { EventsSectionSkeleton } from '@/components/home/EventsSectionSkeleton'
-import { MemberValueSection }    from '@/components/home/MemberValueSection'
-import { BrowseByType }          from '@/components/home/BrowseByType'
-import { EmailCapture }          from '@/components/home/EmailCapture'
-import { HomeFooter }            from '@/components/home/HomeFooter'
-import type { HeaderUser }       from '@/components/layout/Header'
+import { MemberValueSection }   from '@/components/home/MemberValueSection'
+import { HomeFooter }           from '@/components/home/HomeFooter'
+import type { HeaderUser }      from '@/components/layout/Header'
 
 export const metadata: Metadata = {
-  title: 'RaceRadar HQ — Every Major Fitness Event Across Asia Pacific',
+  title: 'RaceRadar HQ — Build Your Race Season',
   description:
-    'Discover HYROX, Spartan, Ironman, Triathlon, trail running and endurance events across Asia-Pacific. Browse free. Join free. Never miss a race.',
+    'Discover HYROX, Spartan, Ironman, Marathon, Trail and more across Asia Pacific. Save events, track registration dates and build your race season in one place.',
 }
 
 export default async function HomePage() {
@@ -46,13 +45,10 @@ export default async function HomePage() {
       <Header user={headerUser} />
       <main id="main-content">
         <HeroSection />
+        <HowItWorksSection />
         <Suspense fallback={<EventsSectionSkeleton />}>
           <EventsSectionServer featuredOnly />
         </Suspense>
-        <Suspense fallback={null}>
-          <BrowseByType />
-        </Suspense>
-        <EmailCapture />
         <MemberValueSection isLoggedIn={!!user} />
       </main>
       <HomeFooter />

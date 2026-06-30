@@ -1,17 +1,11 @@
 import Link from 'next/link'
+import { InlineCalendarCapture } from './InlineCalendarCapture'
 
 const LIVE_BENEFITS = [
   { icon: '❤️', label: 'Your race calendar, always up to date' },
   { icon: '🔔', label: 'Reminders before registrations sell out' },
   { icon: '📅', label: 'Build a season that actually happens' },
   { icon: '🏁', label: 'Count down to your next start line' },
-]
-
-const SOON_BENEFITS = [
-  { icon: '📊', label: 'Track every event you\'ve completed' },
-  { icon: '💰', label: 'Price alerts before early bird ends' },
-  { icon: '🎯', label: 'Events you\'ll love, recommended for you' },
-  { icon: '📈', label: 'Your full event history, in one place' },
 ]
 
 interface Props {
@@ -42,9 +36,10 @@ export function MemberValueSection({ isLoggedIn }: Props) {
   }
 
   return (
-    <section className="relative py-4 md:py-6">
+    <section className="relative py-8 md:py-12">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-wire-bright to-transparent" />
       <div className="container-page">
-        <div className="overflow-hidden rounded-2xl border border-wire bg-panel/60">
+        <div className="relative overflow-hidden rounded-2xl border border-wire bg-panel/60">
 
           {/* Mint glow */}
           <div
@@ -61,7 +56,6 @@ export function MemberValueSection({ isLoggedIn }: Props) {
               <h2 className="font-heading text-2xl font-bold tracking-tight text-ink sm:text-3xl md:text-4xl">
                 Never miss another race.
               </h2>
-
               <p className="mt-3 text-sm leading-relaxed text-ink-muted sm:text-base">
                 Keep your entire season in one place. Save events, get registration reminders and never miss another start line.
               </p>
@@ -71,46 +65,29 @@ export function MemberValueSection({ isLoggedIn }: Props) {
                   href="/signup"
                   className="inline-flex w-full items-center justify-center rounded-xl bg-mint px-6 py-3.5 text-sm font-semibold text-canvas transition-all duration-200 hover:bg-mint-300 hover:shadow-lg hover:shadow-mint/20 hover:-translate-y-px sm:w-auto"
                 >
-                  Join free
+                  Build My Season
                 </Link>
+                <p className="mt-2 text-xs text-ink-muted">
+                  Create your free account in less than 30 seconds.
+                </p>
               </div>
 
-              <div className="mt-4 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-4">
-                <p className="text-xs text-ink-subtle">
-                  Free to browse. Free to join. No credit card.
+              {/* Calendar fallback */}
+              <div className="mt-6 border-t border-wire pt-5">
+                <p className="mb-2 text-xs text-ink-muted">
+                  Not ready to sign up? Get the 2026 APAC calendar delivered to your inbox.
                 </p>
-                <Link
-                  href="/login"
-                  className="text-xs font-medium text-ink-muted transition-colors hover:text-ink"
-                >
-                  Already a member? Log in
-                </Link>
+                <InlineCalendarCapture />
               </div>
             </div>
 
             {/* Right — benefits */}
             <div className="border-t border-wire p-6 sm:p-8 md:border-l md:border-t-0 lg:p-12">
-              <ul className="space-y-3">
+              <ul className="space-y-4">
                 {LIVE_BENEFITS.map((b) => (
                   <li key={b.label} className="flex items-center gap-3">
                     <span className="text-base leading-none" aria-hidden>{b.icon}</span>
                     <span className="text-sm font-medium text-ink">{b.label}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="my-4 hidden border-t border-wire sm:block" />
-
-              <ul className="hidden space-y-3 sm:block">
-                {SOON_BENEFITS.map((b) => (
-                  <li key={b.label} className="flex items-center gap-3">
-                    <span className="text-base leading-none opacity-50" aria-hidden>{b.icon}</span>
-                    <span className="text-sm text-ink-muted">
-                      {b.label}
-                      <span className="ml-1.5 rounded-full border border-wire px-1.5 py-0.5 text-[10px] font-medium text-ink-subtle">
-                        Soon
-                      </span>
-                    </span>
                   </li>
                 ))}
               </ul>
@@ -119,6 +96,7 @@ export function MemberValueSection({ isLoggedIn }: Props) {
           </div>
         </div>
       </div>
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-wire-bright to-transparent" />
     </section>
   )
 }

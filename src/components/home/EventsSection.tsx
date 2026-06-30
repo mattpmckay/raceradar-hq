@@ -152,105 +152,27 @@ export function EventsSection({
 
   // ── Featured-only mode (homepage) ─────────────────────────────────────────
   if (featuredOnly) {
-    const featured      = events.filter((e) => e.is_featured).slice(0, 3).map(toDisplayEvent)
-    const soonEvents    = happeningSoon.slice(0, 3).map(toDisplayEvent)
-    const justAdded     = newEvents.slice(0, 3).map(toDisplayEvent)
-    const browseCount   = totalCount ?? events.length
+    const featured = events.filter((e) => e.is_featured).slice(0, 3).map(toDisplayEvent)
 
-    if (featured.length === 0 && soonEvents.length === 0 && justAdded.length === 0) return null
+    if (featured.length === 0) return null
 
     return (
-      <section className="relative pb-4 pt-3">
-        <div className="container-page space-y-6">
-
-          {/* Featured Events */}
-          {featured.length > 0 && (
-            <div>
-              {/* Bridge from hero — subtle thread into discovery */}
-              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
-                What&apos;s on this season
-              </p>
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="font-heading text-xl font-bold tracking-tight text-ink sm:text-2xl">
-                  Featured Events
-                </h2>
-                <Link
-                  href="/events"
-                  className="hidden items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink sm:flex"
-                >
-                  Browse all
-                  <ArrowRightIcon className="h-4 w-4" />
-                </Link>
-              </div>
-              <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-                {featured.map((event) => (
-                  <EventCard key={event.id} event={event} initialSaved={savedIds.has(event.id)} />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Happening Soon */}
-          {soonEvents.length > 0 && (
-            <div>
-              <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <h2 className="font-heading text-xl font-bold tracking-tight text-ink sm:text-2xl">
-                    Happening Soon
-                  </h2>
-                  <span className="rounded-full bg-fire/10 px-2 py-0.5 text-[11px] font-semibold text-fire">
-                    Next 30 days
-                  </span>
-                </div>
-                <Link
-                  href="/events"
-                  className="hidden items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink sm:flex"
-                >
-                  View all
-                  <ArrowRightIcon className="h-4 w-4" />
-                </Link>
-              </div>
-              <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-                {soonEvents.map((event) => (
-                  <EventCard key={event.id} event={event} initialSaved={savedIds.has(event.id)} />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Just Added */}
-          {justAdded.length > 0 && (
-            <div>
-              <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <h2 className="font-heading text-xl font-bold tracking-tight text-ink sm:text-2xl">
-                    Just Added
-                  </h2>
-                  <span className="rounded-full bg-mint/10 px-2 py-0.5 text-[11px] font-semibold text-mint">
-                    Last 3 weeks
-                  </span>
-                </div>
-                <Link href="/events" className="hidden items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink sm:flex">
-                  View all <ArrowRightIcon className="h-4 w-4" />
-                </Link>
-              </div>
-              <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-                {justAdded.map((event) => (
-                  <EventCard key={event.id} event={event} initialSaved={savedIds.has(event.id)} />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Browse all CTA */}
-          <Link
-            href="/events"
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-wire bg-panel px-6 py-3.5 text-sm font-semibold text-ink-muted transition-all hover:border-wire-bright hover:bg-panel-raised hover:text-ink"
-          >
-            Explore all {browseCount > 0 ? `${browseCount}+` : ''} events across Asia Pacific
-            <ArrowRightIcon className="h-4 w-4" />
-          </Link>
-
+      <section className="relative py-8 md:py-10">
+        <div className="container-page">
+          <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+            {featured.map((event) => (
+              <EventCard key={event.id} event={event} initialSaved={savedIds.has(event.id)} />
+            ))}
+          </div>
+          <div className="mt-6 text-center">
+            <Link
+              href="/events"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
+            >
+              Find more events for your season
+              <ArrowRightIcon className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </section>
     )
