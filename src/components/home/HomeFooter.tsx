@@ -1,81 +1,88 @@
 import Link from 'next/link'
 
-const FOOTER_LINKS = {
-  Discover: [
-    { label: 'Events',      href: '/events' },
-    { label: 'Sports',      href: '/sports' },
-    { label: 'Locations',   href: '/locations' },
-    { label: 'Race Guides', href: '/guides' },
-  ],
-  Sports: [
-    { label: 'HYROX',         href: '/events?discipline=HYROX' },
-    { label: 'Spartan Race',  href: '/events?discipline=Spartan+Race' },
-    { label: 'Ironman',       href: '/events?discipline=Ironman' },
-    { label: 'Trail Running', href: '/events?discipline=Trail+Running' },
-    { label: 'Marathon',      href: '/events?discipline=Marathon' },
-  ],
-}
+const DISCOVER_LINKS = [
+  { label: 'Events',      href: '/events' },
+  { label: 'Sports',      href: '/sports' },
+  { label: 'Locations',   href: '/locations' },
+  { label: 'Race Guides', href: '/guides' },
+]
+
+const SPORTS_LINKS = [
+  { label: 'HYROX',         href: '/events?discipline=HYROX' },
+  { label: 'Spartan Race',  href: '/events?discipline=Spartan+Race' },
+  { label: 'Ironman',       href: '/events?discipline=Ironman' },
+  { label: 'Trail Running', href: '/events?discipline=Trail+Running' },
+  { label: 'Marathon',      href: '/events?discipline=Marathon' },
+]
 
 export function HomeFooter() {
   return (
     <footer className="border-t border-wire bg-canvas">
-      <div className="container-page py-12 md:py-16">
+      <div className="container-page py-10 md:py-14">
 
-        {/* Main grid */}
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:gap-16">
+        {/* Main grid — on mobile: brand full-width + discover. Sports hidden on mobile. */}
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:gap-16">
 
           {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
+          <div className="col-span-2 sm:col-span-1">
             <Link href="/" className="flex items-center gap-2.5">
               <RadarIcon className="h-7 w-7 text-mint" />
               <span className="font-heading text-[17px] font-bold tracking-tight text-ink">
                 RaceRadar <span className="text-mint">HQ</span>
               </span>
             </Link>
-            <p className="mt-4 text-sm leading-relaxed text-ink-muted">
+            <p className="mt-3 text-sm leading-relaxed text-ink-muted">
               APAC&apos;s home for endurance athletes. Discover, plan and race.
             </p>
           </div>
 
-          {/* Nav columns */}
-          {Object.entries(FOOTER_LINKS).map(([heading, links]) => (
-            <div key={heading}>
-              <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-ink">
-                {heading}
-              </h3>
-              <ul className="space-y-2.5">
-                {links.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-ink-muted transition-colors hover:text-ink"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {/* Discover */}
+          <div>
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-ink">
+              Discover
+            </h3>
+            <ul className="space-y-2.5">
+              {DISCOVER_LINKS.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="text-sm text-ink-muted transition-colors hover:text-ink">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Sports — hidden on mobile to keep footer compact */}
+          <div className="hidden sm:block">
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-ink">
+              Sports
+            </h3>
+            <ul className="space-y-2.5">
+              {SPORTS_LINKS.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="text-sm text-ink-muted transition-colors hover:text-ink">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-wire pt-8 sm:flex-row md:mt-14">
+        <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-wire pt-6 sm:flex-row md:mt-12 md:pt-8">
           <p className="text-xs text-ink-muted">
             © {new Date().getFullYear()} RaceRadar HQ. All rights reserved.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-5">
+          <div className="flex flex-wrap items-center justify-center gap-4">
             {[
-              { label: 'About',            href: '/about' },
-              { label: 'Privacy Policy',   href: '/privacy' },
-              { label: 'Terms of Service', href: '/terms' },
-              { label: 'Contact',          href: '/contact' },
+              { label: 'Privacy',  href: '/privacy' },
+              { label: 'Terms',    href: '/terms' },
+              { label: 'About',    href: '/about' },
+              { label: 'Contact',  href: '/contact' },
             ].map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-xs text-ink-muted transition-colors hover:text-ink"
-              >
+              <Link key={link.href} href={link.href} className="text-xs text-ink-muted transition-colors hover:text-ink">
                 {link.label}
               </Link>
             ))}

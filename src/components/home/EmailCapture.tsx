@@ -38,13 +38,12 @@ export function EmailCapture() {
   }
 
   return (
-    <section className="relative overflow-hidden py-24">
+    <section className="relative overflow-hidden py-10 sm:py-16 md:py-24">
       {/* Mint tint background */}
       <div
         className="absolute inset-0"
         style={{
-          background:
-            'radial-gradient(ellipse 100% 80% at 50% 50%, rgba(0,217,166,0.05) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse 100% 80% at 50% 50%, rgba(0,217,166,0.05) 0%, transparent 70%)',
         }}
       />
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-wire-bright to-transparent" />
@@ -54,19 +53,19 @@ export function EmailCapture() {
         <div className="mx-auto max-w-xl text-center">
 
           {/* Badge */}
-          <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-mint/30 bg-mint/10 px-4 py-1.5 text-xs font-semibold text-mint">
+          <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-mint/30 bg-mint/10 px-4 py-1.5 text-xs font-semibold text-mint">
             <CalendarIcon className="h-3.5 w-3.5" />
             Free 2026 Calendar
           </span>
 
-          <h2 className="font-heading text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-            Get the Free 2026 APAC
+          <h2 className="font-heading text-2xl font-bold tracking-tight text-ink sm:text-3xl md:text-4xl">
+            Every APAC fitness event.
             <br />
-            <span className="text-mint">Fitness Events Calendar</span>
+            <span className="text-mint">One free calendar.</span>
           </h2>
 
-          <p className="mt-4 text-base text-ink-muted">
-            Every major HYROX, Spartan, Ironman and OCR event across Asia Pacific — curated, dated, and delivered to your inbox.
+          <p className="mt-3 text-sm leading-relaxed text-ink-muted sm:mt-4 sm:text-base">
+            HYROX, Spartan, Ironman, OCR and more — curated, dated, and sent to your inbox. Free.
           </p>
 
           {submitted ? (
@@ -87,8 +86,8 @@ export function EmailCapture() {
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="mt-8">
-              <div className="flex flex-col gap-3 sm:flex-row">
+            <form onSubmit={handleSubmit} className="mt-6 sm:mt-8">
+              <div className="flex flex-col gap-2.5 sm:flex-row sm:gap-3">
                 <input
                   type="email"
                   required
@@ -102,7 +101,7 @@ export function EmailCapture() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="rounded-xl bg-mint px-6 py-3.5 text-sm font-semibold text-canvas transition-all duration-200 hover:bg-mint-300 hover:shadow-lg hover:shadow-mint/20 hover:-translate-y-px disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0"
+                  className="w-full rounded-xl bg-mint px-6 py-4 text-base font-bold text-canvas transition-all duration-200 hover:bg-mint-300 hover:shadow-lg hover:shadow-mint/20 hover:-translate-y-px disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0 sm:w-auto sm:py-3.5 sm:text-sm sm:font-semibold"
                 >
                   {loading ? 'Sending…' : 'Get Calendar'}
                 </button>
@@ -112,8 +111,8 @@ export function EmailCapture() {
                   {error}
                 </p>
               )}
-              <p className="mt-4 text-xs text-ink-muted">
-                Athletes across Asia Pacific. No spam — ever.
+              <p className="mt-3 text-xs text-ink-muted">
+                No spam — ever. Unsubscribe any time.
               </p>
             </form>
           )}

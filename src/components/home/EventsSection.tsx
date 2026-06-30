@@ -89,74 +89,25 @@ function toDisplayEvent(e: SupabaseEvent): Event {
   }
 }
 
-// ─── Row definitions ──────────────────────────────────────────────────────────
+// ─── Row definitions (full directory mode) ────────────────────────────────────
 
 type RowDef = {
   key: string
   label: string
   eyebrow: string
-  disciplines: string[] | null  // null = filter by is_featured
+  disciplines: string[] | null
   filterHref: string
   accentColor: string
 }
 
 const ROW_DEFS: RowDef[] = [
-  {
-    key:          'featured',
-    label:        'Featured This Month',
-    eyebrow:      'Curated',
-    disciplines:  null,
-    filterHref:   '/events',
-    accentColor:  '#00D9A6',
-  },
-  {
-    key:          'hyrox',
-    label:        'HYROX',
-    eyebrow:      'Upcoming',
-    disciplines:  ['HYROX'],
-    filterHref:   '/events?discipline=HYROX',
-    accentColor:  '#00D9A6',
-  },
-  {
-    key:          'crossfit',
-    label:        'CrossFit',
-    eyebrow:      'Upcoming',
-    disciplines:  ['CrossFit'],
-    filterHref:   '/events?discipline=CrossFit',
-    accentColor:  '#EF4444',
-  },
-  {
-    key:          'spartan',
-    label:        'Spartan Race',
-    eyebrow:      'Upcoming',
-    disciplines:  ['Spartan Race'],
-    filterHref:   '/events?discipline=Spartan%20Race',
-    accentColor:  '#FF6B35',
-  },
-  {
-    key:          'ironman',
-    label:        'Ironman & Triathlon',
-    eyebrow:      'Upcoming',
-    disciplines:  ['Ironman', 'Ironman 70.3'],
-    filterHref:   '/events?discipline=Ironman',
-    accentColor:  '#F87171',
-  },
-  {
-    key:          'marathon',
-    label:        'Marathon & Road Racing',
-    eyebrow:      'Upcoming',
-    disciplines:  ['Marathon', 'Road Racing'],
-    filterHref:   '/events?discipline=Marathon',
-    accentColor:  '#60A5FA',
-  },
-  {
-    key:          'trail',
-    label:        'Trail Running',
-    eyebrow:      'Upcoming',
-    disciplines:  ['Trail Running'],
-    filterHref:   '/events?discipline=Trail%20Running',
-    accentColor:  '#34D399',
-  },
+  { key: 'featured',  label: 'Featured This Month',      eyebrow: 'Curated',  disciplines: null,                           filterHref: '/events',                         accentColor: '#00D9A6' },
+  { key: 'hyrox',     label: 'HYROX',                    eyebrow: 'Upcoming', disciplines: ['HYROX'],                      filterHref: '/events?discipline=HYROX',        accentColor: '#00D9A6' },
+  { key: 'crossfit',  label: 'CrossFit',                 eyebrow: 'Upcoming', disciplines: ['CrossFit'],                   filterHref: '/events?discipline=CrossFit',     accentColor: '#EF4444' },
+  { key: 'spartan',   label: 'Spartan Race',             eyebrow: 'Upcoming', disciplines: ['Spartan Race'],               filterHref: '/events?discipline=Spartan%20Race', accentColor: '#FF6B35' },
+  { key: 'ironman',   label: 'Ironman & Triathlon',      eyebrow: 'Upcoming', disciplines: ['Ironman', 'Ironman 70.3'],    filterHref: '/events?discipline=Ironman',      accentColor: '#F87171' },
+  { key: 'marathon',  label: 'Marathon & Road Racing',   eyebrow: 'Upcoming', disciplines: ['Marathon', 'Road Racing'],    filterHref: '/events?discipline=Marathon',     accentColor: '#60A5FA' },
+  { key: 'trail',     label: 'Trail Running',            eyebrow: 'Upcoming', disciplines: ['Trail Running'],              filterHref: '/events?discipline=Trail%20Running', accentColor: '#34D399' },
 ]
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -168,6 +119,7 @@ export function EventsSection({
   isLoggedIn = false,
   featuredOnly = false,
   totalCount,
+  happeningSoon = [],
 }: {
   events: SupabaseEvent[]
   error?: string
@@ -175,6 +127,7 @@ export function EventsSection({
   isLoggedIn?: boolean
   featuredOnly?: boolean
   totalCount?: number
+  happeningSoon?: SupabaseEvent[]
 }) {
   if (error) {
     return (
@@ -190,55 +143,84 @@ export function EventsSection({
     )
   }
 
-  // ── Featured-only mode (homepage) ──────────────────────────────────────────
+  // ── Featured-only mode (homepage) ─────────────────────────────────────────
   if (featuredOnly) {
-    const featured = events
-      .filter((e) => e.is_featured)
-      .slice(0, 3)
-      .map(toDisplayEvent)
+    const featured      = events.filter((e) => e.is_featured).slice(0, 3).map(toDisplayEvent)
+    const soonEvents    = happeningSoon.slice(0, 3).map(toDisplayEvent)
+    const browseCount   = totalCount ?? events.length
 
-    if (featured.length === 0) return null
-
-    const browseCount = totalCount ?? events.length
+    if (featured.length === 0 && soonEvents.length === 0) return null
 
     return (
-      <section className="relative pb-6 pt-4">
-        <div className="container-page">
-          <div className="mb-5 flex items-end justify-between">
+      <section className="relative pb-4 pt-3">
+        <div className="container-page space-y-6">
+
+          {/* Featured Events */}
+          {featured.length > 0 && (
             <div>
-              <p className="section-eyebrow mb-1.5 text-mint">Curated</p>
-              <h2 className="font-heading text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-                Featured Events
-              </h2>
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="font-heading text-xl font-bold tracking-tight text-ink sm:text-2xl">
+                  Featured Events
+                </h2>
+                <Link
+                  href="/events"
+                  className="hidden items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink sm:flex"
+                >
+                  Browse all
+                  <ArrowRightIcon className="h-4 w-4" />
+                </Link>
+              </div>
+              <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+                {featured.map((event) => (
+                  <EventCard key={event.id} event={event} initialSaved={savedIds.has(event.id)} />
+                ))}
+              </div>
             </div>
-            <Link
-              href="/events"
-              className="hidden items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink sm:flex"
-            >
-              Browse all
-              <ArrowRightIcon className="h-4 w-4" />
-            </Link>
-          </div>
+          )}
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.map((event) => (
-              <EventCard key={event.id} event={event} initialSaved={savedIds.has(event.id)} />
-            ))}
-          </div>
+          {/* Happening Soon */}
+          {soonEvents.length > 0 && (
+            <div>
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <h2 className="font-heading text-xl font-bold tracking-tight text-ink sm:text-2xl">
+                    Happening Soon
+                  </h2>
+                  <span className="rounded-full bg-fire/10 px-2 py-0.5 text-[11px] font-semibold text-fire">
+                    Next 30 days
+                  </span>
+                </div>
+                <Link
+                  href="/events"
+                  className="hidden items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink sm:flex"
+                >
+                  View all
+                  <ArrowRightIcon className="h-4 w-4" />
+                </Link>
+              </div>
+              <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+                {soonEvents.map((event) => (
+                  <EventCard key={event.id} event={event} initialSaved={savedIds.has(event.id)} />
+                ))}
+              </div>
+            </div>
+          )}
 
+          {/* Browse all CTA */}
           <Link
             href="/events"
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border border-wire bg-panel px-6 py-3.5 text-sm font-semibold text-ink-muted transition-all hover:border-wire-bright hover:bg-panel-raised hover:text-ink"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-wire bg-panel px-6 py-3.5 text-sm font-semibold text-ink-muted transition-all hover:border-wire-bright hover:bg-panel-raised hover:text-ink"
           >
             Browse all {browseCount > 0 ? `${browseCount}+` : ''} events across APAC
             <ArrowRightIcon className="h-4 w-4" />
           </Link>
+
         </div>
       </section>
     )
   }
 
-  // ── Full directory mode (events page) ─────────────────────────────────────
+  // ── Full directory mode ────────────────────────────────────────────────────
   const rows = ROW_DEFS
     .map((def) => {
       const raw =
@@ -309,10 +291,7 @@ function SportRow({ row, savedIds }: { row: BuiltRow; savedIds: Set<string> }) {
     <div>
       <div className="mb-5 flex items-end justify-between md:mb-6">
         <div>
-          <p
-            className="section-eyebrow mb-1.5"
-            style={{ color: row.accentColor }}
-          >
+          <p className="section-eyebrow mb-1.5" style={{ color: row.accentColor }}>
             {row.eyebrow}
           </p>
           <h2 className="font-heading text-2xl font-bold tracking-tight text-ink sm:text-3xl">
@@ -328,17 +307,14 @@ function SportRow({ row, savedIds }: { row: BuiltRow; savedIds: Set<string> }) {
         </Link>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 md:gap-4">
+      <div className="grid gap-2.5 sm:grid-cols-2 md:gap-3 lg:grid-cols-3">
         {row.events.map((event) => (
           <EventCard key={event.id} event={event} initialSaved={savedIds.has(event.id)} />
         ))}
       </div>
 
       <div className="mt-4 sm:hidden">
-        <Link
-          href={row.filterHref}
-          className="flex items-center gap-1.5 text-sm font-medium text-ink-muted hover:text-ink"
-        >
+        <Link href={row.filterHref} className="flex items-center gap-1.5 text-sm font-medium text-ink-muted hover:text-ink">
           View all {row.label} events
           <ArrowRightIcon className="h-4 w-4" />
         </Link>
@@ -353,49 +329,46 @@ function EventCard({ event, initialSaved }: { event: Event; initialSaved: boolea
   const style = SPORT_STYLES[event.sport] ?? defaultStyle
 
   return (
-    <div className="group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-wire bg-panel p-4 transition-all duration-300 hover:border-wire-bright hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30 md:gap-5 md:p-6">
+    <div className="group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-wire bg-panel p-4 transition-all duration-300 hover:border-wire-bright hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30">
       {/* Badge + save + date */}
       <div className="flex items-center justify-between gap-3">
         <span
-          className="rounded-full px-3 py-1 text-xs font-semibold"
+          className="rounded-full px-2.5 py-1 text-xs font-semibold"
           style={{ background: style.bg, color: style.text }}
         >
           {event.sport}
         </span>
-        <div className="relative z-10 flex items-center gap-2.5">
+        <div className="relative z-10 flex items-center gap-2">
           <HeartButton eventId={event.id} initialSaved={initialSaved} />
           <div className="text-right">
-            <div className="font-heading text-2xl font-bold leading-none text-ink">{event.date}</div>
-            <div className="mt-0.5 text-xs text-ink-muted">{event.month}</div>
+            <div className="font-heading text-xl font-bold leading-none text-ink">{event.date}</div>
+            <div className="mt-0.5 text-[11px] text-ink-muted">{event.month}</div>
           </div>
         </div>
       </div>
 
       {/* Title */}
-      <h3 className="font-heading text-lg font-semibold leading-snug text-ink transition-colors group-hover:text-mint">
+      <h3 className="font-heading text-base font-bold leading-snug text-ink transition-colors group-hover:text-mint sm:text-lg">
         {event.name}
       </h3>
 
       {/* Location */}
-      <div className="flex items-center gap-2 text-sm text-ink-muted">
-        <PinIcon className="h-4 w-4 shrink-0" style={{ color: style.text }} />
-        <span>{event.city}, {event.country}</span>
+      <div className="flex items-center gap-1.5 text-sm text-ink-muted">
+        <PinIcon className="h-3.5 w-3.5 shrink-0" style={{ color: style.text }} />
+        <span className="truncate">{event.city}, {event.country}</span>
         <span className="ml-auto text-base">{event.flag}</span>
       </div>
 
       <div className="border-t border-wire" />
 
-      {/* CTA */}
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-ink-muted transition-colors group-hover:text-ink">
+      {/* View Event CTA — looks like a button row */}
+      <div className="flex items-center justify-between gap-2 rounded-xl bg-panel-raised px-3 py-2 transition-colors duration-200 group-hover:bg-mint/10">
+        <span className="text-sm font-semibold text-ink-muted transition-colors group-hover:text-mint">
           View Event
         </span>
-        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-wire transition-all duration-200 group-hover:border-wire-bright group-hover:scale-110">
-          <ArrowRightIcon
-            className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
-            style={{ color: style.text }}
-          />
-        </span>
+        <ArrowRightIcon
+          className="h-4 w-4 text-ink-subtle transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-mint"
+        />
       </div>
 
       {/* Full-card invisible link */}

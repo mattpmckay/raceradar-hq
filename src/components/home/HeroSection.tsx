@@ -18,9 +18,9 @@ export async function HeroSection() {
   const disciplineCount = 10
 
   return (
-    <section className="relative flex min-h-[55vh] items-center overflow-hidden md:min-h-screen">
+    <section className="relative overflow-hidden md:min-h-screen">
 
-      {/* Dot-grid texture — desktop only (mobile: reduce visual noise) */}
+      {/* Dot-grid texture — desktop only */}
       <div
         className="absolute inset-0 hidden opacity-40 md:block"
         style={{
@@ -35,14 +35,14 @@ export async function HeroSection() {
         style={{ background: 'radial-gradient(circle, rgba(0,217,166,0.08) 0%, transparent 70%)' }}
       />
 
-      {/* Radar — desktop only (mobile: saves render, reduces distraction) */}
+      {/* Radar — desktop only */}
       <div className="hidden md:block">
         <RadarBackground />
       </div>
 
       {/* Content */}
-      <div className="container-page relative z-10 pb-8 pt-4 md:pb-24 md:pt-10">
-        <div className="max-w-4xl">
+      <div className="container-page relative z-10 pb-4 pt-3 md:pb-24 md:pt-10 md:flex md:min-h-screen md:items-center">
+        <div className="max-w-4xl w-full">
 
           {/* Sport labels — desktop only */}
           <p className="mb-5 hidden text-xs font-semibold uppercase tracking-[0.2em] text-ink-muted animate-fade-in md:block">
@@ -50,21 +50,21 @@ export async function HeroSection() {
           </p>
 
           {/* Headline */}
-          <h1 className="font-heading text-[2.25rem] font-bold leading-[1.08] tracking-tight text-ink animate-fade-up sm:text-6xl lg:text-[80px]">
-            Every Major Fitness Event
-            <br className="hidden sm:block" />{' '}
-            Across{' '}
-            <span className="text-mint">Asia Pacific.</span>
+          <h1 className="font-heading text-[1.85rem] font-bold leading-[1.05] tracking-tight text-ink animate-fade-up sm:text-6xl lg:text-[80px]">
+            Every Major Fitness Event{' '}
+            <span className="sm:block">Across <span className="text-mint">Asia Pacific.</span></span>
           </h1>
 
-          {/* Subheading */}
-          <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink-muted animate-fade-up sm:mt-6 sm:text-xl [animation-delay:150ms]">
-            Discover, compare and plan endurance events across APAC.
-            <span className="hidden sm:inline"> From your first HYROX to your next Ironman.</span>
+          {/* Subheading — shorter on mobile */}
+          <p className="mt-2 text-sm leading-snug text-ink-muted animate-fade-up sm:mt-6 sm:text-xl sm:leading-relaxed [animation-delay:150ms]">
+            <span className="sm:hidden">Find and plan fitness events across APAC.</span>
+            <span className="hidden sm:inline">
+              Discover, compare and plan endurance events across APAC — from your first HYROX to your next Ironman.
+            </span>
           </p>
 
-          {/* Live stats — compact on mobile */}
-          <div className="mt-4 flex flex-wrap items-end gap-x-6 gap-y-3 animate-fade-up sm:mt-8 sm:gap-x-10 [animation-delay:250ms]">
+          {/* Live stats — desktop only (shown above search) */}
+          <div className="mt-8 hidden animate-fade-up md:flex flex-wrap items-end gap-x-10 gap-y-3 [animation-delay:250ms]">
             <StatItem value={eventCount}      label="upcoming events" />
             <Divider />
             <StatItem value={countryCount}    label="countries" />
@@ -72,18 +72,23 @@ export async function HeroSection() {
             <StatItem value={disciplineCount} label="disciplines" />
           </div>
 
-          {/* Search bar */}
+          {/* Search — primary action on mobile */}
           <div className="animate-fade-up [animation-delay:350ms]">
             <HeroSearchBar />
           </div>
+
+          {/* Compact stats line — mobile only, below search so it doesn't compete */}
+          <p className="mt-3 text-xs text-ink-subtle animate-fade-up md:hidden [animation-delay:450ms]">
+            {eventCount > 0 ? `${eventCount}+` : '—'} events &middot; {countryCount} countries &middot; {disciplineCount} disciplines
+          </p>
 
           {/* Discipline pills — desktop only */}
           <div className="hidden animate-fade-up md:block [animation-delay:450ms]">
             <HeroDisciplinePills />
           </div>
 
-          {/* Trust line */}
-          <p className="mt-5 text-sm text-ink-subtle animate-fade-up md:mt-8 [animation-delay:550ms]">
+          {/* Trust line — desktop only (mobile gets compact stats instead) */}
+          <p className="mt-5 hidden text-sm text-ink-subtle animate-fade-up md:block [animation-delay:550ms]">
             Free to browse. Free to join.{' '}
             <span className="text-ink-muted">No credit card.</span>
           </p>
@@ -92,7 +97,7 @@ export async function HeroSection() {
       </div>
 
       {/* Bottom fade */}
-      <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-canvas to-transparent md:h-40" />
+      <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-canvas to-transparent md:h-40" />
     </section>
   )
 }
@@ -102,10 +107,10 @@ export async function HeroSection() {
 function StatItem({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="tabular-nums font-heading text-2xl font-bold leading-none text-ink sm:text-5xl">
+      <span className="tabular-nums font-heading text-5xl font-bold leading-none text-ink">
         {value > 0 ? `${value}+` : '—'}
       </span>
-      <span className="text-[10px] font-medium uppercase tracking-[0.15em] text-ink-muted sm:text-xs">
+      <span className="text-xs font-medium uppercase tracking-[0.15em] text-ink-muted">
         {label}
       </span>
     </div>
@@ -113,7 +118,7 @@ function StatItem({ value, label }: { value: number; label: string }) {
 }
 
 function Divider() {
-  return <div className="hidden h-8 w-px bg-wire sm:block" />
+  return <div className="h-8 w-px bg-wire" />
 }
 
 function RadarBackground() {

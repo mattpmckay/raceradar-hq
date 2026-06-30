@@ -31,6 +31,13 @@ export async function EventsSectionServer({ featuredOnly = false }: { featuredOn
     savedIds = new Set((favs ?? []).map((f) => f.entity_id))
   }
 
+  // "Happening Soon" — events starting within 30 days, not in featured list
+  const in30 = new Date()
+  in30.setDate(in30.getDate() + 30)
+  const happeningSoon = featuredOnly
+    ? (data ?? []).filter((e) => !e.is_featured && new Date(e.start_date) <= in30).slice(0, 3)
+    : []
+
   return (
     <EventsSection
       events={data ?? []}
@@ -39,6 +46,7 @@ export async function EventsSectionServer({ featuredOnly = false }: { featuredOn
       isLoggedIn={!!user}
       featuredOnly={featuredOnly}
       totalCount={data?.length ?? 0}
+      happeningSoon={happeningSoon}
     />
   )
 }
