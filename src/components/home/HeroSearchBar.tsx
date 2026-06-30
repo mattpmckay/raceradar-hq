@@ -56,7 +56,7 @@ export function HeroSearchBar() {
               className="flex-1 min-w-0 appearance-none rounded-xl border border-wire bg-canvas/60 px-3 py-2 text-sm font-medium text-ink-muted focus:border-mint/50 focus:outline-none focus:text-ink cursor-pointer"
               aria-label="Select event type"
             >
-              <option value="">🏁 Any Event Type</option>
+              <option value="">🏁 Event Type</option>
               {SPORTS.map((s) => (
                 <option key={s} value={s} className="bg-panel text-ink">{s}</option>
               ))}
@@ -67,7 +67,7 @@ export function HeroSearchBar() {
               className="flex-1 min-w-0 appearance-none rounded-xl border border-wire bg-canvas/60 px-3 py-2 text-sm font-medium text-ink-muted focus:border-mint/50 focus:outline-none focus:text-ink cursor-pointer"
               aria-label="Select location"
             >
-              <option value="">🌏 Any Location</option>
+              <option value="">🌏 Location</option>
               {LOCATIONS.map((c) => (
                 <option key={c} value={c} className="bg-panel text-ink">{c}</option>
               ))}
@@ -96,7 +96,7 @@ export function HeroSearchBar() {
               className="w-full appearance-none bg-transparent px-4 py-3 text-sm font-medium text-ink-muted focus:outline-none focus:text-ink cursor-pointer hover:text-ink transition-colors"
               aria-label="Select event type"
             >
-              <option value="">Any Event Type</option>
+              <option value="">Event Type</option>
               {SPORTS.map((s) => (
                 <option key={s} value={s} className="bg-panel text-ink">{s}</option>
               ))}
@@ -111,7 +111,7 @@ export function HeroSearchBar() {
               className="w-full appearance-none bg-transparent px-4 py-3 text-sm font-medium text-ink-muted focus:outline-none focus:text-ink cursor-pointer hover:text-ink transition-colors"
               aria-label="Select location"
             >
-              <option value="">Any Location</option>
+              <option value="">Location</option>
               {LOCATIONS.map((c) => (
                 <option key={c} value={c} className="bg-panel text-ink">{c}</option>
               ))}
