@@ -210,14 +210,29 @@ export type Database = {
           start_date: string
           end_date: string | null
           registration_deadline: string | null
+          registration_opens_date: string | null
+          registration_status: 'open' | 'closing_soon' | 'sold_out' | 'coming_soon' | null
+          entry_fee_from: number | null
+          entry_fee_to: number | null
+          entry_fee_currency: string
           description: string | null
+          format_notes: string | null
+          whats_included: string[] | null
+          difficulty: number | null
           image_url: string | null
+          hero_image_url: string | null
           website_url: string | null
           organiser: string | null
           country: string
           region: string | null
           city: string | null
-          registration_status: 'open' | 'closing_soon' | 'sold_out' | 'coming_soon' | null
+          venue_name: string | null
+          venue_address: string | null
+          latitude: number | null
+          longitude: number | null
+          transport_notes: string | null
+          accommodation_notes: string | null
+          series_slug: string | null
           is_published: boolean
           is_featured: boolean
           created_at: string
@@ -234,14 +249,29 @@ export type Database = {
           start_date: string
           end_date?: string | null
           registration_deadline?: string | null
+          registration_opens_date?: string | null
           registration_status?: 'open' | 'closing_soon' | 'sold_out' | 'coming_soon' | null
+          entry_fee_from?: number | null
+          entry_fee_to?: number | null
+          entry_fee_currency?: string
           description?: string | null
+          format_notes?: string | null
+          whats_included?: string[] | null
+          difficulty?: number | null
           image_url?: string | null
+          hero_image_url?: string | null
           website_url?: string | null
           organiser?: string | null
           country: string
           region?: string | null
           city?: string | null
+          venue_name?: string | null
+          venue_address?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          transport_notes?: string | null
+          accommodation_notes?: string | null
+          series_slug?: string | null
           is_published?: boolean
           is_featured?: boolean
           created_at?: string
@@ -258,14 +288,29 @@ export type Database = {
           start_date?: string
           end_date?: string | null
           registration_deadline?: string | null
+          registration_opens_date?: string | null
           registration_status?: 'open' | 'closing_soon' | 'sold_out' | 'coming_soon' | null
+          entry_fee_from?: number | null
+          entry_fee_to?: number | null
+          entry_fee_currency?: string
           description?: string | null
+          format_notes?: string | null
+          whats_included?: string[] | null
+          difficulty?: number | null
           image_url?: string | null
+          hero_image_url?: string | null
           website_url?: string | null
           organiser?: string | null
           country?: string
           region?: string | null
           city?: string | null
+          venue_name?: string | null
+          venue_address?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          transport_notes?: string | null
+          accommodation_notes?: string | null
+          series_slug?: string | null
           is_published?: boolean
           is_featured?: boolean
           created_at?: string
@@ -284,6 +329,94 @@ export type Database = {
             columns: ['championship_id']
             isOneToOne: false
             referencedRelation: 'championships'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      event_categories: {
+        Row: {
+          id: string
+          event_id: string
+          name: string
+          distance_label: string | null
+          entry_fee: number | null
+          cutoff_minutes: number | null
+          max_participants: number | null
+          is_sold_out: boolean
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          name: string
+          distance_label?: string | null
+          entry_fee?: number | null
+          cutoff_minutes?: number | null
+          max_participants?: number | null
+          is_sold_out?: boolean
+          sort_order?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          name?: string
+          distance_label?: string | null
+          entry_fee?: number | null
+          cutoff_minutes?: number | null
+          max_participants?: number | null
+          is_sold_out?: boolean
+          sort_order?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'event_categories_event_id_fkey'
+            columns: ['event_id']
+            isOneToOne: false
+            referencedRelation: 'events'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      event_reminders: {
+        Row: {
+          id: string
+          event_id: string
+          user_id: string | null
+          email: string | null
+          reminder_type: 'registration_opens' | 'registration_closing' | 'race_week'
+          is_sent: boolean
+          sent_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          user_id?: string | null
+          email?: string | null
+          reminder_type: 'registration_opens' | 'registration_closing' | 'race_week'
+          is_sent?: boolean
+          sent_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          user_id?: string | null
+          email?: string | null
+          reminder_type?: 'registration_opens' | 'registration_closing' | 'race_week'
+          is_sent?: boolean
+          sent_at?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'event_reminders_event_id_fkey'
+            columns: ['event_id']
+            isOneToOne: false
+            referencedRelation: 'events'
             referencedColumns: ['id']
           },
         ]
