@@ -59,11 +59,11 @@ export function MemberValueSection({ isLoggedIn }: Props) {
             {/* Left — pitch */}
             <div className="flex flex-col justify-center p-6 sm:p-8 lg:p-12">
               <h2 className="font-heading text-2xl font-bold tracking-tight text-ink sm:text-3xl md:text-4xl">
-                Stay ahead of your race season.
+                Never miss another race.
               </h2>
 
               <p className="mt-3 text-sm leading-relaxed text-ink-muted sm:text-base">
-                Your personal hub for races across APAC — free for every athlete, forever.
+                Save events, get registration reminders and build your race calendar.
               </p>
 
               <div className="mt-6 sm:mt-8">
@@ -99,9 +99,9 @@ export function MemberValueSection({ isLoggedIn }: Props) {
                 ))}
               </ul>
 
-              <div className="my-4 border-t border-wire" />
+              <div className="my-4 hidden border-t border-wire sm:block" />
 
-              <ul className="space-y-3">
+              <ul className="hidden space-y-3 sm:block">
                 {SOON_BENEFITS.map((b) => (
                   <li key={b.label} className="flex items-center gap-3">
                     <span className="text-base leading-none opacity-50" aria-hidden>{b.icon}</span>

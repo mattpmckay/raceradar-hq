@@ -46,16 +46,16 @@ export function HeroSearchBar() {
   return (
     <>
       {/* ── Mobile search card (Airbnb-style) ── */}
-      <div className="mt-4 w-full md:hidden">
+      <div className="mt-3 w-full md:hidden">
         <div className="rounded-2xl border border-wire-bright bg-panel shadow-lg shadow-black/20">
-          <div className="flex gap-2 p-2">
+          <div className="flex gap-1.5 p-1.5">
             <select
               value={sport}
               onChange={(e) => setSport(e.target.value)}
-              className="flex-1 min-w-0 appearance-none rounded-xl border border-wire bg-canvas/60 px-3 py-2.5 text-sm font-medium text-ink-muted focus:border-mint/50 focus:outline-none focus:text-ink cursor-pointer"
+              className="flex-1 min-w-0 appearance-none rounded-xl border border-wire bg-canvas/60 px-3 py-2 text-sm font-medium text-ink-muted focus:border-mint/50 focus:outline-none focus:text-ink cursor-pointer"
               aria-label="Select event type"
             >
-              <option value="">Event</option>
+              <option value="">🏁 Any Event</option>
               {SPORTS.map((s) => (
                 <option key={s} value={s} className="bg-panel text-ink">{s}</option>
               ))}
@@ -63,19 +63,19 @@ export function HeroSearchBar() {
             <select
               value={country}
               onChange={(e) => setCountry(e.target.value)}
-              className="flex-1 min-w-0 appearance-none rounded-xl border border-wire bg-canvas/60 px-3 py-2.5 text-sm font-medium text-ink-muted focus:border-mint/50 focus:outline-none focus:text-ink cursor-pointer"
+              className="flex-1 min-w-0 appearance-none rounded-xl border border-wire bg-canvas/60 px-3 py-2 text-sm font-medium text-ink-muted focus:border-mint/50 focus:outline-none focus:text-ink cursor-pointer"
               aria-label="Select country"
             >
-              <option value="">Country</option>
+              <option value="">🌏 Any Country</option>
               {COUNTRIES.map((c) => (
                 <option key={c} value={c} className="bg-panel text-ink">{c}</option>
               ))}
             </select>
           </div>
-          <div className="px-2 pb-2">
+          <div className="px-1.5 pb-1.5">
             <button
               onClick={handleSearch}
-              className="w-full rounded-xl bg-mint py-4 text-base font-bold text-canvas transition-all duration-200 hover:bg-mint-300 active:scale-[0.98]"
+              className="w-full rounded-xl bg-mint py-3 text-base font-bold text-canvas transition-all duration-200 hover:bg-mint-300 active:scale-[0.98]"
             >
               Find Events
             </button>
@@ -95,7 +95,7 @@ export function HeroSearchBar() {
               className="w-full appearance-none bg-transparent px-4 py-3 text-sm font-medium text-ink-muted focus:outline-none focus:text-ink cursor-pointer hover:text-ink transition-colors"
               aria-label="Select event type"
             >
-              <option value="">Event</option>
+              <option value="">Any Event</option>
               {SPORTS.map((s) => (
                 <option key={s} value={s} className="bg-panel text-ink">{s}</option>
               ))}
@@ -110,7 +110,7 @@ export function HeroSearchBar() {
               className="w-full appearance-none bg-transparent px-4 py-3 text-sm font-medium text-ink-muted focus:outline-none focus:text-ink cursor-pointer hover:text-ink transition-colors"
               aria-label="Select country"
             >
-              <option value="">Country</option>
+              <option value="">Any Country</option>
               {COUNTRIES.map((c) => (
                 <option key={c} value={c} className="bg-panel text-ink">{c}</option>
               ))}

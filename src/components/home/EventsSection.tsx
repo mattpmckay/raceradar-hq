@@ -348,7 +348,7 @@ function EventCard({ event, initialSaved }: { event: Event; initialSaved: boolea
       </div>
 
       {/* Title */}
-      <h3 className="font-heading text-base font-bold leading-snug text-ink transition-colors group-hover:text-mint sm:text-lg">
+      <h3 className="font-heading text-[17px] font-bold leading-snug text-ink transition-colors group-hover:text-mint sm:text-[18px]">
         {event.name}
       </h3>
 
@@ -356,13 +356,13 @@ function EventCard({ event, initialSaved }: { event: Event; initialSaved: boolea
       <div className="flex items-center gap-1.5 text-sm text-ink-muted">
         <PinIcon className="h-3.5 w-3.5 shrink-0" style={{ color: style.text }} />
         <span className="truncate">{event.city}, {event.country}</span>
-        <span className="ml-auto text-base">{event.flag}</span>
+        <span className="ml-auto text-xl">{event.flag}</span>
       </div>
 
       <div className="border-t border-wire" />
 
-      {/* View Event CTA — looks like a button row */}
-      <div className="flex items-center justify-between gap-2 rounded-xl bg-panel-raised px-3 py-2 transition-colors duration-200 group-hover:bg-mint/10">
+      {/* View Event CTA */}
+      <div className="flex items-center justify-between gap-2 rounded-xl border border-wire bg-panel-raised px-3 py-2.5 transition-all duration-200 group-hover:border-mint/30 group-hover:bg-mint/10">
         <span className="text-sm font-semibold text-ink-muted transition-colors group-hover:text-mint">
           View Event
         </span>

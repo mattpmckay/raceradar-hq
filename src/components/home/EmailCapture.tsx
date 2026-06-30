@@ -59,9 +59,9 @@ export function EmailCapture() {
           </span>
 
           <h2 className="font-heading text-2xl font-bold tracking-tight text-ink sm:text-3xl md:text-4xl">
-            Every APAC fitness event.
+            Get the Free 2026 APAC
             <br />
-            <span className="text-mint">One free calendar.</span>
+            <span className="text-mint">Race Calendar</span>
           </h2>
 
           <p className="mt-3 text-sm leading-relaxed text-ink-muted sm:mt-4 sm:text-base">

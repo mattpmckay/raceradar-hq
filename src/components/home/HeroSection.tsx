@@ -41,7 +41,7 @@ export async function HeroSection() {
       </div>
 
       {/* Content */}
-      <div className="container-page relative z-10 pb-4 pt-3 md:pb-24 md:pt-10 md:flex md:min-h-screen md:items-center">
+      <div className="container-page relative z-10 pb-2 pt-2 md:pb-24 md:pt-10 md:flex md:min-h-screen md:items-center">
         <div className="max-w-4xl w-full">
 
           {/* Sport labels — desktop only */}
@@ -56,7 +56,7 @@ export async function HeroSection() {
           </h1>
 
           {/* Subheading — shorter on mobile */}
-          <p className="mt-2 text-sm leading-snug text-ink-muted animate-fade-up sm:mt-6 sm:text-xl sm:leading-relaxed [animation-delay:150ms]">
+          <p className="mt-1 text-sm leading-snug text-ink-muted animate-fade-up sm:mt-6 sm:text-xl sm:leading-relaxed [animation-delay:150ms]">
             <span className="sm:hidden">Find and plan fitness events across APAC.</span>
             <span className="hidden sm:inline">
               Discover, compare and plan endurance events across APAC — from your first HYROX to your next Ironman.
@@ -78,7 +78,7 @@ export async function HeroSection() {
           </div>
 
           {/* Compact stats line — mobile only, below search so it doesn't compete */}
-          <p className="mt-3 text-xs text-ink-subtle animate-fade-up md:hidden [animation-delay:450ms]">
+          <p className="mt-2 text-xs text-ink-subtle animate-fade-up md:hidden [animation-delay:450ms]">
             {eventCount > 0 ? `${eventCount}+` : '—'} events &middot; {countryCount} countries &middot; {disciplineCount} disciplines
           </p>
 
@@ -97,7 +97,7 @@ export async function HeroSection() {
       </div>
 
       {/* Bottom fade */}
-      <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-canvas to-transparent md:h-40" />
+      <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-canvas to-transparent md:h-40" />
     </section>
   )
 }
