@@ -927,6 +927,26 @@ function HeroSection({ event, isTBC, venue }: { event: EventRow; isTBC: boolean;
 function AboutSection({ discipline, event }: { discipline: string; event: EventRow }) {
   const location = [event.city, event.country].filter(Boolean).join(', ')
 
+  // When event-specific overview is available, show it instead of generic copy
+  if (event.event_specific_overview) {
+    return (
+      <section>
+        <SectionHeading>About the Event</SectionHeading>
+        <div className="space-y-4 text-ink leading-relaxed text-[0.9375rem]">
+          {event.event_specific_overview.split('\n').filter(Boolean).map((para, i) => (
+            <p key={i}>{para}</p>
+          ))}
+          {event.format_notes && (
+            <div className="mt-4 rounded-xl border border-wire bg-panel px-5 py-4 text-sm text-ink-muted leading-relaxed">
+              <span className="block text-xs font-semibold uppercase tracking-wider text-ink-subtle mb-2">Format Notes</span>
+              {event.format_notes}
+            </div>
+          )}
+        </div>
+      </section>
+    )
+  }
+
   const editorialCopy: Record<string, React.ReactNode> = {
     'CrossFit': (
       <>
@@ -2032,9 +2052,10 @@ function TravelLogisticsSection({ event, isTBC }: { event: EventRow; isTBC: bool
   const climate = !isTBC && cityData ? cityData.climate[month] : undefined
   const isIndoor = ['HYROX', 'CrossFit', 'Deka Fit'].includes(event.discipline)
 
-  const hasTransport = event.transport_notes || cityData
-  const hasAccommodation = event.accommodation_notes
-  const hasAnything = hasTransport || hasAccommodation || climate
+  const hasTransportCard = event.transport_notes || cityData || event.cbd_to_venue_public_transport_time || event.cbd_to_venue_uber_time
+  const hasParkingCard = event.parking_notes || event.parking_url
+  const hasSpectatorCard = event.spectator_notes || event.spectator_info_url
+  const hasAnything = hasTransportCard || hasParkingCard || hasSpectatorCard || event.accommodation_notes || climate
 
   if (!hasAnything) return null
 
@@ -2043,35 +2064,110 @@ function TravelLogisticsSection({ event, isTBC }: { event: EventRow; isTBC: bool
       <SectionHeading>Travel &amp; Logistics</SectionHeading>
       <div className="space-y-4">
 
-        {/* Transport — DB notes take priority over city data */}
-        {event.transport_notes ? (
-          <div className="card space-y-2">
-            <div className="flex items-center gap-2 text-sm font-semibold text-ink">
-              <Train className="h-4 w-4 text-mint shrink-0" />
-              Getting There
-            </div>
-            <p className="text-sm text-ink-muted leading-relaxed">{event.transport_notes}</p>
-          </div>
-        ) : cityData ? (
+        {/* ── Getting There ──────────────────────────────────────────────────── */}
+        {hasTransportCard && (
           <div className="card space-y-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-ink">
               <Train className="h-4 w-4 text-mint shrink-0" />
               Getting There
             </div>
-            <div className="space-y-2 text-sm text-ink-muted">
-              <div>
-                <span className="font-medium text-ink">Nearest airport — </span>
+
+            {/* Event-specific transport notes take priority */}
+            {event.transport_notes && (
+              <p className="text-sm text-ink-muted leading-relaxed">{event.transport_notes}</p>
+            )}
+
+            {/* Travel time estimates */}
+            {(event.cbd_to_venue_public_transport_time || event.cbd_to_venue_uber_time) && (
+              <div className="grid gap-2 sm:grid-cols-2">
+                {event.cbd_to_venue_public_transport_time && (
+                  <div className="rounded-lg border border-wire bg-canvas px-4 py-3 text-sm">
+                    <div className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Public Transport</div>
+                    <div className="font-medium text-ink">{event.cbd_to_venue_public_transport_time}</div>
+                    <div className="text-xs text-ink-subtle">from CBD</div>
+                    {event.public_transport_url && (
+                      <a href={event.public_transport_url} target="_blank" rel="noopener noreferrer"
+                        className="mt-1.5 inline-block text-xs text-mint hover:underline">
+                        Transport info →
+                      </a>
+                    )}
+                  </div>
+                )}
+                {event.cbd_to_venue_uber_time && (
+                  <div className="rounded-lg border border-wire bg-canvas px-4 py-3 text-sm">
+                    <div className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1">Rideshare</div>
+                    <div className="font-medium text-ink">{event.cbd_to_venue_uber_time}</div>
+                    {event.cbd_to_venue_uber_price_aud && (
+                      <div className="text-xs text-ink-subtle">{event.cbd_to_venue_uber_price_aud} approx.</div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Generic city transport as fallback when no event-specific data */}
+            {!event.transport_notes && !event.cbd_to_venue_public_transport_time && cityData && (
+              <div className="space-y-2 text-sm text-ink-muted">
+                <div>
+                  <span className="font-medium text-ink">Nearest airport — </span>
+                  {cityData.airport}.
+                </div>
+                <div>
+                  <span className="font-medium text-ink">Public transport — </span>
+                  {cityData.transport}
+                </div>
+              </div>
+            )}
+
+            {/* Airport info as supplement when we have specific data but also have city data */}
+            {event.transport_notes && cityData && (
+              <div className="border-t border-wire pt-3 text-xs text-ink-muted">
+                <span className="font-medium text-ink-subtle">Nearest airport — </span>
                 {cityData.airport}.
               </div>
-              <div>
-                <span className="font-medium text-ink">Public transport — </span>
-                {cityData.transport}
-              </div>
-            </div>
+            )}
           </div>
-        ) : null}
+        )}
 
-        {/* Accommodation */}
+        {/* ── Parking ───────────────────────────────────────────────────────── */}
+        {hasParkingCard && (
+          <div className="card space-y-2">
+            <div className="flex items-center gap-2 text-sm font-semibold text-ink">
+              <MapPin className="h-4 w-4 text-mint shrink-0" />
+              Parking
+            </div>
+            {event.parking_notes && (
+              <p className="text-sm text-ink-muted leading-relaxed">{event.parking_notes}</p>
+            )}
+            {event.parking_url && (
+              <a href={event.parking_url} target="_blank" rel="noopener noreferrer"
+                className="inline-block text-sm text-mint hover:underline">
+                Official parking information →
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* ── Spectators ────────────────────────────────────────────────────── */}
+        {hasSpectatorCard && (
+          <div className="card space-y-2">
+            <div className="flex items-center gap-2 text-sm font-semibold text-ink">
+              <Users className="h-4 w-4 text-mint shrink-0" />
+              Spectator Information
+            </div>
+            {event.spectator_notes && (
+              <p className="text-sm text-ink-muted leading-relaxed">{event.spectator_notes}</p>
+            )}
+            {event.spectator_info_url && (
+              <a href={event.spectator_info_url} target="_blank" rel="noopener noreferrer"
+                className="inline-block text-sm text-mint hover:underline">
+                Full spectator guide →
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* ── Accommodation ─────────────────────────────────────────────────── */}
         {event.accommodation_notes ? (
           <div className="card space-y-2">
             <div className="flex items-center gap-2 text-sm font-semibold text-ink">
@@ -2089,7 +2185,7 @@ function TravelLogisticsSection({ event, isTBC }: { event: EventRow; isTBC: bool
           </div>
         )}
 
-        {/* Climate */}
+        {/* ── Climate ───────────────────────────────────────────────────────── */}
         {climate && (
           <div className="card space-y-2">
             <div className="flex items-center gap-2 text-sm font-semibold text-ink">
@@ -2100,7 +2196,7 @@ function TravelLogisticsSection({ event, isTBC }: { event: EventRow; isTBC: bool
           </div>
         )}
 
-        {/* Arrival timing */}
+        {/* ── Race day arrival timing ────────────────────────────────────────── */}
         <div className="card space-y-2">
           <div className="flex items-center gap-2 text-sm font-semibold text-ink">
             <Clock className="h-4 w-4 text-mint shrink-0" />

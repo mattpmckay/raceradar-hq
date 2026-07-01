@@ -133,6 +133,22 @@ function buildEventPayload(body: Record<string, unknown>) {
     transport_notes:     str(body.transport_notes),
     accommodation_notes: str(body.accommodation_notes),
 
+    // Event-specific content
+    event_specific_overview: str(body.event_specific_overview),
+
+    // Travel intelligence
+    public_transport_url:                str(body.public_transport_url),
+    parking_url:                         str(body.parking_url),
+    spectator_info_url:                  str(body.spectator_info_url),
+    cbd_to_venue_public_transport_time:  str(body.cbd_to_venue_public_transport_time),
+    cbd_to_venue_uber_time:              str(body.cbd_to_venue_uber_time),
+    cbd_to_venue_uber_price_aud:         str(body.cbd_to_venue_uber_price_aud),
+    parking_notes:                       str(body.parking_notes),
+    spectator_notes:                     str(body.spectator_notes),
+    travel_source_url:                   str(body.travel_source_url),
+    travel_last_verified_date:           str(body.travel_last_verified_date),
+    travel_data_confidence:              num(body.travel_data_confidence),
+
     // Media
     hero_image_url: str(body.hero_image_url),
     image_url:      str(body.image_url),

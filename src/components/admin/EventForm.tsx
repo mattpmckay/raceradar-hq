@@ -165,6 +165,20 @@ export function EventForm({ event }: Props) {
     transport_notes:      event?.transport_notes ?? '',
     accommodation_notes:  event?.accommodation_notes ?? '',
 
+    // ── Travel intelligence ───────────────────────────────────
+    event_specific_overview:            event?.event_specific_overview ?? '',
+    public_transport_url:               event?.public_transport_url ?? '',
+    parking_url:                        event?.parking_url ?? '',
+    spectator_info_url:                 event?.spectator_info_url ?? '',
+    cbd_to_venue_public_transport_time: event?.cbd_to_venue_public_transport_time ?? '',
+    cbd_to_venue_uber_time:             event?.cbd_to_venue_uber_time ?? '',
+    cbd_to_venue_uber_price_aud:        event?.cbd_to_venue_uber_price_aud ?? '',
+    parking_notes:                      event?.parking_notes ?? '',
+    spectator_notes:                    event?.spectator_notes ?? '',
+    travel_source_url:                  event?.travel_source_url ?? '',
+    travel_last_verified_date:          event?.travel_last_verified_date ?? '',
+    travel_data_confidence:             str(event?.travel_data_confidence),
+
     // ── Media ────────────────────────────────────────────────
     hero_image_url: event?.hero_image_url ?? '',
     image_url:      event?.image_url ?? '',
@@ -581,8 +595,12 @@ export function EventForm({ event }: Props) {
       {/* ── Content ───────────────────────────────────────────────────────── */}
       <Section label="Content">
         <div className="space-y-4">
-          <FormField label="Description">
-            <textarea rows={4} value={form.description} onChange={(e) => set('description', e.target.value)}
+          <FormField label="Event-Specific Overview (replaces generic discipline copy — factual, sourced)">
+            <textarea rows={5} value={form.event_specific_overview} onChange={(e) => set('event_specific_overview', e.target.value)}
+              className="form-input resize-none" placeholder="What makes this specific event unique? Venue history, course character, cultural significance. Do not invent facts — use only verifiable information from official sources." />
+          </FormField>
+          <FormField label="Description (legacy — used as fallback when no overview is set)">
+            <textarea rows={3} value={form.description} onChange={(e) => set('description', e.target.value)}
               className="form-input resize-none" placeholder="Short editorial description shown on the event detail page." />
           </FormField>
           <FormField label="Format Notes">
@@ -607,6 +625,91 @@ export function EventForm({ event }: Props) {
             <textarea rows={3} value={form.accommodation_notes} onChange={(e) => set('accommodation_notes', e.target.value)}
               className="form-input resize-none" placeholder="Official hotel partner, athlete block rate, booking deadline…" />
           </FormField>
+        </div>
+      </Section>
+
+      {/* ── Travel Intelligence ───────────────────────────────────────────── */}
+      <Section label="Travel Intelligence">
+        <p className="mb-4 text-xs text-ink-muted">
+          Structured travel data shown in the Getting There, Parking and Spectators sections on the event page.
+          Only populate with verified information. Leave blank rather than guess — the generic city data fills the gap.
+        </p>
+        <div className="space-y-6">
+
+          {/* Getting there */}
+          <div className="rounded-lg border border-wire bg-panel/50 p-4 space-y-4">
+            <p className="text-xs font-semibold uppercase tracking-widest text-ink-muted">Getting There — Public Transport</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField label="CBD → Venue (public transport time)">
+                <input value={form.cbd_to_venue_public_transport_time} onChange={(e) => set('cbd_to_venue_public_transport_time', e.target.value)}
+                  className="form-input" placeholder="35 min by train from Central" />
+              </FormField>
+              <FormField label="Public Transport Info URL">
+                <input type="url" value={form.public_transport_url} onChange={(e) => set('public_transport_url', e.target.value)}
+                  className="form-input" placeholder="https://..." />
+              </FormField>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField label="CBD → Venue (rideshare time)">
+                <input value={form.cbd_to_venue_uber_time} onChange={(e) => set('cbd_to_venue_uber_time', e.target.value)}
+                  className="form-input" placeholder="20 min" />
+              </FormField>
+              <FormField label="Rideshare Price Estimate (AUD)">
+                <input value={form.cbd_to_venue_uber_price_aud} onChange={(e) => set('cbd_to_venue_uber_price_aud', e.target.value)}
+                  className="form-input" placeholder="$25–$35" />
+              </FormField>
+            </div>
+          </div>
+
+          {/* Parking */}
+          <div className="rounded-lg border border-wire bg-panel/50 p-4 space-y-4">
+            <p className="text-xs font-semibold uppercase tracking-widest text-ink-muted">Parking</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField label="Parking Notes">
+                <textarea rows={3} value={form.parking_notes} onChange={(e) => set('parking_notes', e.target.value)}
+                  className="form-input resize-none" placeholder="Nearest car park, cost, pre-booking required…" />
+              </FormField>
+              <FormField label="Parking Info URL">
+                <input type="url" value={form.parking_url} onChange={(e) => set('parking_url', e.target.value)}
+                  className="form-input" placeholder="https://..." />
+              </FormField>
+            </div>
+          </div>
+
+          {/* Spectators */}
+          <div className="rounded-lg border border-wire bg-panel/50 p-4 space-y-4">
+            <p className="text-xs font-semibold uppercase tracking-widest text-ink-muted">Spectators</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField label="Spectator Notes">
+                <textarea rows={3} value={form.spectator_notes} onChange={(e) => set('spectator_notes', e.target.value)}
+                  className="form-input resize-none" placeholder="Spectator entry, best viewing spots, ticket requirements…" />
+              </FormField>
+              <FormField label="Spectator Guide URL">
+                <input type="url" value={form.spectator_info_url} onChange={(e) => set('spectator_info_url', e.target.value)}
+                  className="form-input" placeholder="https://..." />
+              </FormField>
+            </div>
+          </div>
+
+          {/* Source / verification */}
+          <div className="rounded-lg border border-wire bg-panel/50 p-4 space-y-4">
+            <p className="text-xs font-semibold uppercase tracking-widest text-ink-muted">Travel Data Source &amp; Verification</p>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <FormField label="Source URL">
+                <input type="url" value={form.travel_source_url} onChange={(e) => set('travel_source_url', e.target.value)}
+                  className="form-input" placeholder="https://..." />
+              </FormField>
+              <FormField label="Last Verified Date">
+                <input type="date" value={form.travel_last_verified_date} onChange={(e) => set('travel_last_verified_date', e.target.value)}
+                  className="form-input" />
+              </FormField>
+              <FormField label="Travel Confidence (1–5)">
+                <select value={form.travel_data_confidence} onChange={(e) => set('travel_data_confidence', e.target.value)} className="form-input">
+                  {CONFIDENCE_LEVELS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+                </select>
+              </FormField>
+            </div>
+          </div>
         </div>
       </Section>
 

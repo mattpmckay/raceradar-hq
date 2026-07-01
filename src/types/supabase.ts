@@ -4,6 +4,7 @@
 // Manually updated for Sprint 24 migrations (20260701000006–20260701000007).
 // Manually updated for Sprint 25 migration  (20260701000009).
 // Manually updated for Sprint 26 migration  (20260701000010).
+// Manually updated for Sprint 28 migration  (20260701000011).
 
 export type Json =
   | string
@@ -394,6 +395,18 @@ export type Database = {
           is_featured: boolean
           created_at: string
           updated_at: string
+          event_specific_overview: string | null
+          public_transport_url: string | null
+          parking_url: string | null
+          spectator_info_url: string | null
+          cbd_to_venue_public_transport_time: string | null
+          cbd_to_venue_uber_time: string | null
+          cbd_to_venue_uber_price_aud: string | null
+          parking_notes: string | null
+          spectator_notes: string | null
+          travel_source_url: string | null
+          travel_last_verified_date: string | null
+          travel_data_confidence: number | null
         }
         Insert: {
           id?: string
@@ -482,6 +495,18 @@ export type Database = {
           is_featured?: boolean
           created_at?: string
           updated_at?: string
+          event_specific_overview?: string | null
+          public_transport_url?: string | null
+          parking_url?: string | null
+          spectator_info_url?: string | null
+          cbd_to_venue_public_transport_time?: string | null
+          cbd_to_venue_uber_time?: string | null
+          cbd_to_venue_uber_price_aud?: string | null
+          parking_notes?: string | null
+          spectator_notes?: string | null
+          travel_source_url?: string | null
+          travel_last_verified_date?: string | null
+          travel_data_confidence?: number | null
         }
         Update: {
           id?: string
@@ -570,6 +595,18 @@ export type Database = {
           is_featured?: boolean
           created_at?: string
           updated_at?: string
+          event_specific_overview?: string | null
+          public_transport_url?: string | null
+          parking_url?: string | null
+          spectator_info_url?: string | null
+          cbd_to_venue_public_transport_time?: string | null
+          cbd_to_venue_uber_time?: string | null
+          cbd_to_venue_uber_price_aud?: string | null
+          parking_notes?: string | null
+          spectator_notes?: string | null
+          travel_source_url?: string | null
+          travel_last_verified_date?: string | null
+          travel_data_confidence?: number | null
         }
         Relationships: [
           {
