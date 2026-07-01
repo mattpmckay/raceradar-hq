@@ -3,12 +3,23 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-export function ImportQueueActions({ id }: { id: string }) {
+export function ImportQueueActions({
+  id,
+  hasDuplicateWarning = false,
+}: {
+  id: string
+  hasDuplicateWarning?: boolean
+}) {
   const router = useRouter()
-  const [loading, setLoading] = useState<'approve' | 'reject' | null>(null)
-  const [notes, setNotes]     = useState('')
+  const [loading,  setLoading]  = useState<'approve' | 'reject' | null>(null)
+  const [notes,    setNotes]    = useState('')
+  const [confirmed, setConfirmed] = useState(false)
 
   async function act(action: 'approve' | 'reject') {
+    if (action === 'approve' && hasDuplicateWarning && !confirmed) {
+      setConfirmed(true)
+      return
+    }
     setLoading(action)
     try {
       const res = await fetch(`/api/admin/import-queue/${id}`, {
@@ -24,6 +35,7 @@ export function ImportQueueActions({ id }: { id: string }) {
       router.refresh()
     } finally {
       setLoading(null)
+      setConfirmed(false)
     }
   }
 
@@ -36,13 +48,20 @@ export function ImportQueueActions({ id }: { id: string }) {
         rows={2}
         className="form-input w-48 text-xs resize-none"
       />
+      {confirmed && (
+        <p className="text-xs text-yellow-400 text-right w-48">
+          Potential duplicate detected. Click Approve again to confirm.
+        </p>
+      )}
       <div className="flex gap-2">
         <button
           onClick={() => act('approve')}
           disabled={loading !== null}
-          className="rounded-lg bg-mint px-3 py-1.5 text-xs font-semibold text-canvas hover:opacity-90 disabled:opacity-50 transition-opacity"
+          className={`rounded-lg px-3 py-1.5 text-xs font-semibold text-canvas hover:opacity-90 disabled:opacity-50 transition-opacity ${
+            confirmed ? 'bg-yellow-500' : 'bg-mint'
+          }`}
         >
-          {loading === 'approve' ? 'Applying…' : 'Approve'}
+          {loading === 'approve' ? 'Applying…' : confirmed ? 'Confirm Approve' : 'Approve'}
         </button>
         <button
           onClick={() => act('reject')}

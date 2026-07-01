@@ -1,14 +1,15 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { Flag, Calendar, MapPin, Trophy, LayoutDashboard, Inbox } from 'lucide-react'
+import { Flag, Calendar, MapPin, Trophy, LayoutDashboard, Inbox, Upload } from 'lucide-react'
 
 const navItems = [
-  { href: '/admin', label: 'Overview', icon: LayoutDashboard },
-  { href: '/admin/events', label: 'Events', icon: Calendar },
-  { href: '/admin/import-queue', label: 'Import Queue', icon: Inbox },
-  { href: '/admin/tracks', label: 'Tracks', icon: MapPin },
-  { href: '/admin/championships', label: 'Championships', icon: Trophy },
+  { href: '/admin',                    label: 'Overview',     icon: LayoutDashboard },
+  { href: '/admin/events',             label: 'Events',       icon: Calendar },
+  { href: '/admin/import-queue',       label: 'Import Queue', icon: Inbox },
+  { href: '/admin/import-queue/bulk',  label: 'Bulk Import',  icon: Upload },
+  { href: '/admin/tracks',             label: 'Tracks',       icon: MapPin },
+  { href: '/admin/championships',      label: 'Championships', icon: Trophy },
 ]
 
 const DEV_BYPASS = process.env.DEV_ADMIN_BYPASS === 'true'

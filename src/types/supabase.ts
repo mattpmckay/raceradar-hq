@@ -3,6 +3,7 @@
 // Manually updated for Sprint 23 migrations (20260701000003–20260701000005).
 // Manually updated for Sprint 24 migrations (20260701000006–20260701000007).
 // Manually updated for Sprint 25 migration  (20260701000009).
+// Manually updated for Sprint 26 migration  (20260701000010).
 
 export type Json =
   | string
@@ -385,6 +386,9 @@ export type Database = {
           series_slug: string | null
           data_verified_at: string | null
           data_confidence: number | null
+          last_verified_date: string | null
+          organiser_slug: string | null
+          venue_slug: string | null
           event_status: 'confirmed' | 'postponed' | 'cancelled' | 'completed' | 'tbc'
           is_published: boolean
           is_featured: boolean
@@ -470,6 +474,9 @@ export type Database = {
           series_slug?: string | null
           data_verified_at?: string | null
           data_confidence?: number | null
+          last_verified_date?: string | null
+          organiser_slug?: string | null
+          venue_slug?: string | null
           event_status?: 'confirmed' | 'postponed' | 'cancelled' | 'completed' | 'tbc'
           is_published?: boolean
           is_featured?: boolean
@@ -555,6 +562,9 @@ export type Database = {
           series_slug?: string | null
           data_verified_at?: string | null
           data_confidence?: number | null
+          last_verified_date?: string | null
+          organiser_slug?: string | null
+          venue_slug?: string | null
           event_status?: 'confirmed' | 'postponed' | 'cancelled' | 'completed' | 'tbc'
           is_published?: boolean
           is_featured?: boolean
