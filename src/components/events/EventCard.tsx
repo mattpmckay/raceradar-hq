@@ -5,16 +5,20 @@ import { HeartButton } from './HeartButton'
 type Event = Tables<'events'>
 
 const DISCIPLINE_COLORS: Record<string, { bg: string; text: string }> = {
-  'HYROX':         { bg: 'rgba(0,217,166,0.12)',   text: '#00D9A6' },
-  'CrossFit':      { bg: 'rgba(239,68,68,0.12)',    text: '#EF4444' },
-  'Deka Fit':      { bg: 'rgba(167,139,250,0.12)',  text: '#A78BFA' },
-  'Spartan Race':  { bg: 'rgba(255,107,53,0.12)',   text: '#FF6B35' },
-  'Tough Mudder':  { bg: 'rgba(245,158,11,0.12)',   text: '#F59E0B' },
-  'Ironman':       { bg: 'rgba(248,113,113,0.12)',  text: '#F87171' },
-  'Ironman 70.3':  { bg: 'rgba(248,113,113,0.12)',  text: '#F87171' },
-  'Marathon':      { bg: 'rgba(96,165,250,0.12)',   text: '#60A5FA' },
-  'Road Racing':   { bg: 'rgba(148,163,184,0.12)',  text: '#94A3B8' },
-  'Trail Running': { bg: 'rgba(52,211,153,0.12)',   text: '#34D399' },
+  'HYROX':                  { bg: 'rgba(0,217,166,0.12)',   text: '#00D9A6' },
+  'CrossFit':               { bg: 'rgba(239,68,68,0.12)',   text: '#EF4444' },
+  'Deka Fit':               { bg: 'rgba(167,139,250,0.12)', text: '#A78BFA' },
+  'Spartan Race':           { bg: 'rgba(255,107,53,0.12)',  text: '#FF6B35' },
+  'Obstacle Race':          { bg: 'rgba(255,107,53,0.12)',  text: '#FF6B35' },
+  'Obstacle Course Racing': { bg: 'rgba(255,107,53,0.12)',  text: '#FF6B35' },
+  'Tough Mudder':           { bg: 'rgba(245,158,11,0.12)',  text: '#F59E0B' },
+  'Ironman':                { bg: 'rgba(248,113,113,0.12)', text: '#F87171' },
+  'Ironman 70.3':           { bg: 'rgba(248,113,113,0.12)', text: '#F87171' },
+  'Marathon':               { bg: 'rgba(96,165,250,0.12)',  text: '#60A5FA' },
+  'Road Running':           { bg: 'rgba(148,163,184,0.12)', text: '#94A3B8' },
+  'Road Racing':            { bg: 'rgba(148,163,184,0.12)', text: '#94A3B8' },
+  'Triathlon':              { bg: 'rgba(129,140,248,0.12)', text: '#818CF8' },
+  'Trail Running':          { bg: 'rgba(52,211,153,0.12)',  text: '#34D399' },
 }
 const defaultStyle = { bg: 'rgba(107,122,141,0.12)', text: '#8896A8' }
 

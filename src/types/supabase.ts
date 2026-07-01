@@ -2,6 +2,7 @@
 // Re-run whenever you change the database schema.
 // Manually updated for Sprint 23 migrations (20260701000003–20260701000005).
 // Manually updated for Sprint 24 migrations (20260701000006–20260701000007).
+// Manually updated for Sprint 25 migration  (20260701000009).
 
 export type Json =
   | string
@@ -14,6 +15,110 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      disciplines: {
+        Row: {
+          id: string
+          slug: string
+          name: string
+          short_description: string | null
+          overview_content: string | null
+          first_timer_guide: string | null
+          faqs: Array<{ question: string; answer: string }>
+          icon_name: string | null
+          color: string
+          related_discipline_slugs: string[]
+          event_discipline_values: string[]
+          order_index: number
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          slug: string
+          name: string
+          short_description?: string | null
+          overview_content?: string | null
+          first_timer_guide?: string | null
+          faqs?: Array<{ question: string; answer: string }>
+          icon_name?: string | null
+          color?: string
+          related_discipline_slugs?: string[]
+          event_discipline_values?: string[]
+          order_index?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          slug?: string
+          name?: string
+          short_description?: string | null
+          overview_content?: string | null
+          first_timer_guide?: string | null
+          faqs?: Array<{ question: string; answer: string }>
+          icon_name?: string | null
+          color?: string
+          related_discipline_slugs?: string[]
+          event_discipline_values?: string[]
+          order_index?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      series: {
+        Row: {
+          id: string
+          slug: string
+          name: string
+          discipline_slug: string | null
+          organiser: string | null
+          short_description: string | null
+          website_url: string | null
+          country: string
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          slug: string
+          name: string
+          discipline_slug?: string | null
+          organiser?: string | null
+          short_description?: string | null
+          website_url?: string | null
+          country?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          slug?: string
+          name?: string
+          discipline_slug?: string | null
+          organiser?: string | null
+          short_description?: string | null
+          website_url?: string | null
+          country?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'series_discipline_slug_fkey'
+            columns: ['discipline_slug']
+            isOneToOne: false
+            referencedRelation: 'disciplines'
+            referencedColumns: ['slug']
+          },
+        ]
+      }
       calendar_subscriptions: {
         Row: {
           id: string

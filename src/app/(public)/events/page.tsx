@@ -13,7 +13,7 @@ import type { Metadata } from 'next'
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; discipline?: string; country?: string; window?: string }>
+  searchParams: Promise<{ q?: string; discipline?: string; country?: string; region?: string; window?: string }>
 }): Promise<Metadata> {
   const params = await searchParams
   const title =
@@ -33,27 +33,30 @@ export async function generateMetadata({
 }
 
 // ─── Discipline pills ─────────────────────────────────────────────────────────
+// Values must match events.discipline exactly (case-sensitive).
+// Ironman filter uses ilike to match both 'Ironman' and 'Ironman 70.3'.
 
 const DISCIPLINES = [
-  { label: 'All Events',    value: '' },
-  { label: 'HYROX',         value: 'HYROX' },
-  { label: 'CrossFit',      value: 'CrossFit' },
-  { label: 'Deka Fit',      value: 'Deka Fit' },
-  { label: 'Spartan Race',  value: 'Spartan Race' },
-  { label: 'Tough Mudder',  value: 'Tough Mudder' },
-  { label: 'Ironman',       value: 'Ironman' },
-  { label: 'Marathon',      value: 'Marathon' },
-  { label: 'Road Racing',   value: 'Road Racing' },
-  { label: 'Trail Running', value: 'Trail Running' },
+  { label: 'All Events',    value: '',                disciplineSlug: '' },
+  { label: 'HYROX',         value: 'HYROX',           disciplineSlug: 'hyrox' },
+  { label: 'Ironman',       value: 'Ironman',         disciplineSlug: 'ironman' },
+  { label: 'Marathon',      value: 'Marathon',        disciplineSlug: 'marathon' },
+  { label: 'Road Running',  value: 'Road Running',    disciplineSlug: 'road-running' },
+  { label: 'Obstacle Race', value: 'Obstacle Race',   disciplineSlug: 'obstacle-race' },
+  { label: 'Triathlon',     value: 'Triathlon',       disciplineSlug: 'triathlon' },
+  { label: 'Trail Running', value: 'Trail Running',   disciplineSlug: 'trail-running' },
+  { label: 'CrossFit',      value: 'CrossFit',        disciplineSlug: 'crossfit' },
+  { label: 'Deka Fit',      value: 'Deka Fit',        disciplineSlug: 'deka-fit' },
 ]
 
 const DISCIPLINE_COLORS: Record<string, string> = {
   'HYROX':         '#00D9A6',
-  'Spartan Race':  '#FF6B35',
-  'Tough Mudder':  '#F59E0B',
   'Ironman':       '#F87171',
+  'Ironman 70.3':  '#F87171',
   'Marathon':      '#60A5FA',
-  'Road Racing':   '#94A3B8',
+  'Road Running':  '#94A3B8',
+  'Obstacle Race': '#FF6B35',
+  'Triathlon':     '#818CF8',
   'Trail Running': '#34D399',
   'Deka Fit':      '#A78BFA',
   'CrossFit':      '#EF4444',
@@ -80,7 +83,7 @@ function windowEndDate(window: string | undefined, today: string): string {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 interface PageProps {
-  searchParams: Promise<{ q?: string; discipline?: string; country?: string; window?: string }>
+  searchParams: Promise<{ q?: string; discipline?: string; country?: string; region?: string; window?: string }>
 }
 
 export default async function EventsPage({ searchParams }: PageProps) {
@@ -112,6 +115,9 @@ export default async function EventsPage({ searchParams }: PageProps) {
   if (params.country) {
     eventsQuery = eventsQuery.eq('country', params.country)
   }
+  if (params.region) {
+    eventsQuery = eventsQuery.eq('region', params.region)
+  }
 
   const [
     { data: events, error },
@@ -141,6 +147,9 @@ export default async function EventsPage({ searchParams }: PageProps) {
     disciplineCounts.set(d, (disciplineCounts.get(d) ?? 0) + 1)
     totalCount++
   }
+  // Group Ironman 70.3 under the Ironman pill
+  const ironmanTotal = (disciplineCounts.get('Ironman') ?? 0) + (disciplineCounts.get('Ironman 70.3') ?? 0)
+  disciplineCounts.set('Ironman', ironmanTotal)
 
   // Saved event IDs for the current user
   let savedIds = new Set<string>()
@@ -169,7 +178,8 @@ export default async function EventsPage({ searchParams }: PageProps) {
     return `/events${p.size ? `?${p}` : ''}`
   }
 
-  const activeDiscipline = params.discipline ?? ''
+  const activeDiscipline    = params.discipline ?? ''
+  const activeDisciplineObj = DISCIPLINES.find((d) => d.value === activeDiscipline)
 
   // ── Reset-filters href ──────────────────────────────────────────────────
   const hasFilters = !!(params.q || params.country || params.window)
@@ -223,8 +233,22 @@ export default async function EventsPage({ searchParams }: PageProps) {
                 )
               })}
             </div>
+
             <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-canvas to-transparent sm:hidden" />
           </div>
+
+          {/* Discipline guide link */}
+          {activeDisciplineObj?.disciplineSlug && (
+            <p className="mb-4 text-xs text-ink-muted">
+              Looking for training guides, FAQs and race advice?{' '}
+              <Link
+                href={`/discipline/${activeDisciplineObj.disciplineSlug}`}
+                className="text-mint hover:underline"
+              >
+                View the {activeDisciplineObj.label} guide →
+              </Link>
+            </p>
+          )}
 
           {/* Filter bar */}
           <Suspense fallback={null}>

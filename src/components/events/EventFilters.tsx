@@ -29,6 +29,8 @@ const WINDOW_LABELS: Record<string, string> = {
   '6months':    'Next 6 months',
 }
 
+const AU_STATES = ['NSW', 'VIC', 'QLD', 'WA', 'SA', 'TAS', 'ACT', 'NT']
+
 export function EventFilters() {
   const router       = useRouter()
   const searchParams = useSearchParams()
@@ -40,6 +42,17 @@ export function EventFilters() {
     (key: string, value: string) => {
       const params = new URLSearchParams(searchParams.toString())
       if (value) { params.set(key, value) } else { params.delete(key) }
+      params.delete('page')
+      router.push(`/events?${params.toString()}`)
+    },
+    [router, searchParams],
+  )
+
+  const updateCountry = useCallback(
+    (value: string) => {
+      const params = new URLSearchParams(searchParams.toString())
+      if (value) { params.set('country', value) } else { params.delete('country') }
+      if (value !== 'Australia') params.delete('region')
       params.delete('page')
       router.push(`/events?${params.toString()}`)
     },
@@ -72,9 +85,10 @@ export function EventFilters() {
   }, [searchVal])
 
   const activeCountry = searchParams.get('country') ?? ''
+  const activeRegion  = searchParams.get('region') ?? ''
   const activeQ       = searchParams.get('q') ?? ''
   const activeWindow  = searchParams.get('window') ?? ''
-  const hasActiveFilters = !!(activeCountry || activeQ || activeWindow)
+  const hasActiveFilters = !!(activeCountry || activeRegion || activeQ || activeWindow)
 
   return (
     <div>
@@ -96,7 +110,7 @@ export function EventFilters() {
         {/* Country */}
         <FilterSelect
           value={activeCountry}
-          onChange={(v) => updateParam('country', v)}
+          onChange={updateCountry}
           aria-label="Filter by country"
         >
           <option value="">All countries</option>
@@ -104,6 +118,20 @@ export function EventFilters() {
             <option key={c} value={c}>{c}</option>
           ))}
         </FilterSelect>
+
+        {/* Australian state — only shown when Australia is selected */}
+        {(activeCountry === 'Australia' || activeCountry === '') && (
+          <FilterSelect
+            value={activeRegion}
+            onChange={(v) => updateParam('region', v)}
+            aria-label="Filter by state"
+          >
+            <option value="">All states</option>
+            {AU_STATES.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </FilterSelect>
+        )}
 
         {/* Time window */}
         <FilterSelect
@@ -128,7 +156,10 @@ export function EventFilters() {
             />
           )}
           {activeCountry && (
-            <FilterChip label={activeCountry} onRemove={() => updateParam('country', '')} />
+            <FilterChip label={activeCountry} onRemove={() => { updateParam('country', ''); updateParam('region', '') }} />
+          )}
+          {activeRegion && (
+            <FilterChip label={activeRegion} onRemove={() => updateParam('region', '')} />
           )}
           {activeWindow && (
             <FilterChip
