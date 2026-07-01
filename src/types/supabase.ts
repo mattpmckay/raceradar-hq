@@ -211,11 +211,37 @@ export type Database = {
           end_date: string | null
           registration_deadline: string | null
           registration_opens_date: string | null
-          registration_status: 'open' | 'closing_soon' | 'sold_out' | 'coming_soon' | null
+          registration_status: 'open' | 'closing_soon' | 'sold_out' | 'waitlist_only' | 'coming_soon' | 'ballot_open' | 'ballot_closed' | null
+          early_bird_opens_date: string | null
           early_bird_closes_date: string | null
           early_bird_price_from: number | null
+          early_bird_price_to: number | null
+          late_entry_opens_date: string | null
+          late_entry_price_from: number | null
+          late_entry_price_to: number | null
           registration_url: string | null
+          registration_platform: string | null
           waitlist_open: boolean
+          waitlist_url: string | null
+          total_capacity: number | null
+          refund_available: boolean | null
+          refund_deadline: string | null
+          transfer_available: boolean | null
+          transfer_deadline: string | null
+          deferral_available: boolean | null
+          deferral_deadline: string | null
+          policies_url: string | null
+          qualification_required: boolean | null
+          qualification_notes: string | null
+          is_qualifier: boolean | null
+          qualifier_for: string | null
+          ballot_required: boolean | null
+          ballot_opens_date: string | null
+          ballot_closes_date: string | null
+          ballot_results_date: string | null
+          ballot_apply_url: string | null
+          min_age: number | null
+          max_age: number | null
           entry_fee_from: number | null
           entry_fee_to: number | null
           entry_fee_currency: string
@@ -254,11 +280,37 @@ export type Database = {
           end_date?: string | null
           registration_deadline?: string | null
           registration_opens_date?: string | null
-          registration_status?: 'open' | 'closing_soon' | 'sold_out' | 'coming_soon' | null
+          registration_status?: 'open' | 'closing_soon' | 'sold_out' | 'waitlist_only' | 'coming_soon' | 'ballot_open' | 'ballot_closed' | null
+          early_bird_opens_date?: string | null
           early_bird_closes_date?: string | null
           early_bird_price_from?: number | null
+          early_bird_price_to?: number | null
+          late_entry_opens_date?: string | null
+          late_entry_price_from?: number | null
+          late_entry_price_to?: number | null
           registration_url?: string | null
+          registration_platform?: string | null
           waitlist_open?: boolean
+          waitlist_url?: string | null
+          total_capacity?: number | null
+          refund_available?: boolean | null
+          refund_deadline?: string | null
+          transfer_available?: boolean | null
+          transfer_deadline?: string | null
+          deferral_available?: boolean | null
+          deferral_deadline?: string | null
+          policies_url?: string | null
+          qualification_required?: boolean | null
+          qualification_notes?: string | null
+          is_qualifier?: boolean | null
+          qualifier_for?: string | null
+          ballot_required?: boolean | null
+          ballot_opens_date?: string | null
+          ballot_closes_date?: string | null
+          ballot_results_date?: string | null
+          ballot_apply_url?: string | null
+          min_age?: number | null
+          max_age?: number | null
           entry_fee_from?: number | null
           entry_fee_to?: number | null
           entry_fee_currency?: string
@@ -297,11 +349,37 @@ export type Database = {
           end_date?: string | null
           registration_deadline?: string | null
           registration_opens_date?: string | null
-          registration_status?: 'open' | 'closing_soon' | 'sold_out' | 'coming_soon' | null
+          registration_status?: 'open' | 'closing_soon' | 'sold_out' | 'waitlist_only' | 'coming_soon' | 'ballot_open' | 'ballot_closed' | null
+          early_bird_opens_date?: string | null
           early_bird_closes_date?: string | null
           early_bird_price_from?: number | null
+          early_bird_price_to?: number | null
+          late_entry_opens_date?: string | null
+          late_entry_price_from?: number | null
+          late_entry_price_to?: number | null
           registration_url?: string | null
+          registration_platform?: string | null
           waitlist_open?: boolean
+          waitlist_url?: string | null
+          total_capacity?: number | null
+          refund_available?: boolean | null
+          refund_deadline?: string | null
+          transfer_available?: boolean | null
+          transfer_deadline?: string | null
+          deferral_available?: boolean | null
+          deferral_deadline?: string | null
+          policies_url?: string | null
+          qualification_required?: boolean | null
+          qualification_notes?: string | null
+          is_qualifier?: boolean | null
+          qualifier_for?: string | null
+          ballot_required?: boolean | null
+          ballot_opens_date?: string | null
+          ballot_closes_date?: string | null
+          ballot_results_date?: string | null
+          ballot_apply_url?: string | null
+          min_age?: number | null
+          max_age?: number | null
           entry_fee_from?: number | null
           entry_fee_to?: number | null
           entry_fee_currency?: string
