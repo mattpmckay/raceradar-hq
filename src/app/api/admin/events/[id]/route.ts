@@ -13,48 +13,165 @@ async function requireAdmin() {
   return user
 }
 
+// ─── Payload builder (shared with POST route) ─────────────────────────────────
+
+function str(v: unknown): string | null {
+  const s = v as string
+  return s && s.trim() ? s.trim() : null
+}
+
+function num(v: unknown): number | null {
+  const s = v as string
+  if (!s || !String(s).trim()) return null
+  const n = Number(s)
+  return isNaN(n) ? null : n
+}
+
+function bool(v: unknown): boolean {
+  return Boolean(v)
+}
+
+function nullableBool(v: unknown): boolean | null {
+  if (v === null || v === undefined || v === '') return null
+  return Boolean(v)
+}
+
+function buildEventPayload(body: Record<string, unknown>) {
+  return {
+    title:           str(body.title) ?? '',
+    slug:            str(body.slug) ?? '',
+    event_type:      str(body.event_type) ?? 'race',
+    discipline:      str(body.discipline) ?? 'Other',
+    organiser:       str(body.organiser),
+    series_slug:     str(body.series_slug),
+    first_year_held: num(body.first_year_held),
+
+    start_date: str(body.start_date) ?? '',
+    end_date:   str(body.end_date),
+
+    country:       str(body.country) ?? '',
+    region:        str(body.region),
+    city:          str(body.city),
+    venue_name:    str(body.venue_name),
+    venue_address: str(body.venue_address),
+    latitude:      num(body.latitude),
+    longitude:     num(body.longitude),
+
+    registration_status:
+      (str(body.registration_status) as
+        | 'open' | 'closing_soon' | 'sold_out' | 'waitlist_only'
+        | 'coming_soon' | 'ballot_open' | 'ballot_closed' | null) ?? null,
+    registration_opens_date:  str(body.registration_opens_date),
+    registration_deadline:    str(body.registration_deadline),
+    registration_url:         str(body.registration_url),
+    registration_platform:    str(body.registration_platform),
+    total_capacity:           num(body.total_capacity),
+
+    entry_fee_from:           num(body.entry_fee_from),
+    entry_fee_to:             num(body.entry_fee_to),
+    entry_fee_currency:       str(body.entry_fee_currency) ?? 'AUD',
+    early_bird_opens_date:    str(body.early_bird_opens_date),
+    early_bird_closes_date:   str(body.early_bird_closes_date),
+    early_bird_price_from:    num(body.early_bird_price_from),
+    early_bird_price_to:      num(body.early_bird_price_to),
+    next_price_increase_date: str(body.next_price_increase_date),
+    late_entry_opens_date:    str(body.late_entry_opens_date),
+    late_entry_price_from:    num(body.late_entry_price_from),
+    late_entry_price_to:      num(body.late_entry_price_to),
+
+    ballot_required:     bool(body.ballot_required),
+    ballot_opens_date:   str(body.ballot_opens_date),
+    ballot_closes_date:  str(body.ballot_closes_date),
+    ballot_results_date: str(body.ballot_results_date),
+    ballot_apply_url:    str(body.ballot_apply_url),
+
+    waitlist_open:        bool(body.waitlist_open),
+    waitlist_url:         str(body.waitlist_url),
+    waitlist_closes_date: str(body.waitlist_closes_date),
+
+    transfer_available:  nullableBool(body.transfer_available),
+    transfer_deadline:   str(body.transfer_deadline),
+    deferral_available:  nullableBool(body.deferral_available),
+    deferral_deadline:   str(body.deferral_deadline),
+    refund_available:    nullableBool(body.refund_available),
+    refund_deadline:     str(body.refund_deadline),
+    policies_url:        str(body.policies_url),
+
+    qualification_required: nullableBool(body.qualification_required),
+    qualification_notes:    str(body.qualification_notes),
+    is_qualifier:           nullableBool(body.is_qualifier),
+    qualifier_for:          str(body.qualifier_for),
+
+    min_age:              num(body.min_age),
+    max_age:              num(body.max_age),
+    difficulty:           num(body.difficulty),
+    surface_type:
+      (str(body.surface_type) as
+        | 'road' | 'trail' | 'track' | 'mixed' | 'indoor' | 'water' | 'other' | null) ?? null,
+    elevation_gain_m:     num(body.elevation_gain_m),
+    relay_available:      nullableBool(body.relay_available),
+    team_available:       nullableBool(body.team_available),
+    wheelchair_available: nullableBool(body.wheelchair_available),
+    adaptive_available:   nullableBool(body.adaptive_available),
+
+    athlete_guide_url: str(body.athlete_guide_url),
+    course_map_url:    str(body.course_map_url),
+    gpx_file_url:      str(body.gpx_file_url),
+    results_url:       str(body.results_url),
+
+    description:    str(body.description),
+    format_notes:   str(body.format_notes),
+    whats_included: body.whats_included
+      ? String(body.whats_included).split('\n').map((s) => s.trim()).filter(Boolean)
+      : null,
+
+    transport_notes:     str(body.transport_notes),
+    accommodation_notes: str(body.accommodation_notes),
+
+    hero_image_url: str(body.hero_image_url),
+    image_url:      str(body.image_url),
+    website_url:    str(body.website_url),
+
+    data_confidence: num(body.data_confidence),
+
+    is_published: bool(body.is_published),
+    is_featured:  bool(body.is_featured),
+  }
+}
+
+// ─── PATCH /api/admin/events/[id] ────────────────────────────────────────────
+
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const authed = await requireAdmin()
   if (!authed) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { id } = await params
-  const body = await request.json() as Record<string, unknown>
-  const admin = await createAdminClient()
+  const body   = await request.json() as Record<string, unknown>
+  const admin  = await createAdminClient()
 
-  const { data, error } = await admin.from('events').update({
-    title: body.title as string,
-    slug: body.slug as string,
-    event_type: body.event_type as string,
-    discipline: body.discipline as string,
-    start_date: body.start_date as string,
-    end_date: (body.end_date as string) || null,
-    registration_deadline: (body.registration_deadline as string) || null,
-    registration_status: (body.registration_status as 'open' | 'closing_soon' | 'sold_out' | 'coming_soon') || null,
-    country: body.country as string,
-    region: (body.region as string) || null,
-    city: (body.city as string) || null,
-    organiser: (body.organiser as string) || null,
-    description: (body.description as string) || null,
-    website_url: (body.website_url as string) || null,
-    image_url: (body.image_url as string) || null,
-    is_published: Boolean(body.is_published),
-    is_featured: Boolean(body.is_featured),
-  }).eq('id', id).select('id, slug').single()
+  const { data, error } = await admin
+    .from('events')
+    .update(buildEventPayload(body))
+    .eq('id', id)
+    .select('id, slug')
+    .single()
 
   if (error) {
-    if (error.code === '23505') return NextResponse.json({ error: 'A event with that slug already exists.' }, { status: 409 })
+    if (error.code === '23505') return NextResponse.json({ error: 'An event with that slug already exists.' }, { status: 409 })
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
   return NextResponse.json(data)
 }
 
+// ─── DELETE /api/admin/events/[id] ───────────────────────────────────────────
+
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const authed = await requireAdmin()
   if (!authed) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { id } = await params
-  const admin = await createAdminClient()
+  const admin  = await createAdminClient()
   const { error } = await admin.from('events').delete().eq('id', id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

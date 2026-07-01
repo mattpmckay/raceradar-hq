@@ -3,7 +3,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import {
   Calendar, MapPin, Globe, ArrowLeft, Flag, CheckCircle, Clock,
-  Train, Users, Thermometer, Heart,
+  Train, Users, Thermometer, Heart, BookOpen, Map, Download,
+  Mountain, ChevronRight,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import type { Tables } from '@/types/supabase'
@@ -448,13 +449,25 @@ export default async function EventDetailPage({ params }: PageProps) {
   const venue = event.venue_name ?? extractVenue(event.description)
   const location = [event.city, event.region, event.country].filter(Boolean).join(', ')
 
-  const [categories, relatedRaw, isSaved, saveCount] = await Promise.all([
+  const [categories, seriesRaw, relatedRaw, isSaved, saveCount] = await Promise.all([
     supabase
       .from('event_categories')
       .select('id, name, distance_label, entry_fee, cutoff_minutes, max_participants, is_sold_out, sort_order')
       .eq('event_id', event.id)
       .order('sort_order')
       .then(({ data }) => (data ?? []) as EventCategory[]),
+    event.series_slug
+      ? supabase
+          .from('events')
+          .select('title, slug, city, country, start_date, discipline')
+          .eq('series_slug', event.series_slug)
+          .eq('is_published', true)
+          .neq('slug', slug)
+          .gte('start_date', today)
+          .order('start_date', { ascending: true })
+          .limit(4)
+          .then(({ data }) => data ?? [])
+      : Promise.resolve([]),
     supabase
       .from('events')
       .select('title, slug, city, country, start_date, discipline')
@@ -478,9 +491,11 @@ export default async function EventDetailPage({ params }: PageProps) {
       .then(({ data }) => (data as number | null) ?? 0),
   ])
 
-  const related = relatedRaw
-    .filter((e) => e.discipline === event.discipline && e.start_date >= today)
-    .slice(0, 4)
+  const seriesEvents = seriesRaw as typeof relatedRaw
+  const related = seriesEvents.length > 0
+    ? seriesEvents
+    : relatedRaw.filter((e) => e.discipline === event.discipline && e.start_date >= today).slice(0, 4)
+  const relatedHeading = seriesEvents.length > 0 ? 'Also in This Series' : `More ${event.discipline} Events`
 
   const eventSchema = buildEventSchema(event, venue)
 
@@ -547,6 +562,9 @@ export default async function EventDetailPage({ params }: PageProps) {
             {/* Venue */}
             <VenueSection event={event} venue={venue} />
 
+            {/* Race weekend resources — athlete guide, course map, GPX */}
+            <RaceWeekendResourcesSection event={event} />
+
             {/* Travel & logistics */}
             <TravelLogisticsSection event={event} isTBC={isTBC} />
 
@@ -588,6 +606,32 @@ export default async function EventDetailPage({ params }: PageProps) {
                       <div className="text-ink-muted text-xs">Organiser</div>
                       <div className="font-medium text-ink">{event.organiser}</div>
                     </div>
+                  </div>
+                )}
+                {(event.elevation_gain_m || event.surface_type) && (
+                  <div className="flex items-start gap-3">
+                    <Mountain className="h-4 w-4 text-mint mt-0.5 shrink-0" />
+                    <div className="space-y-0.5">
+                      {event.elevation_gain_m && (
+                        <div className="font-medium text-ink">{event.elevation_gain_m.toLocaleString()} m elevation</div>
+                      )}
+                      {event.surface_type && (
+                        <div className="text-ink-muted capitalize">{event.surface_type} surface</div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {(event.relay_available || event.team_available || event.wheelchair_available) && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {event.relay_available && (
+                      <span className="rounded-full border border-wire px-2 py-0.5 text-xs text-ink-muted">Relay</span>
+                    )}
+                    {event.team_available && (
+                      <span className="rounded-full border border-wire px-2 py-0.5 text-xs text-ink-muted">Team</span>
+                    )}
+                    {event.wheelchair_available && (
+                      <span className="rounded-full border border-wire px-2 py-0.5 text-xs text-ink-muted">Wheelchair</span>
+                    )}
                   </div>
                 )}
               </div>
@@ -673,7 +717,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 
             {related.length > 0 && (
               <div className="card space-y-3 text-sm">
-                <h2 className="font-heading font-semibold text-ink">More {event.discipline} Events</h2>
+                <h2 className="font-heading font-semibold text-ink">{relatedHeading}</h2>
                 <ul className="space-y-2 text-ink-muted">
                   {related.map((e) => (
                     <li key={e.slug}>
@@ -1854,6 +1898,64 @@ function VenueSection({ event, venue }: { event: EventRow; venue: string | null 
         >
           <MapPin className="h-4 w-4" /> Open in Google Maps
         </a>
+      </div>
+    </section>
+  )
+}
+
+// ─── Race weekend resources ───────────────────────────────────────────────────
+
+function RaceWeekendResourcesSection({ event }: { event: EventRow }) {
+  const resources = [
+    event.athlete_guide_url && {
+      label: 'Athlete Guide',
+      href: event.athlete_guide_url,
+      icon: <BookOpen className="h-4 w-4 shrink-0" />,
+      desc: 'Official information guide — bib collection, schedule, mandatory gear',
+    },
+    event.course_map_url && {
+      label: 'Course Map',
+      href: event.course_map_url,
+      icon: <Map className="h-4 w-4 shrink-0" />,
+      desc: 'Route map, aid stations and key landmarks',
+    },
+    event.gpx_file_url && {
+      label: 'GPX File',
+      href: event.gpx_file_url,
+      icon: <Download className="h-4 w-4 shrink-0" />,
+      desc: 'Download the course to your GPS device or training app',
+    },
+    event.results_url && {
+      label: 'Past Results',
+      href: event.results_url,
+      icon: <ChevronRight className="h-4 w-4 shrink-0" />,
+      desc: 'Finish times from previous editions — use for pacing strategy',
+    },
+  ].filter(Boolean) as { label: string; href: string; icon: React.ReactNode; desc: string }[]
+
+  if (resources.length === 0) return null
+
+  return (
+    <section>
+      <SectionHeading>Race Weekend Resources</SectionHeading>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {resources.map((r) => (
+          <a
+            key={r.label}
+            href={r.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="card flex items-start gap-4 transition-colors hover:border-mint/40 group"
+          >
+            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-mint/10 text-mint transition-colors group-hover:bg-mint/20">
+              {r.icon}
+            </div>
+            <div className="min-w-0">
+              <div className="font-medium text-ink group-hover:text-mint transition-colors">{r.label} →</div>
+              <div className="mt-0.5 text-xs text-ink-muted leading-relaxed">{r.desc}</div>
+            </div>
+          </a>
+        ))}
       </div>
     </section>
   )
