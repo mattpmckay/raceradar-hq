@@ -814,7 +814,7 @@ INSERT INTO public.events (
   'race', 'Open Water Swimming', 'Lorne Surf Life Saving Club', NULL,
   '2026-01-10', NULL,
   'Australia', 'VIC', 'Lorne', 'Lorne Pier to Main Beach',
-  'https://www.piertopub.com.au', 'open_water',
+  'https://www.piertopub.com.au', 'water',
   35, 55, 'AUD',
   'The world''s largest open water swimming event, attracting 4,000+ participants to the Great Ocean Road town of Lorne each January. The 1.2 km course runs from the Lorne Pier to the main beach in the stunning surf conditions of the Southern Ocean. A beloved community event for swimmers of all levels, held by the Lorne Surf Life Saving Club since 1981.',
   4, '2026-07-01', 'confirmed', true, true
@@ -826,7 +826,7 @@ INSERT INTO public.events (
   'race', 'Open Water Swimming', 'Manly Swimming Club', NULL,
   '2026-02-01', NULL,
   'Australia', 'NSW', 'Manly', 'Shelley Beach to Manly Beach',
-  'https://www.coleclassic.com.au', 'open_water',
+  'https://www.coleclassic.com.au', 'water',
   40, 65, 'AUD',
   'Sydney''s iconic ocean swimming event, held since 1983. The Cole Classic offers 1 km and 2 km courses from Shelley Beach through the Cabbage Tree Bay Aquatic Reserve to the world-famous Manly Beach. The crystal-clear water and abundant marine life make this as much a snorkelling experience as a race. A rite of passage for Sydney ocean swimmers.',
   3, '2026-07-01', 'confirmed', true, false
