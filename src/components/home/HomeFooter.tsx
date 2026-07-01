@@ -1,10 +1,11 @@
 import Link from 'next/link'
 
 const DISCOVER_LINKS = [
-  { label: 'Events',      href: '/events' },
-  { label: 'Sports',      href: '/sports' },
-  { label: 'Locations',   href: '/locations' },
-  { label: 'Race Guides', href: '/guides' },
+  { label: 'Events',         href: '/events' },
+  { label: 'Sports',         href: '/sports' },
+  { label: 'Locations',      href: '/locations' },
+  { label: 'Race Guides',    href: '/guides' },
+  { label: 'Free Calendar',  href: '/calendar' },
 ]
 
 const SPORTS_LINKS = [

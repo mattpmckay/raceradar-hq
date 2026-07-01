@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { LayoutDashboard, LogOut, Settings } from 'lucide-react'
+import { LayoutDashboard, LogOut, Settings, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export type HeaderUser = {
@@ -15,43 +15,50 @@ export type HeaderUser = {
   email: string
 }
 
-const NAV_LINKS = [
-  { href: '/events',    label: 'Events' },
+// ─── Single navigation source of truth ───────────────────────────────────────
+// Desktop renders PRIMARY_NAV horizontally + MORE_NAV in a dropdown.
+// Mobile renders the same items in a drawer — primary links first, More below a divider.
+// Authenticated users see My Season added to PRIMARY_NAV.
+// This is the only place navigation is defined. Never duplicate it.
+
+const PRIMARY_NAV = [
+  { href: '/events', label: 'Events' },
+] as const
+
+const MORE_NAV = [
   { href: '/sports',    label: 'Sports' },
   { href: '/locations', label: 'Locations' },
   { href: '/guides',    label: 'Race Guides' },
-]
+] as const
 
-const MOBILE_NAV_LINKS = [
-  { href: '/events',        label: 'Events' },
-  { href: '/championships', label: 'Championships' },
-  { href: '/tracks',        label: 'Tracks' },
-  { href: '/calendar',      label: 'Free Calendar' },
-  { href: '/guides',        label: 'Race Guides' },
-]
+const MY_SEASON = { href: '/dashboard', label: 'My Season' } as const
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export function Header({ user }: { user: HeaderUser | null }) {
   const pathname = usePathname()
   const router   = useRouter()
 
   const [menuOpen,    setMenuOpen]    = useState(false)
+  const [moreOpen,    setMoreOpen]    = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
+
+  const moreRef    = useRef<HTMLDivElement>(null)
   const accountRef = useRef<HTMLDivElement>(null)
 
-  // Close desktop dropdown on outside click
+  // Close dropdowns on outside click
   useEffect(() => {
-    if (!accountOpen) return
+    if (!moreOpen && !accountOpen) return
     function onMouseDown(e: MouseEvent) {
-      if (accountRef.current && !accountRef.current.contains(e.target as Node)) {
-        setAccountOpen(false)
-      }
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) setMoreOpen(false)
+      if (accountRef.current && !accountRef.current.contains(e.target as Node)) setAccountOpen(false)
     }
     document.addEventListener('mousedown', onMouseDown)
     return () => document.removeEventListener('mousedown', onMouseDown)
-  }, [accountOpen])
+  }, [moreOpen, accountOpen])
 
   // Close mobile menu on route change
-  useEffect(() => { setMenuOpen(false) }, [pathname])
+  useEffect(() => { setMenuOpen(false); setMoreOpen(false) }, [pathname])
 
   async function handleLogout() {
     const supabase = createClient()
@@ -61,6 +68,8 @@ export function Header({ user }: { user: HeaderUser | null }) {
     router.push('/')
     router.refresh()
   }
+
+  const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
 
   return (
     <header className="sticky top-0 z-50 border-b border-wire bg-canvas/95 backdrop-blur-md">
@@ -79,48 +88,81 @@ export function Header({ user }: { user: HeaderUser | null }) {
             </span>
           </Link>
 
-          {/* Desktop nav */}
-          <nav aria-label="Main navigation" className="hidden md:flex flex-1 items-center gap-0.5">
-            {NAV_LINKS.map((link) => (
+          {/* ── Desktop nav ─────────────────────────────────────────────────── */}
+          <nav aria-label="Main navigation" className="hidden flex-1 items-center gap-0.5 md:flex">
+
+            {/* Primary links */}
+            {PRIMARY_NAV.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
                   'rounded-lg px-4 py-2 text-sm font-medium transition-colors',
-                  pathname.startsWith(link.href)
-                    ? 'bg-panel text-ink'
-                    : 'text-ink-muted hover:bg-panel hover:text-ink',
+                  isActive(link.href) ? 'bg-panel text-ink' : 'text-ink-muted hover:bg-panel hover:text-ink',
                 )}
               >
                 {link.label}
               </Link>
             ))}
+
+            {/* My Season — authenticated only */}
             {user && (
               <Link
-                href="/dashboard"
+                href={MY_SEASON.href}
                 className={cn(
                   'rounded-lg px-4 py-2 text-sm font-semibold transition-colors',
-                  pathname.startsWith('/dashboard')
-                    ? 'text-mint'
-                    : 'text-mint/70 hover:text-mint',
+                  isActive(MY_SEASON.href) ? 'text-mint' : 'text-mint/70 hover:text-mint',
                 )}
               >
-                My Season
+                {MY_SEASON.label}
               </Link>
             )}
+
+            {/* More dropdown */}
+            <div ref={moreRef} className="relative">
+              <button
+                onClick={() => setMoreOpen(!moreOpen)}
+                aria-expanded={moreOpen}
+                className={cn(
+                  'flex items-center gap-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+                  MORE_NAV.some((l) => isActive(l.href))
+                    ? 'bg-panel text-ink'
+                    : 'text-ink-muted hover:bg-panel hover:text-ink',
+                )}
+              >
+                More
+                <ChevronDown
+                  className={cn('h-3.5 w-3.5 transition-transform duration-200', moreOpen && 'rotate-180')}
+                />
+              </button>
+
+              {moreOpen && (
+                <div className="absolute left-0 top-full mt-1.5 w-44 rounded-xl border border-wire bg-panel shadow-2xl shadow-canvas/60">
+                  <div className="p-1.5">
+                    {MORE_NAV.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setMoreOpen(false)}
+                        className={cn(
+                          'flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                          isActive(link.href)
+                            ? 'bg-panel-raised text-ink'
+                            : 'text-ink-muted hover:bg-panel-raised hover:text-ink',
+                        )}
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </nav>
 
-          {/* Desktop right — authenticated */}
+          {/* ── Desktop right — authenticated ───────────────────────────────── */}
           {user ? (
-            <div className="hidden md:flex items-center gap-2">
-              <Link
-                href="/calendar"
-                className="inline-flex items-center gap-2 rounded-full bg-fire px-5 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-fire-600 hover:-translate-y-px hover:shadow-lg hover:shadow-fire/25"
-              >
-                Free Calendar
-              </Link>
-
-              {/* Account dropdown */}
+            <div className="hidden items-center gap-2 md:flex">
               <div ref={accountRef} className="relative">
                 <button
                   onClick={() => setAccountOpen(!accountOpen)}
@@ -129,15 +171,13 @@ export function Header({ user }: { user: HeaderUser | null }) {
                   className="flex items-center gap-2 rounded-full p-0.5 transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint/50"
                 >
                   <Avatar user={user} size="sm" />
-                  <ChevronDownIcon
+                  <ChevronDown
                     className={cn('h-3.5 w-3.5 text-ink-muted transition-transform duration-200', accountOpen && 'rotate-180')}
                   />
                 </button>
 
-                {/* Dropdown panel */}
                 {accountOpen && (
                   <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-wire bg-panel shadow-2xl shadow-canvas/60">
-                    {/* User info */}
                     <div className="flex items-center gap-3 border-b border-wire p-4">
                       <Avatar user={user} size="md" />
                       <div className="min-w-0">
@@ -145,8 +185,6 @@ export function Header({ user }: { user: HeaderUser | null }) {
                         <p className="truncate text-xs text-ink-muted">{user.email}</p>
                       </div>
                     </div>
-
-                    {/* Links */}
                     <div className="p-1.5">
                       <DropdownLink href="/dashboard" icon={<LayoutDashboard className="h-4 w-4" />} onClick={() => setAccountOpen(false)}>
                         My Season
@@ -155,7 +193,6 @@ export function Header({ user }: { user: HeaderUser | null }) {
                         Profile Settings
                       </DropdownLink>
                     </div>
-
                     <div className="border-t border-wire p-1.5">
                       <button
                         onClick={handleLogout}
@@ -170,14 +207,8 @@ export function Header({ user }: { user: HeaderUser | null }) {
               </div>
             </div>
           ) : (
-            /* Desktop right — guest */
-            <div className="hidden md:flex items-center gap-3">
-              <Link
-                href="/calendar"
-                className="inline-flex items-center gap-2 rounded-full bg-fire px-5 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-fire-600 hover:-translate-y-px hover:shadow-lg hover:shadow-fire/25"
-              >
-                Free Calendar
-              </Link>
+            /* ── Desktop right — guest ──────────────────────────────────────── */
+            <div className="hidden items-center gap-3 md:flex">
               <Link
                 href="/login"
                 className="text-sm font-medium text-ink-muted transition-colors hover:text-ink"
@@ -193,12 +224,12 @@ export function Header({ user }: { user: HeaderUser | null }) {
             </div>
           )}
 
-          {/* Mobile: persistent right actions */}
-          <div className="flex md:hidden items-center gap-2">
+          {/* ── Mobile: persistent right actions ────────────────────────────── */}
+          <div className="flex items-center gap-2 md:hidden">
             {user ? (
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                aria-label="Account menu"
+                aria-label="Open account menu"
                 className="rounded-full p-0.5 transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint/50"
               >
                 <Avatar user={user} size="sm" />
@@ -226,47 +257,65 @@ export function Header({ user }: { user: HeaderUser | null }) {
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* ── Mobile drawer ─────────────────────────────────────────────────── */}
       <div
         id="mobile-nav"
         className={cn(
-          'md:hidden border-t border-wire bg-canvas transition-all duration-200',
-          menuOpen ? 'max-h-[560px] opacity-100' : 'max-h-0 overflow-hidden opacity-0',
+          'border-t border-wire bg-canvas transition-all duration-200 md:hidden',
+          menuOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 overflow-hidden opacity-0',
         )}
       >
         <div className="container-page py-3">
-
-          {/* Nav links */}
           <nav aria-label="Mobile navigation" className="space-y-0.5">
+
+            {/* My Season — authenticated, shown first */}
             {user && (
               <Link
-                href="/dashboard"
+                href={MY_SEASON.href}
                 className={cn(
                   'flex items-center rounded-xl px-4 py-3.5 text-[15px] font-semibold transition-colors',
-                  pathname.startsWith('/dashboard')
-                    ? 'bg-mint/10 text-mint'
-                    : 'text-mint hover:bg-mint/10',
+                  isActive(MY_SEASON.href) ? 'bg-mint/10 text-mint' : 'text-mint hover:bg-mint/10',
                 )}
                 onClick={() => setMenuOpen(false)}
               >
-                ❤️ My Season
+                My Season
               </Link>
             )}
-            {MOBILE_NAV_LINKS.map((link) => (
+
+            {/* Primary nav links */}
+            {PRIMARY_NAV.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
                   'flex items-center rounded-xl px-4 py-3.5 text-[15px] font-medium transition-colors',
-                  pathname.startsWith(link.href)
-                    ? 'bg-panel text-ink'
-                    : 'text-ink-muted hover:bg-panel hover:text-ink',
+                  isActive(link.href) ? 'bg-panel text-ink' : 'text-ink-muted hover:bg-panel hover:text-ink',
                 )}
                 onClick={() => setMenuOpen(false)}
               >
                 {link.label}
               </Link>
             ))}
+
+            {/* More links — below a divider */}
+            <div className="pt-1">
+              <p className="px-4 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-widest text-ink-subtle">
+                More
+              </p>
+              {MORE_NAV.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    'flex items-center rounded-xl px-4 py-3 text-[15px] font-medium transition-colors',
+                    isActive(link.href) ? 'bg-panel text-ink' : 'text-ink-muted hover:bg-panel hover:text-ink',
+                  )}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
           </nav>
 
           {/* Account section */}
@@ -325,9 +374,7 @@ export function Header({ user }: { user: HeaderUser | null }) {
 
 function Avatar({ user, size }: { user: HeaderUser; size: 'sm' | 'md' }) {
   const dim = size === 'md' ? 36 : 28
-  const cls = size === 'md'
-    ? 'h-9 w-9 text-sm'
-    : 'h-7 w-7 text-xs'
+  const cls = size === 'md' ? 'h-9 w-9 text-sm' : 'h-7 w-7 text-xs'
 
   return (
     <div className={cn('flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-mint/15 ring-1 ring-mint/30', cls)}>
@@ -396,14 +443,6 @@ function XIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden>
       <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  )
-}
-
-function ChevronDownIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 16 16" fill="none" aria-hidden className={className}>
-      <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
