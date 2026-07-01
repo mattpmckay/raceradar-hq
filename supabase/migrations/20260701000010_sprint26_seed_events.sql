@@ -696,7 +696,7 @@ ON CONFLICT (slug) DO NOTHING;
 
 INSERT INTO public.events (
   title, slug, event_type, discipline, organiser, series_slug,
-  start_date, country, region, city, venue_name,
+  start_date, end_date, country, region, city, venue_name,
   website_url, surface_type,
   entry_fee_from, entry_fee_to, entry_fee_currency,
   description, data_confidence, last_verified_date, event_status, is_published, is_featured
@@ -802,7 +802,7 @@ ON CONFLICT (slug) DO NOTHING;
 
 INSERT INTO public.events (
   title, slug, event_type, discipline, organiser, series_slug,
-  start_date, country, region, city, venue_name,
+  start_date, end_date, country, region, city, venue_name,
   website_url, surface_type,
   entry_fee_from, entry_fee_to, entry_fee_currency,
   description, data_confidence, last_verified_date, event_status, is_published, is_featured
