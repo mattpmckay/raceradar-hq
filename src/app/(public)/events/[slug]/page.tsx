@@ -6,6 +6,7 @@ import {
   Train, Users, Thermometer, Heart,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import type { Tables } from '@/types/supabase'
 import { Badge } from '@/components/ui/Badge'
 import { SaveButton } from '@/components/events/SaveButton'
 import { ReminderSignup } from '@/components/events/ReminderSignup'
@@ -331,39 +332,7 @@ interface PageProps {
   params: Promise<{ slug: string }>
 }
 
-type EventRow = {
-  id: string
-  title: string
-  slug: string
-  discipline: string
-  event_type: string
-  city: string | null
-  region: string | null
-  country: string | null
-  start_date: string
-  end_date: string | null
-  registration_deadline: string | null
-  registration_opens_date: string | null
-  registration_status: 'open' | 'closing_soon' | 'sold_out' | 'coming_soon' | null
-  website_url: string | null
-  description: string | null
-  format_notes: string | null
-  whats_included: string[] | null
-  difficulty: number | null
-  organiser: string | null
-  is_featured: boolean
-  hero_image_url: string | null
-  entry_fee_from: number | null
-  entry_fee_to: number | null
-  entry_fee_currency: string
-  venue_name: string | null
-  venue_address: string | null
-  latitude: number | null
-  longitude: number | null
-  transport_notes: string | null
-  accommodation_notes: string | null
-  series_slug: string | null
-}
+type EventRow = Tables<'events'>
 
 type EventCategory = {
   id: string
@@ -380,6 +349,8 @@ type EventCategory = {
 
 function buildEventSchema(event: EventRow, venue: string | null) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://raceradar.com.au'
+  const regUrl = event.registration_url ?? event.website_url
+  const isSoldOut = event.registration_status === 'sold_out'
 
   return {
     '@context': 'https://schema.org',
@@ -408,6 +379,18 @@ function buildEventSchema(event: EventRow, venue: string | null) {
       ? { organizer: { '@type': 'Organization', name: event.organiser ?? event.discipline } }
       : {}),
     ...(event.website_url ? { sameAs: event.website_url } : {}),
+    ...(regUrl && event.entry_fee_from != null ? {
+      offers: {
+        '@type': 'Offer',
+        url: regUrl,
+        price: event.entry_fee_from,
+        priceCurrency: event.entry_fee_currency ?? 'AUD',
+        availability: isSoldOut
+          ? 'https://schema.org/SoldOut'
+          : 'https://schema.org/InStock',
+        ...(event.registration_deadline ? { validThrough: event.registration_deadline } : {}),
+      },
+    } : {}),
   }
 }
 
@@ -448,26 +431,17 @@ export default async function EventDetailPage({ params }: PageProps) {
   const { slug } = await params
   const supabase = await createClient()
 
-  const [{ data: rawEvent }, { data: { user } }] = await Promise.all([
+  const [{ data: event }, { data: { user } }] = await Promise.all([
     supabase
       .from('events')
-      .select(
-        'id, title, slug, discipline, event_type, city, region, country, start_date, end_date,' +
-        'registration_deadline, registration_opens_date, registration_status,' +
-        'website_url, description, format_notes, whats_included, difficulty,' +
-        'organiser, is_featured, hero_image_url,' +
-        'entry_fee_from, entry_fee_to, entry_fee_currency,' +
-        'venue_name, venue_address, latitude, longitude,' +
-        'transport_notes, accommodation_notes, series_slug',
-      )
+      .select('*')
       .eq('slug', slug)
       .eq('is_published', true)
       .single(),
     supabase.auth.getUser(),
   ])
 
-  if (!rawEvent) notFound()
-  const event = rawEvent as unknown as EventRow
+  if (!event) notFound()
 
   const today = new Date().toISOString().split('T')[0]
   const isTBC = event.start_date === '2099-01-01'
@@ -556,6 +530,9 @@ export default async function EventDetailPage({ params }: PageProps) {
             {/* Registration information */}
             <RegistrationSection event={event} />
 
+            {/* Registration policies — transfer, deferral, qualification, age */}
+            <RegistrationPoliciesSection event={event} />
+
             {/* Entry fees */}
             <EntryFeesSection event={event} categories={categories} />
 
@@ -634,21 +611,48 @@ export default async function EventDetailPage({ params }: PageProps) {
                 )
               })()}
 
-              {event.registration_deadline && (
+              {event.early_bird_closes_date && (() => {
+                const d = new Date(event.early_bird_closes_date + 'T00:00:00')
+                const days = Math.round((d.getTime() - new Date().setHours(0,0,0,0)) / 86400000)
+                if (days <= 0 || days > 30) return null
+                return (
+                  <div className="rounded-lg bg-mint/10 border border-mint/20 px-3 py-2.5 text-sm">
+                    <span className="text-mint font-medium">Early bird closes in {days} day{days !== 1 ? 's' : ''}</span>
+                    {event.early_bird_price_from != null && (
+                      <div className="mt-0.5 text-ink">From ${event.early_bird_price_from.toLocaleString('en-AU', { minimumFractionDigits: 0 })} {event.entry_fee_currency}</div>
+                    )}
+                  </div>
+                )
+              })()}
+
+              {event.ballot_opens_date && (() => {
+                const d = new Date(event.ballot_opens_date + 'T00:00:00')
+                const days = Math.round((d.getTime() - new Date().setHours(0,0,0,0)) / 86400000)
+                if (days <= 0 || days > 30) return null
+                return (
+                  <div className="rounded-lg bg-mint/10 border border-mint/20 px-3 py-2.5 text-sm">
+                    <span className="text-mint font-medium">Ballot opens in {days} day{days !== 1 ? 's' : ''}</span>
+                    <div className="mt-0.5 text-ink">{formatDate(event.ballot_opens_date)}</div>
+                  </div>
+                )
+              })()}
+
+              {event.registration_deadline && !event.early_bird_closes_date && (
                 <div className="rounded-lg bg-mint/10 border border-mint/20 px-3 py-2.5 text-sm">
                   <span className="text-mint font-medium">Registration closes</span>
                   <div className="text-ink">{formatDate(event.registration_deadline)}</div>
                 </div>
               )}
 
-              {event.website_url && (
+              {(event.registration_url ?? event.website_url) && (
                 <a
-                  href={event.website_url}
+                  href={(event.registration_url ?? event.website_url)!}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-primary w-full justify-center"
                 >
-                  <Globe className="h-4 w-4" /> Register Now
+                  <Globe className="h-4 w-4" />
+                  {event.ballot_required ? 'Apply for Ballot' : event.waitlist_open ? 'Join Waitlist' : 'Register Now'}
                 </a>
               )}
 
@@ -773,15 +777,16 @@ function HeroSection({ event, isTBC, venue }: { event: EventRow; isTBC: boolean;
           {dateStr}{endStr}
         </span>
       </div>
-      {event.website_url && (
+      {(event.registration_url ?? event.website_url) && (
         <div className="pt-2">
           <a
-            href={event.website_url}
+            href={(event.registration_url ?? event.website_url)!}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-primary"
           >
-            <Globe className="h-4 w-4" /> Register Now
+            <Globe className="h-4 w-4" />
+            {event.ballot_required ? 'Apply for Ballot' : event.waitlist_open ? 'Join Waitlist' : 'Register Now'}
           </a>
         </div>
       )}
@@ -1234,9 +1239,16 @@ function RunningWhoShouldEnter({ discipline }: { discipline: string }) {
 // ─── Registration information ─────────────────────────────────────────────────
 
 function RegistrationSection({ event }: { event: EventRow }) {
-  if (!event.registration_opens_date && !event.registration_deadline && !event.registration_status) {
-    return null
-  }
+  const hasAnyRegData =
+    event.registration_opens_date ||
+    event.registration_deadline ||
+    event.registration_status ||
+    event.ballot_required ||
+    event.early_bird_closes_date ||
+    event.waitlist_open ||
+    event.registration_url
+
+  if (!hasAnyRegData) return null
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -1249,50 +1261,193 @@ function RegistrationSection({ event }: { event: EventRow }) {
 
   const opensIn = event.registration_opens_date ? daysFrom(event.registration_opens_date) : null
   const closesIn = event.registration_deadline ? daysFrom(event.registration_deadline) : null
+  const earlyBirdDays = event.early_bird_closes_date ? daysFrom(event.early_bird_closes_date) : null
+  const ballotOpensDays = event.ballot_opens_date ? daysFrom(event.ballot_opens_date) : null
+  const ballotClosesDays = event.ballot_closes_date ? daysFrom(event.ballot_closes_date) : null
+  const isBallotActive = ballotOpensDays !== null && ballotOpensDays <= 0 && (ballotClosesDays === null || ballotClosesDays > 0)
+
+  const regCta = event.ballot_apply_url ?? event.registration_url
+  const ctaLabel = event.ballot_required ? 'Apply for Ballot' : event.waitlist_open ? 'Join Waitlist' : 'Register Now'
 
   return (
     <section>
       <SectionHeading>Registration</SectionHeading>
-      <div className="card space-y-5">
+      <div className="space-y-4">
+
+        {/* Status badge */}
         {event.registration_status && (
           <RegistrationStatusBadge status={event.registration_status} />
         )}
 
-        <div className="space-y-4 text-sm">
-          {event.registration_opens_date && (
-            <div className="flex items-start justify-between gap-4">
+        {/* ── Ballot section ──────────────────────────────────── */}
+        {event.ballot_required && (
+          <div className="card space-y-4 border-mint/20 bg-mint/5">
+            <div className="flex items-start gap-3">
+              <BallotIcon className="h-5 w-5 shrink-0 text-mint mt-0.5" />
               <div>
-                <div className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-0.5">Registrations Open</div>
-                <div className="font-medium text-ink">{formatDate(event.registration_opens_date)}</div>
+                <h3 className="font-semibold text-ink">Ballot Entry</h3>
+                <p className="mt-1 text-sm text-ink-muted">
+                  This event uses a ballot (lottery) system. Athletes apply during the ballot window and places are allocated randomly.
+                </p>
               </div>
-              {opensIn !== null && (
-                <div className={`shrink-0 text-right text-xs font-medium ${opensIn > 0 ? 'text-ink-subtle' : 'text-mint'}`}>
-                  {opensIn > 0 ? `Opens in ${opensIn} day${opensIn !== 1 ? 's' : ''}` : opensIn === 0 ? 'Opens today' : 'Now open'}
+            </div>
+            <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+              {event.ballot_opens_date && (
+                <div className="rounded-lg border border-wire bg-canvas px-4 py-3">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Ballot Opens</div>
+                  <div className="mt-1 font-medium text-ink">{formatDate(event.ballot_opens_date)}</div>
+                  {ballotOpensDays !== null && ballotOpensDays > 0 && (
+                    <div className="mt-0.5 text-xs text-ink-subtle">In {ballotOpensDays} day{ballotOpensDays !== 1 ? 's' : ''}</div>
+                  )}
+                  {ballotOpensDays !== null && ballotOpensDays <= 0 && (
+                    <div className="mt-0.5 text-xs text-mint">Now open</div>
+                  )}
+                </div>
+              )}
+              {event.ballot_closes_date && (
+                <div className={`rounded-lg border px-4 py-3 ${ballotClosesDays !== null && ballotClosesDays <= 7 && ballotClosesDays > 0 ? 'border-amber-500/30 bg-amber-500/5' : 'border-wire bg-canvas'}`}>
+                  <div className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Ballot Closes</div>
+                  <div className="mt-1 font-medium text-ink">{formatDate(event.ballot_closes_date)}</div>
+                  {ballotClosesDays !== null && ballotClosesDays > 0 && (
+                    <div className={`mt-0.5 text-xs ${ballotClosesDays <= 7 ? 'text-amber-400' : 'text-ink-subtle'}`}>
+                      {ballotClosesDays === 1 ? 'Closes tomorrow' : `Closes in ${ballotClosesDays} days`}
+                    </div>
+                  )}
+                </div>
+              )}
+              {event.ballot_results_date && (
+                <div className="rounded-lg border border-wire bg-canvas px-4 py-3">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Results Announced</div>
+                  <div className="mt-1 font-medium text-ink">{formatDate(event.ballot_results_date)}</div>
                 </div>
               )}
             </div>
-          )}
+            {isBallotActive && event.ballot_apply_url && (
+              <a
+                href={event.ballot_apply_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary inline-flex"
+              >
+                <Globe className="h-4 w-4" /> Apply for Ballot
+              </a>
+            )}
+          </div>
+        )}
 
-          {event.registration_deadline && (
+        {/* ── Early bird section ──────────────────────────────── */}
+        {event.early_bird_closes_date && earlyBirdDays !== null && earlyBirdDays > 0 && (
+          <div className="card space-y-3 border-mint/20 bg-mint/5">
             <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-0.5">Registrations Close</div>
-                <div className="font-medium text-ink">{formatDate(event.registration_deadline)}</div>
+              <div className="flex items-start gap-3">
+                <EarlyBirdIcon className="h-5 w-5 shrink-0 text-mint mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-ink">
+                    Early Bird{' '}
+                    <span className={earlyBirdDays <= 7 ? 'text-amber-400' : 'text-mint'}>
+                      closes in {earlyBirdDays} day{earlyBirdDays !== 1 ? 's' : ''}
+                    </span>
+                  </h3>
+                  <p className="mt-0.5 text-sm text-ink-muted">{formatDate(event.early_bird_closes_date)}</p>
+                </div>
               </div>
-              {closesIn !== null && (
-                <div className={`shrink-0 text-right text-xs font-medium ${
-                  closesIn < 0 ? 'text-ink-subtle line-through' :
-                  closesIn <= 7 ? 'text-amber-400' :
-                  'text-ink-subtle'
-                }`}>
-                  {closesIn < 0 ? 'Closed' :
-                   closesIn === 0 ? 'Closes today!' :
-                   `Closes in ${closesIn} day${closesIn !== 1 ? 's' : ''}`}
+              {event.early_bird_price_from != null && (
+                <div className="shrink-0 text-right">
+                  <div className="text-lg font-bold text-mint">
+                    ${event.early_bird_price_from.toLocaleString('en-AU', { minimumFractionDigits: 0 })}
+                  </div>
+                  {event.entry_fee_from != null && event.entry_fee_from > event.early_bird_price_from && (
+                    <div className="text-xs text-ink-muted line-through">
+                      ${event.entry_fee_from.toLocaleString('en-AU', { minimumFractionDigits: 0 })}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
-        </div>
+            {event.registration_url && (
+              <a
+                href={event.registration_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary inline-flex text-sm"
+              >
+                <Globe className="h-4 w-4" /> Register at Early Bird Rate
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* ── Waitlist section ────────────────────────────────── */}
+        {event.waitlist_open && (
+          <div className="card space-y-3 border-amber-500/20 bg-amber-500/5">
+            <div className="flex items-start gap-3">
+              <WaitlistIcon className="h-5 w-5 shrink-0 text-amber-400 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-ink">Waitlist Available</h3>
+                <p className="mt-1 text-sm text-ink-muted">
+                  Registration is currently full. Join the waitlist to be notified if a spot becomes available.
+                </p>
+              </div>
+            </div>
+            {event.waitlist_url && (
+              <a
+                href={event.waitlist_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary inline-flex text-sm"
+              >
+                Join Waitlist
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* ── Standard opens / closes dates ──────────────────── */}
+        {(event.registration_opens_date || event.registration_deadline) && (
+          <div className="card space-y-4 text-sm">
+            {event.registration_opens_date && (
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-0.5">Registrations Open</div>
+                  <div className="font-medium text-ink">{formatDate(event.registration_opens_date)}</div>
+                </div>
+                {opensIn !== null && (
+                  <div className={`shrink-0 text-right text-xs font-medium ${opensIn > 0 ? 'text-ink-subtle' : 'text-mint'}`}>
+                    {opensIn > 0 ? `Opens in ${opensIn} day${opensIn !== 1 ? 's' : ''}` : opensIn === 0 ? 'Opens today' : 'Now open'}
+                  </div>
+                )}
+              </div>
+            )}
+            {event.registration_deadline && (
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wider text-ink-muted mb-0.5">Registrations Close</div>
+                  <div className="font-medium text-ink">{formatDate(event.registration_deadline)}</div>
+                </div>
+                {closesIn !== null && (
+                  <div className={`shrink-0 text-right text-xs font-medium ${
+                    closesIn < 0 ? 'text-ink-subtle' :
+                    closesIn <= 7 ? 'text-amber-400' : 'text-ink-subtle'
+                  }`}>
+                    {closesIn < 0 ? 'Closed' : closesIn === 0 ? 'Closes today!' : `Closes in ${closesIn} day${closesIn !== 1 ? 's' : ''}`}
+                  </div>
+                )}
+              </div>
+            )}
+            {regCta && (
+              <a href={regCta} target="_blank" rel="noopener noreferrer" className="btn-primary inline-flex">
+                <Globe className="h-4 w-4" /> {ctaLabel}
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* Platform */}
+        {event.registration_platform && (
+          <p className="text-xs text-ink-muted">
+            Registration via <span className="font-medium text-ink">{event.registration_platform}</span>
+          </p>
+        )}
 
         <p className="text-xs text-ink-muted border-t border-wire pt-4">
           Always verify registration details on the{' '}
@@ -1307,6 +1462,173 @@ function RegistrationSection({ event }: { event: EventRow }) {
         </p>
       </div>
     </section>
+  )
+}
+
+// ─── Registration policies ────────────────────────────────────────────────────
+
+function RegistrationPoliciesSection({ event }: { event: EventRow }) {
+  const hasPolicies =
+    event.transfer_available != null ||
+    event.deferral_available != null ||
+    event.refund_available != null ||
+    event.qualification_required ||
+    event.is_qualifier ||
+    event.min_age != null ||
+    event.max_age != null
+
+  if (!hasPolicies) return null
+
+  return (
+    <section>
+      <SectionHeading>Policies &amp; Requirements</SectionHeading>
+      <div className="space-y-3">
+
+        {/* Qualification required */}
+        {event.qualification_required && (
+          <div className="card flex items-start gap-3 border-amber-500/20 bg-amber-500/5">
+            <QualIcon className="h-5 w-5 shrink-0 text-amber-400 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-ink">Qualification Required</h3>
+              {event.qualification_notes && (
+                <p className="mt-1 text-sm text-ink-muted">{event.qualification_notes}</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Qualifier for a championship */}
+        {event.is_qualifier && event.qualifier_for && (
+          <div className="card flex items-start gap-3 border-mint/20 bg-mint/5">
+            <TrophyIcon className="h-5 w-5 shrink-0 text-mint mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-ink">Championship Qualifier</h3>
+              <p className="mt-1 text-sm text-ink-muted">
+                This event awards qualification spots for <span className="font-medium text-ink">{event.qualifier_for}</span>.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Transfer / deferral / refund */}
+        {(event.transfer_available != null || event.deferral_available != null || event.refund_available != null) && (
+          <div className="card space-y-3 text-sm">
+            <h3 className="font-semibold text-ink">Cancellation &amp; Transfer</h3>
+            <div className="space-y-2">
+              <PolicyRow
+                label="Transfer"
+                available={event.transfer_available}
+                deadline={event.transfer_deadline}
+              />
+              <PolicyRow
+                label="Deferral"
+                available={event.deferral_available}
+                deadline={event.deferral_deadline}
+              />
+              <PolicyRow
+                label="Refund"
+                available={event.refund_available}
+                deadline={event.refund_deadline}
+              />
+            </div>
+            {event.policies_url && (
+              <a href={event.policies_url} target="_blank" rel="noopener noreferrer" className="text-xs text-mint hover:underline">
+                Full policies &amp; conditions →
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* Age requirements */}
+        {(event.min_age != null || event.max_age != null) && (
+          <div className="card flex items-center justify-between gap-4 text-sm">
+            <span className="text-ink-muted">Age requirements</span>
+            <span className="font-medium text-ink">
+              {event.min_age != null && event.max_age != null
+                ? `${event.min_age}–${event.max_age} years`
+                : event.min_age != null
+                ? `${event.min_age}+ years`
+                : `Under ${event.max_age} years`}
+            </span>
+          </div>
+        )}
+
+        {/* Capacity */}
+        {event.total_capacity != null && (
+          <div className="card flex items-center justify-between gap-4 text-sm">
+            <span className="text-ink-muted">Total capacity</span>
+            <span className="font-medium text-ink">{event.total_capacity.toLocaleString()} participants</span>
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+function PolicyRow({
+  label,
+  available,
+  deadline,
+}: {
+  label: string
+  available: boolean | null
+  deadline: string | null
+}) {
+  if (available === null) return null
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <span className="text-ink-muted">{label}</span>
+      <span className={`font-medium ${available ? 'text-green-400' : 'text-red-400'}`}>
+        {available
+          ? deadline ? `Yes — until ${formatDate(deadline)}` : 'Available'
+          : 'Not available'}
+      </span>
+    </div>
+  )
+}
+
+// ─── Inline icons (avoid extra lucide imports) ────────────────────────────────
+
+function BallotIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden className={className}>
+      <rect x="4" y="2" width="12" height="16" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M7 7h6M7 10h6M7 13h4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function EarlyBirdIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden className={className}>
+      <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M10 6v4l2.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function WaitlistIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden className={className}>
+      <path d="M4 10h12M4 6h12M4 14h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function QualIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden className={className}>
+      <path d="M10 2l2.4 5.1 5.6.5-4.1 3.8 1.3 5.5L10 14l-5.2 2.9 1.3-5.5L2 7.6l5.6-.5L10 2z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function TrophyIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden className={className}>
+      <path d="M6 3h8v6a4 4 0 0 1-8 0V3z" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M6 6H3a2 2 0 0 0 2 2h1M14 6h3a2 2 0 0 1-2 2h-1M10 13v3M7 17h6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
   )
 }
 
@@ -1835,19 +2157,19 @@ function QuickFactsSidebar({ discipline }: { discipline: string }) {
 
 // ─── Registration status badge ────────────────────────────────────────────────
 
-const REG_STATUS_CONFIG = {
-  open:         { label: 'Registration Open',  color: '#22C55E', bg: 'rgba(34,197,94,0.12)',   dot: 'bg-green-400' },
-  closing_soon: { label: 'Closing Soon',        color: '#F59E0B', bg: 'rgba(245,158,11,0.12)',  dot: 'bg-amber-400' },
-  sold_out:     { label: 'Sold Out',            color: '#EF4444', bg: 'rgba(239,68,68,0.12)',   dot: 'bg-red-400'   },
-  coming_soon:  { label: 'Coming Soon',         color: '#94A3B8', bg: 'rgba(148,163,184,0.12)', dot: 'bg-slate-400' },
-} as const
+const REG_STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string }> = {
+  open:          { label: 'Registration Open',   color: '#22C55E', bg: 'rgba(34,197,94,0.12)',   dot: 'bg-green-400' },
+  closing_soon:  { label: 'Closing Soon',         color: '#F59E0B', bg: 'rgba(245,158,11,0.12)',  dot: 'bg-amber-400' },
+  sold_out:      { label: 'Sold Out',             color: '#EF4444', bg: 'rgba(239,68,68,0.12)',   dot: 'bg-red-400'   },
+  waitlist_only: { label: 'Waitlist Available',   color: '#F59E0B', bg: 'rgba(245,158,11,0.12)',  dot: 'bg-amber-400' },
+  coming_soon:   { label: 'Registration Opening Soon', color: '#94A3B8', bg: 'rgba(148,163,184,0.12)', dot: 'bg-slate-400' },
+  ballot_open:   { label: 'Ballot Open',          color: '#00D9A6', bg: 'rgba(0,217,166,0.12)',   dot: 'bg-emerald-400' },
+  ballot_closed: { label: 'Ballot Closed',        color: '#94A3B8', bg: 'rgba(148,163,184,0.12)', dot: 'bg-slate-400' },
+}
 
-function RegistrationStatusBadge({
-  status,
-}: {
-  status: 'open' | 'closing_soon' | 'sold_out' | 'coming_soon'
-}) {
+function RegistrationStatusBadge({ status }: { status: string }) {
   const cfg = REG_STATUS_CONFIG[status]
+  if (!cfg) return null
   return (
     <div
       className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium"
@@ -1872,15 +2194,19 @@ function ConversionCTAsSection({
   saveCount: number
   hasUser: boolean
 }) {
-  const remindLabel =
-    event.registration_status === 'open' || event.registration_status === 'closing_soon'
-      ? 'Notify me next year'
-      : 'Notify me when registrations open'
+  const isCurrentlyOpen = ['open', 'closing_soon', 'ballot_open', 'waitlist_only'].includes(event.registration_status ?? '')
 
-  const remindDesc =
-    event.registration_status === 'open' || event.registration_status === 'closing_soon'
-      ? "Registration is open now — but if you miss it, we'll remind you when next year's edition opens."
-      : "We'll send you one email the moment registrations open. No spam, no pressure."
+  const remindLabel = isCurrentlyOpen
+    ? 'Notify me next year'
+    : event.ballot_required
+    ? 'Remind me when the ballot opens'
+    : 'Notify me when registrations open'
+
+  const remindDesc = isCurrentlyOpen
+    ? "Registration is open now — but if you miss it, we'll remind you when next year's edition opens."
+    : event.ballot_required
+    ? "We'll send you one email when the ballot window opens. No spam, no pressure."
+    : "We'll send you one email the moment registrations open. No spam, no pressure."
 
   return (
     <section className="border-t border-wire bg-panel">
