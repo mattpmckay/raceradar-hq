@@ -212,6 +212,10 @@ export type Database = {
           registration_deadline: string | null
           registration_opens_date: string | null
           registration_status: 'open' | 'closing_soon' | 'sold_out' | 'coming_soon' | null
+          early_bird_closes_date: string | null
+          early_bird_price_from: number | null
+          registration_url: string | null
+          waitlist_open: boolean
           entry_fee_from: number | null
           entry_fee_to: number | null
           entry_fee_currency: string
@@ -251,6 +255,10 @@ export type Database = {
           registration_deadline?: string | null
           registration_opens_date?: string | null
           registration_status?: 'open' | 'closing_soon' | 'sold_out' | 'coming_soon' | null
+          early_bird_closes_date?: string | null
+          early_bird_price_from?: number | null
+          registration_url?: string | null
+          waitlist_open?: boolean
           entry_fee_from?: number | null
           entry_fee_to?: number | null
           entry_fee_currency?: string
@@ -290,6 +298,10 @@ export type Database = {
           registration_deadline?: string | null
           registration_opens_date?: string | null
           registration_status?: 'open' | 'closing_soon' | 'sold_out' | 'coming_soon' | null
+          early_bird_closes_date?: string | null
+          early_bird_price_from?: number | null
+          registration_url?: string | null
+          waitlist_open?: boolean
           entry_fee_from?: number | null
           entry_fee_to?: number | null
           entry_fee_currency?: string
@@ -386,7 +398,7 @@ export type Database = {
           event_id: string
           user_id: string | null
           email: string | null
-          reminder_type: 'registration_opens' | 'registration_closing' | 'race_week'
+          reminder_type: 'registration_opens' | 'registration_closing' | 'early_bird_closing' | 'race_week'
           is_sent: boolean
           sent_at: string | null
           created_at: string
@@ -396,7 +408,7 @@ export type Database = {
           event_id: string
           user_id?: string | null
           email?: string | null
-          reminder_type: 'registration_opens' | 'registration_closing' | 'race_week'
+          reminder_type: 'registration_opens' | 'registration_closing' | 'early_bird_closing' | 'race_week'
           is_sent?: boolean
           sent_at?: string | null
           created_at?: string
