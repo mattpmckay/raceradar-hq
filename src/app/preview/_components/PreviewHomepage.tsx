@@ -161,7 +161,7 @@ export function PreviewHomepage({ currentSlug }: { currentSlug: string }) {
         <div className="container-page" style={{ position: 'relative', paddingTop: '6rem', paddingBottom: '6rem' }}>
           <div style={{ maxWidth: '48rem' }}>
             <h1 className="page-title">
-              Australia's home for{' '}
+              Australia&apos;s home for{' '}
               <span className="pa-text">endurance sport.</span>
             </h1>
             <p style={{ marginTop: '1.5rem', fontSize: '1.125rem', color: '#9ca3af', lineHeight: '1.75' }}>
@@ -274,7 +274,7 @@ export function PreviewHomepage({ currentSlug }: { currentSlug: string }) {
             Create a free account to save events, follow series, and get alerts tailored to your discipline and location.
           </p>
           <a href="#" className="pa-btn" style={{ marginTop: '1.5rem', display: 'inline-flex' }}>
-            Get started — it's free
+            Get started — it&apos;s free
           </a>
         </div>
       </section>

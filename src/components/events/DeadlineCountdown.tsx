@@ -16,6 +16,7 @@ export function DeadlineCountdown({ date, label, variant = 'registration' }: Cou
     const target = new Date(date)
     target.setHours(23, 59, 59, 999)
     const diff = Math.ceil((target.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDays(diff)
   }, [date])
 

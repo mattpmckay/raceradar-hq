@@ -179,7 +179,7 @@ export default function HowToChooseYourFirstRacePage() {
           <h3 className="font-semibold text-ink mb-2">One more thing: register early</h3>
           <p className="text-ink-muted leading-relaxed">
             Popular APAC events — HYROX, Spartan Trifecta weekends, the Sydney Marathon, Ironman 70.3 Sunshine Coast — sell out months in advance.
-            Once you've picked your discipline, browse the calendar and lock in your entry. The registration deadline
+            Once you&apos;ve picked your discipline, browse the calendar and lock in your entry. The registration deadline
             is a powerful training motivator.
           </p>
         </section>

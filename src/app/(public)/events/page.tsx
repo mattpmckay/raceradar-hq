@@ -13,7 +13,7 @@ import type { Metadata } from 'next'
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; discipline?: string; country?: string; region?: string; window?: string }>
+  searchParams: Promise<SearchParams>
 }): Promise<Metadata> {
   const params = await searchParams
   const title =
@@ -33,8 +33,6 @@ export async function generateMetadata({
 }
 
 // ─── Discipline pills ─────────────────────────────────────────────────────────
-// Values must match events.discipline exactly (case-sensitive).
-// Ironman filter uses ilike to match both 'Ironman' and 'Ironman 70.3'.
 
 const DISCIPLINES = [
   { label: 'All Events',    value: '',                disciplineSlug: '' },
@@ -62,10 +60,25 @@ const DISCIPLINE_COLORS: Record<string, string> = {
   'CrossFit':      '#EF4444',
 }
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type SearchParams = {
+  q?:          string
+  discipline?: string
+  country?:    string
+  region?:     string
+  window?:     string
+  series?:     string
+}
+
+interface PageProps {
+  searchParams: Promise<SearchParams>
+}
+
 // ─── Date window helpers ───────────────────────────────────────────────────────
 
 function windowEndDate(window: string | undefined, today: string): string {
-  if (!window) return '2099-01-01'
+  if (!window || window === 'past') return '2099-01-01'
   const d = new Date(today + 'T00:00:00')
   if (window === 'this-month') {
     d.setMonth(d.getMonth() + 1)
@@ -74,6 +87,8 @@ function windowEndDate(window: string | undefined, today: string): string {
     d.setMonth(d.getMonth() + 3)
   } else if (window === '6months') {
     d.setMonth(d.getMonth() + 6)
+  } else if (window === 'this-year') {
+    return `${d.getFullYear()}-12-31`
   } else {
     return '2099-01-01'
   }
@@ -82,24 +97,29 @@ function windowEndDate(window: string | undefined, today: string): string {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-interface PageProps {
-  searchParams: Promise<{ q?: string; discipline?: string; country?: string; region?: string; window?: string }>
-}
-
 export default async function EventsPage({ searchParams }: PageProps) {
-  const params    = await searchParams
-  const supabase  = await createClient()
-  const today     = new Date().toISOString().split('T')[0]
-  const dateEnd   = windowEndDate(params.window, today)
+  const params   = await searchParams
+  const supabase = await createClient()
+  const today    = new Date().toISOString().split('T')[0]
+  const isPast   = params.window === 'past'
+  const dateEnd  = windowEndDate(params.window, today)
 
-  // ── Parallel data fetches ────────────────────────────────────────────────
+  // ── Build main events query ────────────────────────────────────────────────
   let eventsQuery = supabase
     .from('events')
     .select('*')
     .eq('is_published', true)
-    .gte('start_date', today)
-    .lt('start_date', dateEnd)
-    .order('start_date', { ascending: true })
+
+  if (isPast) {
+    eventsQuery = eventsQuery
+      .lt('start_date', today)
+      .order('start_date', { ascending: false })
+  } else {
+    eventsQuery = eventsQuery
+      .gte('start_date', today)
+      .lt('start_date', dateEnd)
+      .order('start_date', { ascending: true })
+  }
 
   if (params.q) {
     const q = params.q.trim()
@@ -112,32 +132,49 @@ export default async function EventsPage({ searchParams }: PageProps) {
       ? eventsQuery.ilike('discipline', 'Ironman%')
       : eventsQuery.eq('discipline', params.discipline)
   }
-  if (params.country) {
-    eventsQuery = eventsQuery.eq('country', params.country)
-  }
-  if (params.region) {
-    eventsQuery = eventsQuery.eq('region', params.region)
+  if (params.country) eventsQuery = eventsQuery.eq('country', params.country)
+  if (params.region)  eventsQuery = eventsQuery.eq('region', params.region)
+  if (params.series)  eventsQuery = eventsQuery.eq('series_slug', params.series)
+
+  // ── Count query (discipline pill badge counts, same date window, no other filters) ──
+  let countQuery = supabase
+    .from('events')
+    .select('discipline')
+    .eq('is_published', true)
+
+  if (isPast) {
+    countQuery = countQuery.lt('start_date', today)
+  } else {
+    countQuery = countQuery.gte('start_date', today).lt('start_date', dateEnd)
   }
 
+  // ── Parallel fetches ───────────────────────────────────────────────────────
   const [
     { data: events, error },
     { data: countRows },
     { data: { user } },
+    { data: allSeries },
   ] = await Promise.all([
     eventsQuery.limit(48),
-    // Counts: no discipline filter, same date window — drives pill badges
-    supabase
-      .from('events')
-      .select('discipline')
-      .eq('is_published', true)
-      .gte('start_date', today)
-      .lt('start_date', dateEnd),
+    countQuery,
     supabase.auth.getUser(),
+    supabase
+      .from('series')
+      .select('slug, name, discipline_slug')
+      .eq('is_active', true)
+      .order('name'),
   ])
 
   if (error) {
     console.error('[EventsPage] Supabase error:', error.code, error.message)
   }
+
+  // Series options: filter to the active discipline when one is selected
+  const activeDisciplineSlug =
+    DISCIPLINES.find((d) => d.value === (params.discipline ?? ''))?.disciplineSlug ?? ''
+  const seriesOptions = activeDisciplineSlug
+    ? (allSeries ?? []).filter((s) => s.discipline_slug === activeDisciplineSlug)
+    : (allSeries ?? [])
 
   // Per-discipline counts for pill badges
   const disciplineCounts = new Map<string, number>()
@@ -147,7 +184,6 @@ export default async function EventsPage({ searchParams }: PageProps) {
     disciplineCounts.set(d, (disciplineCounts.get(d) ?? 0) + 1)
     totalCount++
   }
-  // Group Ironman 70.3 under the Ironman pill
   const ironmanTotal = (disciplineCounts.get('Ironman') ?? 0) + (disciplineCounts.get('Ironman 70.3') ?? 0)
   disciplineCounts.set('Ironman', ironmanTotal)
 
@@ -162,13 +198,13 @@ export default async function EventsPage({ searchParams }: PageProps) {
     savedIds = new Set((favs ?? []).map((f) => f.entity_id))
   }
 
-  // ── Hero ────────────────────────────────────────────────────────────────
+  // ── Hero text ──────────────────────────────────────────────────────────────
   const count      = events?.length ?? 0
   const countLabel = count === 48 ? '48+' : String(count)
   const heroTitle    = buildTitle(params)
   const heroSubtitle = buildSubtitle(params, count, countLabel)
 
-  // ── Pill href (preserves all active filters except discipline) ──────────
+  // Pill href: changing discipline drops series (series are discipline-specific)
   function pillHref(value: string) {
     const p = new URLSearchParams()
     if (value)          p.set('discipline', value)
@@ -181,8 +217,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
   const activeDiscipline    = params.discipline ?? ''
   const activeDisciplineObj = DISCIPLINES.find((d) => d.value === activeDiscipline)
 
-  // ── Reset-filters href ──────────────────────────────────────────────────
-  const hasFilters = !!(params.q || params.country || params.window)
+  const hasFilters = !!(params.q || params.country || params.window || params.series)
   const resetHref  = params.discipline
     ? `/events?discipline=${encodeURIComponent(params.discipline)}`
     : '/events'
@@ -209,7 +244,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
                 const activeStyle = isActive && color
                   ? { background: `${color}18`, borderColor: `${color}60`, color }
                   : {}
-                const count = d.value === ''
+                const pillCount = d.value === ''
                   ? totalCount
                   : disciplineCounts.get(d.value) ?? 0
 
@@ -226,14 +261,13 @@ export default async function EventsPage({ searchParams }: PageProps) {
                     style={activeStyle}
                   >
                     {d.label}
-                    {count > 0 && (
-                      <span className="ml-1.5 text-xs opacity-60">{count}</span>
+                    {pillCount > 0 && (
+                      <span className="ml-1.5 text-xs opacity-60">{pillCount}</span>
                     )}
                   </Link>
                 )
               })}
             </div>
-
             <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-canvas to-transparent sm:hidden" />
           </div>
 
@@ -252,7 +286,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
 
           {/* Filter bar */}
           <Suspense fallback={null}>
-            <EventFilters />
+            <EventFilters seriesOptions={seriesOptions} />
           </Suspense>
 
         </div>
@@ -267,15 +301,22 @@ export default async function EventsPage({ searchParams }: PageProps) {
             description="Could not connect to the database. Please try refreshing the page."
           />
         ) : events && events.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {events.map((event) => (
-              <EventCard
-                key={event.id}
-                event={event}
-                initialSaved={savedIds.has(event.id)}
-              />
-            ))}
-          </div>
+          <>
+            <p className="mb-5 text-sm text-ink-muted">
+              {countLabel} {isPast ? 'past' : 'upcoming'} event{count !== 1 ? 's' : ''}
+              {params.discipline ? ` · ${params.discipline}` : ''}
+              {params.country ? ` · ${params.country}` : ''}
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {events.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  initialSaved={savedIds.has(event.id)}
+                />
+              ))}
+            </div>
+          </>
         ) : (
           <EmptyState
             icon={<Calendar className="h-10 w-10" />}
@@ -305,9 +346,11 @@ const WINDOW_LABELS: Record<string, string> = {
   'this-month': 'this month',
   '3months':    'next 3 months',
   '6months':    'next 6 months',
+  'this-year':  'this year',
+  'past':       'past events',
 }
 
-function buildTitle(params: { discipline?: string; country?: string; q?: string }) {
+function buildTitle(params: SearchParams) {
   const { discipline, country, q } = params
   if (discipline && country) return `${discipline} Events · ${country}`
   if (discipline)            return `${discipline} Events`
@@ -316,24 +359,25 @@ function buildTitle(params: { discipline?: string; country?: string; q?: string 
   return 'Events for Your Season'
 }
 
-function buildSubtitle(
-  params: { discipline?: string; country?: string; q?: string; window?: string },
-  count: number,
-  countLabel: string,
-) {
-  const { discipline, country, q, window } = params
-  const windowLabel = window ? ` · ${WINDOW_LABELS[window] ?? ''}` : ''
+function buildSubtitle(params: SearchParams, count: number, countLabel: string) {
+  const { discipline, country, q, window, series } = params
+  const isPast      = window === 'past'
+  const qualifier   = isPast ? 'past' : 'upcoming'
+  const windowLabel = window && !isPast ? ` · ${WINDOW_LABELS[window] ?? ''}` : ''
+  const seriesLabel = series ? ` · ${series.replace(/-/g, ' ')}` : ''
 
   if (count === 0) {
-    if (discipline || country || q || window) return 'No upcoming events match your current filters.'
+    if (discipline || country || q || window || series)
+      return 'No events match your current filters.'
     return 'No upcoming events found. Check back soon.'
   }
 
-  const showing = `${countLabel} upcoming`
+  const showing = `${countLabel} ${qualifier}`
 
-  if (discipline && country) return `${showing} ${discipline} events in ${country}${windowLabel}`
-  if (discipline)            return `${showing} ${discipline} events across Asia Pacific${windowLabel}`
-  if (country)               return `${showing} events in ${country}${windowLabel}`
-  if (q)                     return `${showing} events matching "${q}"${windowLabel}`
+  if (discipline && country) return `${showing} ${discipline} events in ${country}${windowLabel}${seriesLabel}`
+  if (discipline)            return `${showing} ${discipline} events across Asia Pacific${windowLabel}${seriesLabel}`
+  if (country)               return `${showing} events in ${country}${windowLabel}${seriesLabel}`
+  if (q)                     return `${showing} events matching "${q}"${windowLabel}${seriesLabel}`
+  if (series)                return `${showing} events${seriesLabel}${windowLabel}`
   return `${showing} events to add to your season${windowLabel}`
 }

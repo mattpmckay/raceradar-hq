@@ -66,7 +66,7 @@ export default async function DashboardPage() {
         {/* Header */}
         <div>
           <h1 className="font-heading text-2xl font-bold text-ink">My Season</h1>
-          <p className="mt-1 text-sm text-ink-muted">Hey {firstName}, let's plan your season.</p>
+          <p className="mt-1 text-sm text-ink-muted">Hey {firstName}, let&apos;s plan your season.</p>
         </div>
 
         {/* Value proposition */}

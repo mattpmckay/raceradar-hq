@@ -21,17 +21,30 @@ const WINDOWS = [
   { label: 'This month',     value: 'this-month' },
   { label: 'Next 3 months',  value: '3months' },
   { label: 'Next 6 months',  value: '6months' },
+  { label: 'This year',      value: 'this-year' },
+  { label: 'Past events',    value: 'past' },
 ]
 
 const WINDOW_LABELS: Record<string, string> = {
   'this-month': 'This month',
   '3months':    'Next 3 months',
   '6months':    'Next 6 months',
+  'this-year':  'This year',
+  'past':       'Past events',
 }
 
 const AU_STATES = ['NSW', 'VIC', 'QLD', 'WA', 'SA', 'TAS', 'ACT', 'NT']
 
-export function EventFilters() {
+interface SeriesOption {
+  slug: string
+  name: string
+}
+
+interface Props {
+  seriesOptions: SeriesOption[]
+}
+
+export function EventFilters({ seriesOptions }: Props) {
   const router       = useRouter()
   const searchParams = useSearchParams()
 
@@ -52,6 +65,7 @@ export function EventFilters() {
     (value: string) => {
       const params = new URLSearchParams(searchParams.toString())
       if (value) { params.set('country', value) } else { params.delete('country') }
+      // Region is AU-specific — clear it when switching away from Australia
       if (value !== 'Australia') params.delete('region')
       params.delete('page')
       router.push(`/events?${params.toString()}`)
@@ -67,7 +81,7 @@ export function EventFilters() {
     setSearchVal('')
   }, [router, searchParams])
 
-  // Debounced search: fires 350 ms after user stops typing; immediate on clear
+  // Debounced search: fires 350 ms after typing; immediate on clear
   const updateParamRef = useRef(updateParam)
   useEffect(() => { updateParamRef.current = updateParam }, [updateParam])
 
@@ -85,18 +99,23 @@ export function EventFilters() {
   }, [searchVal])
 
   const activeCountry = searchParams.get('country') ?? ''
-  const activeRegion  = searchParams.get('region') ?? ''
-  const activeQ       = searchParams.get('q') ?? ''
-  const activeWindow  = searchParams.get('window') ?? ''
-  const hasActiveFilters = !!(activeCountry || activeRegion || activeQ || activeWindow)
+  const activeRegion  = searchParams.get('region')  ?? ''
+  const activeQ       = searchParams.get('q')       ?? ''
+  const activeWindow  = searchParams.get('window')  ?? ''
+  const activeSeries  = searchParams.get('series')  ?? ''
+
+  const hasActiveFilters = !!(activeCountry || activeRegion || activeQ || activeWindow || activeSeries)
+
+  // Display name for the active series chip
+  const activeSeriesName = seriesOptions.find((s) => s.slug === activeSeries)?.name ?? activeSeries
 
   return (
     <div>
-      {/* Filter bar */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+      {/* Filter bar — stacks vertically on mobile, wraps on desktop */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
 
         {/* Search */}
-        <div className="relative flex-1">
+        <div className="relative flex-1 min-w-0 sm:min-w-[200px]">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
           <input
             type="search"
@@ -119,8 +138,8 @@ export function EventFilters() {
           ))}
         </FilterSelect>
 
-        {/* Australian state — only shown when Australia is selected */}
-        {(activeCountry === 'Australia' || activeCountry === '') && (
+        {/* Australian state — only when Australia is explicitly selected */}
+        {activeCountry === 'Australia' && (
           <FilterSelect
             value={activeRegion}
             onChange={(v) => updateParam('region', v)}
@@ -144,6 +163,21 @@ export function EventFilters() {
           ))}
         </FilterSelect>
 
+        {/* Series — shown when there are options (discipline-filtered by server) */}
+        {seriesOptions.length > 0 && (
+          <FilterSelect
+            value={activeSeries}
+            onChange={(v) => updateParam('series', v)}
+            aria-label="Filter by series"
+            className="sm:w-52"
+          >
+            <option value="">All series</option>
+            {seriesOptions.map((s) => (
+              <option key={s.slug} value={s.slug}>{s.name}</option>
+            ))}
+          </FilterSelect>
+        )}
+
       </div>
 
       {/* Active filter chips */}
@@ -156,7 +190,10 @@ export function EventFilters() {
             />
           )}
           {activeCountry && (
-            <FilterChip label={activeCountry} onRemove={() => { updateParam('country', ''); updateParam('region', '') }} />
+            <FilterChip
+              label={activeCountry}
+              onRemove={() => { updateCountry('') }}
+            />
           )}
           {activeRegion && (
             <FilterChip label={activeRegion} onRemove={() => updateParam('region', '')} />
@@ -165,6 +202,12 @@ export function EventFilters() {
             <FilterChip
               label={WINDOW_LABELS[activeWindow] ?? activeWindow}
               onRemove={() => updateParam('window', '')}
+            />
+          )}
+          {activeSeries && (
+            <FilterChip
+              label={activeSeriesName}
+              onRemove={() => updateParam('series', '')}
             />
           )}
           <button
@@ -186,11 +229,13 @@ function FilterSelect({
   onChange,
   children,
   'aria-label': ariaLabel,
+  className = '',
 }: {
   value: string
   onChange: (v: string) => void
   children: React.ReactNode
   'aria-label': string
+  className?: string
 }) {
   return (
     <div className="relative">
@@ -198,7 +243,7 @@ function FilterSelect({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         aria-label={ariaLabel}
-        className="w-full sm:w-44 cursor-pointer appearance-none rounded-xl border border-wire bg-panel px-4 py-2.5 pr-9 text-sm text-ink-muted focus:border-mint/50 focus:outline-none focus:ring-1 focus:ring-mint/20 transition-colors"
+        className={`w-full sm:w-44 cursor-pointer appearance-none rounded-xl border border-wire bg-panel px-4 py-2.5 pr-9 text-sm text-ink-muted focus:border-mint/50 focus:outline-none focus:ring-1 focus:ring-mint/20 transition-colors ${className}`}
       >
         {children}
       </select>
