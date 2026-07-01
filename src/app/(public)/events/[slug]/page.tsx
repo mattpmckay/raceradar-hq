@@ -4,7 +4,7 @@ import Image from 'next/image'
 import {
   Calendar, MapPin, Globe, ArrowLeft, Flag, CheckCircle, Clock,
   Train, Users, Thermometer, Heart, BookOpen, Map, Download,
-  Mountain, ChevronRight,
+  Mountain, ChevronRight, AlertTriangle, XCircle,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import type { Tables } from '@/types/supabase'
@@ -13,6 +13,7 @@ import { SaveButton } from '@/components/events/SaveButton'
 import { ReminderSignup } from '@/components/events/ReminderSignup'
 import { CalendarCtaInline } from '@/components/events/CalendarCtaInline'
 import { MobileSeasonCta } from '@/components/events/MobileSeasonCta'
+import { DeadlineCountdown } from '@/components/events/DeadlineCountdown'
 import { formatDate } from '@/lib/utils'
 import type { Metadata } from 'next'
 
@@ -360,9 +361,12 @@ function buildEventSchema(event: EventRow, venue: string | null) {
     url: `${siteUrl}/events/${event.slug}`,
     ...(event.start_date !== '2099-01-01' ? { startDate: event.start_date } : {}),
     ...(event.end_date && event.start_date !== '2099-01-01' ? { endDate: event.end_date } : {}),
-    eventStatus: event.start_date === '2099-01-01'
-      ? 'https://schema.org/EventPostponed'
-      : 'https://schema.org/EventScheduled',
+    eventStatus:
+      event.event_status === 'cancelled'  ? 'https://schema.org/EventCancelled' :
+      event.event_status === 'postponed'  ? 'https://schema.org/EventPostponed' :
+      event.event_status === 'tbc'        ? 'https://schema.org/EventPostponed' :
+      event.start_date === '2099-01-01'   ? 'https://schema.org/EventPostponed' :
+                                            'https://schema.org/EventScheduled',
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     sport: event.discipline,
     location: {
@@ -513,6 +517,9 @@ export default async function EventDetailPage({ params }: PageProps) {
         <Link href="/events" className="btn-ghost mb-6 inline-flex px-0 text-ink-muted">
           <ArrowLeft className="h-4 w-4" /> Back to Events
         </Link>
+
+        {/* ── Event status banner ─────────────────────────────────────────── */}
+        <EventStatusBanner status={event.event_status} />
 
         <div className="grid gap-10 lg:grid-cols-3">
 
@@ -681,11 +688,19 @@ export default async function EventDetailPage({ params }: PageProps) {
                 )
               })()}
 
-              {event.registration_deadline && !event.early_bird_closes_date && (
-                <div className="rounded-lg bg-mint/10 border border-mint/20 px-3 py-2.5 text-sm">
-                  <span className="text-mint font-medium">Registration closes</span>
-                  <div className="text-ink">{formatDate(event.registration_deadline)}</div>
-                </div>
+              {event.registration_deadline && (
+                <DeadlineCountdown
+                  date={event.registration_deadline}
+                  label="Registration"
+                  variant="registration"
+                />
+              )}
+              {event.next_price_increase_date && (
+                <DeadlineCountdown
+                  date={event.next_price_increase_date}
+                  label="Price increase"
+                  variant="price"
+                />
               )}
 
               {(event.registration_url ?? event.website_url) && (
@@ -763,6 +778,53 @@ export default async function EventDetailPage({ params }: PageProps) {
       />
     </>
   )
+}
+
+// ─── Event status banner ──────────────────────────────────────────────────────
+
+function EventStatusBanner({ status }: { status: string }) {
+  if (!status || status === 'confirmed' || status === 'completed') return null
+
+  if (status === 'cancelled') {
+    return (
+      <div className="mb-6 flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3">
+        <XCircle className="h-5 w-5 shrink-0 text-red-400 mt-0.5" />
+        <div>
+          <p className="font-semibold text-red-400">This event has been cancelled</p>
+          <p className="mt-0.5 text-sm text-red-400/70">
+            Check the official website for details and refund information.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  if (status === 'postponed') {
+    return (
+      <div className="mb-6 flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3">
+        <AlertTriangle className="h-5 w-5 shrink-0 text-amber-400 mt-0.5" />
+        <div>
+          <p className="font-semibold text-amber-400">This event has been postponed</p>
+          <p className="mt-0.5 text-sm text-amber-400/70">
+            A new date will be announced by the organiser. Check the official website for updates.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  if (status === 'tbc') {
+    return (
+      <div className="mb-6 flex items-start gap-3 rounded-lg border border-wire bg-panel px-4 py-3">
+        <AlertTriangle className="h-5 w-5 shrink-0 text-ink-muted mt-0.5" />
+        <p className="text-sm text-ink-muted">
+          Details for this event have not yet been officially confirmed. Dates and information are subject to change.
+        </p>
+      </div>
+    )
+  }
+
+  return null
 }
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────

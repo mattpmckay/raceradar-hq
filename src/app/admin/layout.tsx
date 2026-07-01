@@ -1,11 +1,12 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { Flag, Calendar, MapPin, Trophy, LayoutDashboard } from 'lucide-react'
+import { Flag, Calendar, MapPin, Trophy, LayoutDashboard, Inbox } from 'lucide-react'
 
 const navItems = [
   { href: '/admin', label: 'Overview', icon: LayoutDashboard },
   { href: '/admin/events', label: 'Events', icon: Calendar },
+  { href: '/admin/import-queue', label: 'Import Queue', icon: Inbox },
   { href: '/admin/tracks', label: 'Tracks', icon: MapPin },
   { href: '/admin/championships', label: 'Championships', icon: Trophy },
 ]

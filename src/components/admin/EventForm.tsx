@@ -50,6 +50,14 @@ const CONFIDENCE_LEVELS = [
   { value: '5', label: '5 — Verified (confirmed by organiser)' },
 ]
 
+const EVENT_STATUS_OPTIONS = [
+  { value: 'confirmed', label: 'Confirmed — event is on, dates set' },
+  { value: 'tbc', label: 'TBC — placeholder, details not yet confirmed' },
+  { value: 'postponed', label: 'Postponed — delayed, new date TBC' },
+  { value: 'cancelled', label: 'Cancelled — will not happen' },
+  { value: 'completed', label: 'Completed — event has occurred' },
+]
+
 type Props = { event?: EventRow }
 
 function str(v: string | number | null | undefined): string {
@@ -165,7 +173,8 @@ export function EventForm({ event }: Props) {
     // ── Provenance ───────────────────────────────────────────
     data_confidence: str(event?.data_confidence),
 
-    // ── Visibility ───────────────────────────────────────────
+    // ── Status & visibility ───────────────────────────────────
+    event_status: event?.event_status ?? 'confirmed',
     is_published: event?.is_published ?? false,
     is_featured:  event?.is_featured ?? false,
   })
@@ -641,6 +650,13 @@ export function EventForm({ event }: Props) {
 
       {/* ── Visibility ────────────────────────────────────────────────────── */}
       <Section label="Visibility">
+        <div className="grid gap-4 sm:grid-cols-2 mb-4">
+          <FormField label="Event Status">
+            <select value={form.event_status} onChange={(e) => set('event_status', e.target.value as typeof form['event_status'])} className="form-input">
+              {EVENT_STATUS_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+            </select>
+          </FormField>
+        </div>
         <div className="space-y-3">
           <CheckboxField label="Published (visible on site)" checked={form.is_published} onChange={(v) => set('is_published', v)} />
           <CheckboxField label="Featured (shown in 'Featured Events' on homepage)" checked={form.is_featured} onChange={(v) => set('is_featured', v)} />

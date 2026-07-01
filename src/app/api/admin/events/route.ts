@@ -142,6 +142,9 @@ function buildEventPayload(body: Record<string, unknown>) {
     data_confidence: num(body.data_confidence),
 
     // Visibility
+    event_status:
+      (str(body.event_status) as
+        | 'confirmed' | 'postponed' | 'cancelled' | 'completed' | 'tbc' | null) ?? 'confirmed',
     is_published: bool(body.is_published),
     is_featured:  bool(body.is_featured),
   }
