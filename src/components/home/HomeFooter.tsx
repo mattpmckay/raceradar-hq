@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 const DISCOVER_LINKS = [
   { label: 'Events',         href: '/events' },
-  { label: 'Sports',         href: '/sports' },
+  { label: 'Event Types',    href: '/sports' },
   { label: 'Locations',      href: '/locations' },
   { label: 'Race Guides',    href: '/guides' },
   { label: 'Free Calendar',  href: '/calendar' },
@@ -53,10 +53,10 @@ export function HomeFooter() {
             </ul>
           </div>
 
-          {/* Sports — hidden on mobile to keep footer compact */}
+          {/* Event Types — hidden on mobile to keep footer compact */}
           <div className="hidden sm:block">
             <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-ink">
-              Sports
+              Event Types
             </h3>
             <ul className="space-y-2.5">
               {SPORTS_LINKS.map((link) => (

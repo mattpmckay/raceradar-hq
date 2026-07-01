@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 
 const NAV_LINKS = [
   { label: 'Events',      href: '/events' },
-  { label: 'Sports',      href: '/sports' },
+  { label: 'Event Types', href: '/sports' },
   { label: 'Locations',   href: '/locations' },
   { label: 'Race Guides', href: '/guides' },
 ]

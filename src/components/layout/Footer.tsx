@@ -3,11 +3,11 @@ import Link from 'next/link'
 const FOOTER_LINKS = {
   Discover: [
     { label: 'Events',      href: '/events' },
-    { label: 'Sports',      href: '/sports' },
+    { label: 'Event Types', href: '/sports' },
     { label: 'Locations',   href: '/locations' },
     { label: 'Race Guides', href: '/guides' },
   ],
-  Sports: [
+  'Event Types': [
     { label: 'HYROX',         href: '/events?discipline=HYROX' },
     { label: 'CrossFit',      href: '/events?discipline=CrossFit' },
     { label: 'Deka Fit',      href: '/events?discipline=Deka+Fit' },

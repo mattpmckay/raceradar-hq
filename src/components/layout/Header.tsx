@@ -26,7 +26,7 @@ const PRIMARY_NAV = [
 ] as const
 
 const MORE_NAV = [
-  { href: '/sports',    label: 'Sports' },
+  { href: '/sports',    label: 'Event Types' },
   { href: '/locations', label: 'Locations' },
   { href: '/guides',    label: 'Race Guides' },
 ] as const

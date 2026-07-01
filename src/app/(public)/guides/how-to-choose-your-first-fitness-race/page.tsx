@@ -196,7 +196,7 @@ export default function HowToChooseYourFirstRacePage() {
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link href="/sports" className="btn-secondary inline-flex">
-              Explore sports
+              Explore event types
             </Link>
           </div>
         </div>

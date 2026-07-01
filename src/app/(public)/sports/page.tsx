@@ -4,11 +4,11 @@ import { createClient } from '@/lib/supabase/server'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: { absolute: 'Sports — Fitness Races & Endurance Events | RaceRadar HQ' },
+  title: { absolute: 'Event Types — Fitness Races & Endurance Events | RaceRadar HQ' },
   description:
     'Explore every sport on RaceRadar HQ: HYROX, Spartan Race, Tough Mudder, IRONMAN, Marathon, Road Racing, Trail Running, Deka Fit and CrossFit. Find upcoming events across Asia Pacific.',
   openGraph: {
-    title: 'Sports — Explore Fitness Disciplines | RaceRadar HQ',
+    title: 'Event Types — Explore Fitness Disciplines | RaceRadar HQ',
     description:
       'Discover HYROX, Spartan, Tough Mudder, Ironman, Marathon, Road Racing, CrossFit and more across Asia Pacific.',
   },
@@ -208,7 +208,7 @@ export default async function SportsPage() {
 
       {/* Header */}
       <div className="mb-12 max-w-2xl">
-        <h1 className="page-title">Explore Sports</h1>
+        <h1 className="page-title">Explore Event Types</h1>
         <p className="mt-3 text-ink-muted text-lg leading-relaxed">
           From indoor fitness races to mountain ultras, discover every discipline on RaceRadar HQ
           and find events that match your training goals.
@@ -283,7 +283,7 @@ export default async function SportsPage() {
       <div className="mt-16 rounded-2xl border border-wire bg-panel p-8 text-center">
         <h2 className="text-xl font-bold text-ink">Not sure where to start?</h2>
         <p className="mt-2 text-ink-muted max-w-md mx-auto">
-          Browse all upcoming events across every discipline, filtered by date, location or sport.
+          Browse all upcoming events across every discipline, filtered by date, location or event type.
         </p>
         <Link href="/events" className="btn-primary mt-5 inline-flex">
           Browse all events

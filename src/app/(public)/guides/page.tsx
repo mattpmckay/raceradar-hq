@@ -378,7 +378,7 @@ export default async function GuidesPage() {
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-3">
           <Link href="/sports" className="btn-primary inline-flex">
-            Explore sports
+            Explore event types
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link href="/events" className="btn-secondary inline-flex">
