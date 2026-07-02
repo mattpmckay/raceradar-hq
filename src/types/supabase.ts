@@ -5,6 +5,10 @@
 // Manually updated for Sprint 25 migration  (20260701000009).
 // Manually updated for Sprint 26 migration  (20260701000010).
 // Manually updated for Sprint 28 migration  (20260701000011).
+// Manually updated for Sprint 30 migration  (20260702000001):
+//   events.canonical_discipline_slug, profiles passport columns,
+//   challenges, challenge_titles, challenge_requirements,
+//   completion_claims, athlete_challenge_progress, result_feeds.
 
 export type Json =
   | string
@@ -161,6 +165,13 @@ export type Database = {
           profile_photo_url: string | null
           avatar_url: string | null
           role: 'user' | 'admin'
+          // Sprint 30: Passport settings
+          passport_is_public: boolean
+          passport_bio: string | null
+          passport_location: string | null
+          show_finish_times: boolean
+          show_active_challenges: boolean
+          primary_title_id: string | null
           created_at: string
           updated_at: string
         }
@@ -179,6 +190,12 @@ export type Database = {
           profile_photo_url?: string | null
           avatar_url?: string | null
           role?: 'user' | 'admin'
+          passport_is_public?: boolean
+          passport_bio?: string | null
+          passport_location?: string | null
+          show_finish_times?: boolean
+          show_active_challenges?: boolean
+          primary_title_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -197,6 +214,12 @@ export type Database = {
           profile_photo_url?: string | null
           avatar_url?: string | null
           role?: 'user' | 'admin'
+          passport_is_public?: boolean
+          passport_bio?: string | null
+          passport_location?: string | null
+          show_finish_times?: boolean
+          show_active_challenges?: boolean
+          primary_title_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -407,6 +430,7 @@ export type Database = {
           travel_source_url: string | null
           travel_last_verified_date: string | null
           travel_data_confidence: number | null
+          canonical_discipline_slug: string | null
         }
         Insert: {
           id?: string
@@ -507,6 +531,7 @@ export type Database = {
           travel_source_url?: string | null
           travel_last_verified_date?: string | null
           travel_data_confidence?: number | null
+          canonical_discipline_slug?: string | null
         }
         Update: {
           id?: string
@@ -607,6 +632,7 @@ export type Database = {
           travel_source_url?: string | null
           travel_last_verified_date?: string | null
           travel_data_confidence?: number | null
+          canonical_discipline_slug?: string | null
         }
         Relationships: [
           {
@@ -1059,12 +1085,375 @@ export type Database = {
           },
         ]
       }
+      // ─── Sprint 30: Passport & Challenge System ───────────────────────────────
+      challenges: {
+        Row: {
+          id: string
+          slug: string
+          name: string
+          tagline: string | null
+          description: string | null
+          family: 'series' | 'pursuit' | 'collection'
+          tier: 'starter' | 'achiever' | 'explorer' | 'legend'
+          primary_discipline_slug: string | null
+          geographic_scope: 'australia' | 'nz' | 'global' | null
+          is_seasonal: boolean
+          season_year: number | null
+          is_retired: boolean
+          retired_at: string | null
+          events_required_total: number
+          badge_image_url: string | null
+          hero_image_url: string | null
+          sort_order: number
+          is_published: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          slug: string
+          name: string
+          tagline?: string | null
+          description?: string | null
+          family: 'series' | 'pursuit' | 'collection'
+          tier: 'starter' | 'achiever' | 'explorer' | 'legend'
+          primary_discipline_slug?: string | null
+          geographic_scope?: 'australia' | 'nz' | 'global' | null
+          is_seasonal?: boolean
+          season_year?: number | null
+          is_retired?: boolean
+          retired_at?: string | null
+          events_required_total?: number
+          badge_image_url?: string | null
+          hero_image_url?: string | null
+          sort_order?: number
+          is_published?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          slug?: string
+          name?: string
+          tagline?: string | null
+          description?: string | null
+          family?: 'series' | 'pursuit' | 'collection'
+          tier?: 'starter' | 'achiever' | 'explorer' | 'legend'
+          primary_discipline_slug?: string | null
+          geographic_scope?: 'australia' | 'nz' | 'global' | null
+          is_seasonal?: boolean
+          season_year?: number | null
+          is_retired?: boolean
+          retired_at?: string | null
+          events_required_total?: number
+          badge_image_url?: string | null
+          hero_image_url?: string | null
+          sort_order?: number
+          is_published?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'challenges_primary_discipline_slug_fkey'
+            columns: ['primary_discipline_slug']
+            isOneToOne: false
+            referencedRelation: 'disciplines'
+            referencedColumns: ['slug']
+          },
+        ]
+      }
+      challenge_titles: {
+        Row: {
+          id: string
+          challenge_id: string
+          title: string
+          description: string | null
+        }
+        Insert: {
+          id?: string
+          challenge_id: string
+          title: string
+          description?: string | null
+        }
+        Update: {
+          id?: string
+          challenge_id?: string
+          title?: string
+          description?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'challenge_titles_challenge_id_fkey'
+            columns: ['challenge_id']
+            isOneToOne: true
+            referencedRelation: 'challenges'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      challenge_requirements: {
+        Row: {
+          id: string
+          challenge_id: string
+          requirement_type: 'specific_event' | 'discipline' | 'geographic' | 'any_event'
+          event_id: string | null
+          discipline: string | null
+          country: string | null
+          region: string | null
+          min_count: number
+          display_label: string
+          sort_order: number
+        }
+        Insert: {
+          id?: string
+          challenge_id: string
+          requirement_type: 'specific_event' | 'discipline' | 'geographic' | 'any_event'
+          event_id?: string | null
+          discipline?: string | null
+          country?: string | null
+          region?: string | null
+          min_count?: number
+          display_label: string
+          sort_order?: number
+        }
+        Update: {
+          id?: string
+          challenge_id?: string
+          requirement_type?: 'specific_event' | 'discipline' | 'geographic' | 'any_event'
+          event_id?: string | null
+          discipline?: string | null
+          country?: string | null
+          region?: string | null
+          min_count?: number
+          display_label?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'challenge_requirements_challenge_id_fkey'
+            columns: ['challenge_id']
+            isOneToOne: false
+            referencedRelation: 'challenges'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'challenge_requirements_event_id_fkey'
+            columns: ['event_id']
+            isOneToOne: false
+            referencedRelation: 'events'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'challenge_requirements_discipline_fkey'
+            columns: ['discipline']
+            isOneToOne: false
+            referencedRelation: 'disciplines'
+            referencedColumns: ['slug']
+          },
+        ]
+      }
+      completion_claims: {
+        Row: {
+          id: string
+          athlete_id: string
+          event_id: string
+          event_date: string
+          source: 'athlete_claim' | 'result_feed' | 'admin_import'
+          status: 'pending' | 'under_review' | 'approved' | 'rejected' | 'appealing' | 'auto_approved'
+          evidence_type: 'photo' | 'results_url' | 'bib_photo' | 'medal_photo' | null
+          evidence_url: string | null
+          evidence_notes: string | null
+          finish_time: string | null
+          bib_number: string | null
+          official_position: number | null
+          reviewed_by: string | null
+          reviewed_at: string | null
+          review_notes: string | null
+          rejection_reason: 'insufficient_evidence' | 'evidence_mismatch' | 'duplicate' | 'event_not_in_database' | 'other' | null
+          appeal_submitted_at: string | null
+          appeal_notes: string | null
+          result_feed_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          athlete_id: string
+          event_id: string
+          event_date: string
+          source?: 'athlete_claim' | 'result_feed' | 'admin_import'
+          status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'appealing' | 'auto_approved'
+          evidence_type?: 'photo' | 'results_url' | 'bib_photo' | 'medal_photo' | null
+          evidence_url?: string | null
+          evidence_notes?: string | null
+          finish_time?: string | null
+          bib_number?: string | null
+          official_position?: number | null
+          reviewed_by?: string | null
+          reviewed_at?: string | null
+          review_notes?: string | null
+          rejection_reason?: 'insufficient_evidence' | 'evidence_mismatch' | 'duplicate' | 'event_not_in_database' | 'other' | null
+          appeal_submitted_at?: string | null
+          appeal_notes?: string | null
+          result_feed_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          athlete_id?: string
+          event_id?: string
+          event_date?: string
+          source?: 'athlete_claim' | 'result_feed' | 'admin_import'
+          status?: 'pending' | 'under_review' | 'approved' | 'rejected' | 'appealing' | 'auto_approved'
+          evidence_type?: 'photo' | 'results_url' | 'bib_photo' | 'medal_photo' | null
+          evidence_url?: string | null
+          evidence_notes?: string | null
+          finish_time?: string | null
+          bib_number?: string | null
+          official_position?: number | null
+          reviewed_by?: string | null
+          reviewed_at?: string | null
+          review_notes?: string | null
+          rejection_reason?: 'insufficient_evidence' | 'evidence_mismatch' | 'duplicate' | 'event_not_in_database' | 'other' | null
+          appeal_submitted_at?: string | null
+          appeal_notes?: string | null
+          result_feed_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'completion_claims_event_id_fkey'
+            columns: ['event_id']
+            isOneToOne: false
+            referencedRelation: 'events'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      athlete_challenge_progress: {
+        Row: {
+          id: string
+          athlete_id: string
+          challenge_id: string
+          // [{requirement_id, display_label, needed, met, satisfied}]
+          requirements_met: Json
+          events_contributed: number
+          events_required: number
+          completion_pct: number
+          is_complete: boolean
+          completed_at: string | null
+          earned_title_id: string | null
+          last_computed_at: string
+        }
+        Insert: {
+          id?: string
+          athlete_id: string
+          challenge_id: string
+          requirements_met?: Json
+          events_contributed?: number
+          events_required?: number
+          completion_pct?: number
+          is_complete?: boolean
+          completed_at?: string | null
+          earned_title_id?: string | null
+          last_computed_at?: string
+        }
+        Update: {
+          id?: string
+          athlete_id?: string
+          challenge_id?: string
+          requirements_met?: Json
+          events_contributed?: number
+          events_required?: number
+          completion_pct?: number
+          is_complete?: boolean
+          completed_at?: string | null
+          earned_title_id?: string | null
+          last_computed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'acp_challenge_id_fkey'
+            columns: ['challenge_id']
+            isOneToOne: false
+            referencedRelation: 'challenges'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'acp_earned_title_id_fkey'
+            columns: ['earned_title_id']
+            isOneToOne: false
+            referencedRelation: 'challenge_titles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      result_feeds: {
+        Row: {
+          id: string
+          event_id: string
+          submitted_by_admin_id: string | null
+          file_url: string | null
+          status: 'pending_import' | 'processing' | 'imported' | 'failed'
+          records_total: number | null
+          records_matched: number | null
+          records_auto_approved: number | null
+          records_unmatched: number | null
+          error_log: Json | null
+          imported_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          submitted_by_admin_id?: string | null
+          file_url?: string | null
+          status?: 'pending_import' | 'processing' | 'imported' | 'failed'
+          records_total?: number | null
+          records_matched?: number | null
+          records_auto_approved?: number | null
+          records_unmatched?: number | null
+          error_log?: Json | null
+          imported_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          submitted_by_admin_id?: string | null
+          file_url?: string | null
+          status?: 'pending_import' | 'processing' | 'imported' | 'failed'
+          records_total?: number | null
+          records_matched?: number | null
+          records_auto_approved?: number | null
+          records_unmatched?: number | null
+          error_log?: Json | null
+          imported_at?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'result_feeds_event_id_fkey'
+            columns: ['event_id']
+            isOneToOne: false
+            referencedRelation: 'events'
+            referencedColumns: ['id']
+          },
+        ]
+      }
     }
     Views: Record<string, never>
     Functions: {
       get_event_save_count: {
         Args: { p_event_id: string }
         Returns: number
+      }
+      compute_athlete_challenge_progress: {
+        Args: { p_athlete_id: string; p_challenge_id: string }
+        Returns: undefined
       }
     }
     Enums: Record<string, never>
