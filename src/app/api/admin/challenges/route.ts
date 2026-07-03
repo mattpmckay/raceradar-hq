@@ -56,7 +56,7 @@ export async function POST(request: Request) {
   if (!authed) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body  = await request.json() as Record<string, unknown>
-  const admin = await createAdminClient()
+  const admin = createAdminClient()
 
   const { data, error } = await admin
     .from('challenges')

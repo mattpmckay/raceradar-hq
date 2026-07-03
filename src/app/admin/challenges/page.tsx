@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
 import { Pencil } from 'lucide-react'
@@ -27,7 +27,7 @@ const TIER_VARIANT: Record<string, 'default' | 'brand' | 'warning' | 'danger'> =
 }
 
 export default async function AdminChallengesPage() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { data: challenges } = await supabase
     .from('challenges')
     .select('id, name, slug, family, tier, is_published, events_required_total, primary_discipline_slug')

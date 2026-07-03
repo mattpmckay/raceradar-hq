@@ -32,7 +32,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const { id: challenge_id } = await params
   const body = await request.json() as Record<string, unknown>
-  const admin = await createAdminClient()
+  const admin = createAdminClient()
 
   const requirement_type = str(body.requirement_type) as
     'specific_event' | 'discipline' | 'geographic' | 'any_event' | null

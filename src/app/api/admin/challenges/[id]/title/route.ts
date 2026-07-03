@@ -24,7 +24,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const { id: challenge_id } = await params
   const body  = await request.json() as Record<string, unknown>
-  const admin = await createAdminClient()
+  const admin = createAdminClient()
 
   const title = str(body.title)
   if (!title) return NextResponse.json({ error: 'title is required' }, { status: 400 })
@@ -47,7 +47,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   if (!authed) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { id: challenge_id } = await params
-  const admin = await createAdminClient()
+  const admin = createAdminClient()
 
   const { error } = await admin
     .from('challenge_titles')

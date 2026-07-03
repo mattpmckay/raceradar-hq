@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { ChallengeForm } from '@/components/admin/ChallengeForm'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: 'Edit Challenge — Admin' }
 
 export default async function EditChallengePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const [
     { data: challenge },

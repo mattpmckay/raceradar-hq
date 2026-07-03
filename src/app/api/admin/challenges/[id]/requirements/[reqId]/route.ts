@@ -21,7 +21,7 @@ export async function DELETE(
   if (!authed) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { id: challenge_id, reqId } = await params
-  const admin = await createAdminClient()
+  const admin = createAdminClient()
 
   const { error } = await admin
     .from('challenge_requirements')

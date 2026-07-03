@@ -178,7 +178,7 @@ export async function POST(request: Request) {
   }
 
   const body  = await request.json() as Record<string, unknown>
-  const admin = await createAdminClient()
+  const admin = createAdminClient()
 
   const { data, error } = await admin
     .from('events')

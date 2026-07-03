@@ -57,7 +57,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   const { id } = await params
   const body   = await request.json() as Record<string, unknown>
-  const admin  = await createAdminClient()
+  const admin  = createAdminClient()
 
   const { data, error } = await admin
     .from('challenges')
@@ -79,7 +79,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   if (!authed) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { id } = await params
-  const admin  = await createAdminClient()
+  const admin  = createAdminClient()
   const { error } = await admin.from('challenges').delete().eq('id', id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

@@ -1,11 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { ChallengeForm } from '@/components/admin/ChallengeForm'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'New Challenge — Admin' }
 
 export default async function NewChallengePage() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const [{ data: disciplines }, { data: events }] = await Promise.all([
     supabase

@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Maximum 500 records per batch' }, { status: 400 })
   }
 
-  const admin = await createAdminClient()
+  const admin = createAdminClient()
 
   // ── Validate all records first ────────────────────────────────────────────
   const validationErrors: string[] = []

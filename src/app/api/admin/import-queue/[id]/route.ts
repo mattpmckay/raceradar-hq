@@ -26,7 +26,7 @@ export async function POST(
 
   const { id } = await params
   const body   = await request.json() as { action: 'approve' | 'reject'; reviewer_notes?: string }
-  const admin  = await createAdminClient()
+  const admin  = createAdminClient()
 
   // Fetch the queue item
   const { data: item, error: fetchErr } = await admin
