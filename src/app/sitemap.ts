@@ -13,6 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { data: disciplines },
     { data: seriesList },
     { data: eventLocations },
+    { data: challenges },
   ] = await Promise.all([
     supabase.from('events').select('slug, updated_at').eq('is_published', true).lt('start_date', '2099-01-01'),
     supabase.from('tracks').select('slug, updated_at').eq('is_published', true),
@@ -25,6 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .eq('is_published', true)
       .gte('start_date', today)
       .not('city', 'is', null),
+    supabase.from('challenges').select('slug, updated_at').eq('is_published', true).eq('is_retired', false),
   ])
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -33,6 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/discipline`,        changeFrequency: 'weekly',  priority: 0.85 },
     { url: `${base}/sports`,            changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${base}/locations`,         changeFrequency: 'weekly',  priority: 0.8 },
+    { url: `${base}/challenges`,        changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${base}/guides`,            changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${base}/tracks`,            changeFrequency: 'weekly',  priority: 0.7 },
     { url: `${base}/championships`,     changeFrequency: 'weekly',  priority: 0.7 },
@@ -96,6 +99,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }))
 
+  const challengeRoutes: MetadataRoute.Sitemap = (challenges ?? []).map((c) => ({
+    url: `${base}/challenges/${c.slug}`,
+    lastModified: c.updated_at,
+    changeFrequency: 'weekly',
+    priority: 0.7,
+  }))
+
   return [
     ...staticRoutes,
     ...eventRoutes,
@@ -104,5 +114,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...seriesRoutes,
     ...trackRoutes,
     ...championshipRoutes,
+    ...challengeRoutes,
   ]
 }
