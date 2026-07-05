@@ -38,3 +38,7 @@ next-env.d.ts
 /supabase/.branches
 /supabase/.temp
 .env*
+
+# ghost files — numbered write-retry copies created by Claude Code (e.g. "page 2.tsx")
+src/**/* *.ts
+src/**/* *.tsx
