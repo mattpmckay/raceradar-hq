@@ -13,6 +13,11 @@
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
+  /* Safari renders today's date in the shadow DOM for empty <input type="date" value="">.
+     Apply .date-empty when value is '' to hide the phantom date display. */
+  .date-empty::-webkit-datetime-edit {
+    visibility: hidden;
+  }
 }
 
 @layer base {

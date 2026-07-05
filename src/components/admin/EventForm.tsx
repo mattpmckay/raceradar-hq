@@ -298,7 +298,7 @@ export function EventForm({ event }: Props) {
             <input required type="date" value={form.start_date} onChange={(e) => set('start_date', e.target.value)} className="form-input" />
           </FormField>
           <FormField label="End Date">
-            <input type="date" value={form.end_date} onChange={(e) => set('end_date', e.target.value)} className="form-input" autoComplete="off" />
+            <input type="date" value={form.end_date} onChange={(e) => set('end_date', e.target.value)} className={`form-input${form.end_date ? '' : ' date-empty'}`} />
           </FormField>
         </div>
       </Section>
