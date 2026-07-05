@@ -431,6 +431,9 @@ export type Database = {
           travel_last_verified_date: string | null
           travel_data_confidence: number | null
           canonical_discipline_slug: string | null
+          submission_source: string
+          submitter_name: string | null
+          submitter_email: string | null
         }
         Insert: {
           id?: string
@@ -532,6 +535,9 @@ export type Database = {
           travel_last_verified_date?: string | null
           travel_data_confidence?: number | null
           canonical_discipline_slug?: string | null
+          submission_source?: string
+          submitter_name?: string | null
+          submitter_email?: string | null
         }
         Update: {
           id?: string
@@ -633,6 +639,9 @@ export type Database = {
           travel_last_verified_date?: string | null
           travel_data_confidence?: number | null
           canonical_discipline_slug?: string | null
+          submission_source?: string
+          submitter_name?: string | null
+          submitter_email?: string | null
         }
         Relationships: [
           {

@@ -9,6 +9,7 @@ const FOOTER_LINKS = {
     { label: 'Tracks',         href: '/tracks' },
     { label: 'Championships',  href: '/championships' },
     { label: 'Race Guides',    href: '/guides' },
+    { label: 'Submit Your Event', href: '/submit-event' },
   ],
   'Event Types': [
     { label: 'HYROX',         href: '/events?discipline=HYROX' },
