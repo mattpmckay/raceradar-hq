@@ -282,7 +282,7 @@ export function EventForm({ event }: Props) {
           </FormField>
           <FormField label="Series Slug">
             <input value={form.series_slug} onChange={(e) => set('series_slug', e.target.value)}
-              className="form-input font-mono text-xs" placeholder="hyrox-melbourne" />
+              className="form-input font-mono text-xs" placeholder="e.g. hyrox-2026" />
           </FormField>
           <FormField label="First Year Held">
             <input type="number" value={form.first_year_held} onChange={(e) => set('first_year_held', e.target.value)}
@@ -298,7 +298,7 @@ export function EventForm({ event }: Props) {
             <input required type="date" value={form.start_date} onChange={(e) => set('start_date', e.target.value)} className="form-input" />
           </FormField>
           <FormField label="End Date">
-            <input type="date" value={form.end_date} onChange={(e) => set('end_date', e.target.value)} className="form-input" />
+            <input type="date" value={form.end_date} onChange={(e) => set('end_date', e.target.value)} className="form-input" autoComplete="off" />
           </FormField>
         </div>
       </Section>
