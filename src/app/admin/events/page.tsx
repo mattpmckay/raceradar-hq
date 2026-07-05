@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
 import { formatDateShort } from '@/lib/utils'
@@ -15,7 +15,7 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
   const { filter } = await searchParams
   const isPendingFilter = filter === 'pending'
 
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   let query = supabase
     .from('events')

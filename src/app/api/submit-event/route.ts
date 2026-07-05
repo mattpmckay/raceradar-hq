@@ -73,9 +73,10 @@ export async function POST(request: Request) {
     submission_source:  'organiser_submission',
     submitter_name,
     submitter_email,
-  })
+  }).select('id').single()
 
   if (error) {
+    console.error('[submit-event] insert error:', error.message)
     return NextResponse.json({ error: 'Submission failed. Please try again.' }, { status: 500 })
   }
 

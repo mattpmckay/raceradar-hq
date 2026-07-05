@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { EventForm } from '@/components/admin/EventForm'
 import Link from 'next/link'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: 'Edit Event — Admin' }
 
 export default async function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { data: event } = await supabase
     .from('events')
