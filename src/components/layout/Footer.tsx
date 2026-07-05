@@ -2,10 +2,13 @@ import Link from 'next/link'
 
 const FOOTER_LINKS = {
   Discover: [
-    { label: 'Events',      href: '/events' },
-    { label: 'Event Types', href: '/sports' },
-    { label: 'Locations',   href: '/locations' },
-    { label: 'Race Guides', href: '/guides' },
+    { label: 'Events',         href: '/events' },
+    { label: 'Event Types',    href: '/sports' },
+    { label: 'Locations',      href: '/locations' },
+    { label: 'Challenges',     href: '/challenges' },
+    { label: 'Tracks',         href: '/tracks' },
+    { label: 'Championships',  href: '/championships' },
+    { label: 'Race Guides',    href: '/guides' },
   ],
   'Event Types': [
     { label: 'HYROX',         href: '/events?discipline=HYROX' },

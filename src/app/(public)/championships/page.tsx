@@ -6,23 +6,25 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Series',
-  description: 'Explore endurance series, obstacle race programs, and multi-event fitness programs across Australia.',
+  title: 'Championships & Series',
+  description: 'Explore endurance championships, race series and multi-event fitness programs across Asia Pacific.',
 }
 
 export default async function ChampionshipsPage() {
   const supabase = await createClient()
   const { data: championships } = await supabase
     .from('championships')
-    .select('*')
+    .select('id, slug, name, discipline, season_year, organiser, country')
     .eq('is_published', true)
     .order('name', { ascending: true })
 
   return (
     <div className="container-page py-10">
       <div className="mb-8">
-        <h1 className="page-title">Series</h1>
-        <p className="mt-2 text-gray-400">Endurance series, obstacle programs, and multi-event fitness programs.</p>
+        <h1 className="page-title">Championships &amp; Series</h1>
+        <p className="mt-2 text-ink-muted max-w-xl">
+          Endurance championships, race series and multi-event programs across Asia Pacific.
+        </p>
       </div>
 
       {championships && championships.length > 0 ? (
@@ -31,25 +33,25 @@ export default async function ChampionshipsPage() {
             <Link
               key={c.id}
               href={`/championships/${c.slug}`}
-              className="card group hover:border-brand-500/50 transition-colors space-y-3"
+              className="card group hover:border-mint/40 transition-colors space-y-3"
             >
               <div className="flex items-start justify-between gap-2">
                 <Badge variant="brand">{c.discipline}</Badge>
                 {c.season_year && (
-                  <span className="text-xs text-gray-500">{c.season_year}</span>
+                  <span className="text-xs text-ink-subtle">{c.season_year}</span>
                 )}
               </div>
 
-              <h3 className="font-semibold text-white group-hover:text-brand-400 transition-colors">
+              <h3 className="font-semibold text-ink group-hover:text-mint transition-colors">
                 {c.name}
               </h3>
 
               {c.organiser && (
-                <p className="text-sm text-gray-400">{c.organiser}</p>
+                <p className="text-sm text-ink-muted">{c.organiser}</p>
               )}
 
               {c.country && (
-                <p className="text-xs text-gray-500">{c.country}</p>
+                <p className="text-xs text-ink-subtle">{c.country}</p>
               )}
             </Link>
           ))}
@@ -57,8 +59,8 @@ export default async function ChampionshipsPage() {
       ) : (
         <EmptyState
           icon={<Trophy className="h-10 w-10" />}
-          title="No series listed yet"
-          description="Series listings are coming soon."
+          title="No championships listed yet"
+          description="Championship and series listings are coming soon."
         />
       )}
     </div>
