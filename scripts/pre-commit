@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Pre-commit hook: block ghost files in src/ that break the Turbopack build.
+#
+# Two classes are blocked:
+#   1. Extensionless files  — e.g. "Footer", "EventCard"
+#   2. Space-numbered files — e.g. "page 2.tsx", "Header 3.tsx"
+#
+# These are write-retry copies produced by editors or Claude Code when the
+# original file is locked. They are never intentional and always break the build.
+
+set -euo pipefail
+
+ERRORS=()
+
+# 1. Extensionless files: basename contains no dot
+while IFS= read -r -d '' file; do
+  basename=$(basename "$file")
+  if [[ "$basename" != *.* ]]; then
+    ERRORS+=("  extensionless: $file")
+  fi
+done < <(find src -type f -print0)
+
+# 2. Space-numbered files: basename matches "* [0-9]" or "* [0-9].*"
+while IFS= read -r -d '' file; do
+  basename=$(basename "$file")
+  if [[ "$basename" =~ ^.*\ [0-9](\.|$) ]]; then
+    ERRORS+=("  space-numbered: $file")
+  fi
+done < <(find src -type f -print0)
+
+if [[ ${#ERRORS[@]} -gt 0 ]]; then
+  echo ""
+  echo "✗ Pre-commit: ghost files detected in src/ — commit blocked."
+  echo ""
+  echo "  These files break the production build. Delete them before committing:"
+  echo ""
+  for err in "${ERRORS[@]}"; do
+    echo "$err"
+  done
+  echo ""
+  echo "  To find all ghost files: find src -type f | grep -E '(^|/) [0-9]|\.' | grep -vE '\.[a-zA-Z]'"
+  echo ""
+  exit 1
+fi
+
+exit 0
