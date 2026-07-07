@@ -39,9 +39,9 @@ export function ReminderSignup({ slug }: { slug: string }) {
           <Check className="h-6 w-6 text-mint" />
         </div>
         <div>
-          <p className="font-semibold text-ink">You&apos;re on the list</p>
+          <p className="font-semibold text-ink">Interest saved</p>
           <p className="mt-1 text-sm text-ink-muted">
-            We&apos;ll notify you as soon as registrations open.
+            We&apos;ve noted your interest. Email reminders are coming — we&apos;ll reach out when they&apos;re live.
           </p>
         </div>
       </div>
