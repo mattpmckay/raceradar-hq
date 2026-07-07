@@ -487,9 +487,11 @@ export default async function EventDetailPage({ params }: PageProps) {
       .from('events')
       .select('title, slug, city, country, start_date, discipline')
       .eq('is_published', true)
+      .eq('discipline', event.discipline)
       .neq('slug', slug)
+      .gte('start_date', today)
       .order('start_date', { ascending: true })
-      .limit(20)
+      .limit(4)
       .then(({ data }) => data ?? []),
     user
       ? supabase
@@ -509,7 +511,7 @@ export default async function EventDetailPage({ params }: PageProps) {
   const seriesEvents = seriesRaw as typeof relatedRaw
   const related = seriesEvents.length > 0
     ? seriesEvents
-    : relatedRaw.filter((e) => e.discipline === event.discipline && e.start_date >= today).slice(0, 4)
+    : relatedRaw
   const relatedHeading = seriesEvents.length > 0 ? 'Also in This Series' : `More ${event.discipline} Events`
 
   const eventSchema = buildEventSchema(event, venue)
