@@ -42,3 +42,8 @@ next-env.d.ts
 # ghost files — numbered write-retry copies created by Claude Code (e.g. "page 2.tsx")
 src/**/* *.ts
 src/**/* *.tsx
+
+# Claude Code local settings — stale write-retry copies
+.claude/settings.local
+.claude/settings.local *
+.claude/settings.local *.json
