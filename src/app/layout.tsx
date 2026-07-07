@@ -28,6 +28,10 @@ export const metadata: Metadata = {
     siteName: 'RaceRadar HQ',
     type: 'website',
   },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@RaceRadarHQ',
+  },
 }
 
 export default function RootLayout({

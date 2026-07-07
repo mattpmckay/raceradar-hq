@@ -419,13 +419,24 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       ? event.description
       : `${event.title} — ${event.discipline} in ${location}. Dates, categories, entry fees, venue and race guide.`
 
+  const ogImage = event.hero_image_url
+    ? { url: event.hero_image_url, width: 1200, height: 630 }
+    : { url: '/opengraph-image', width: 1200, height: 630 }
+
   return {
     title: `${event.title} — ${event.discipline} Race Guide`,
     description: metaDesc,
     openGraph: {
       title: `${event.title} — Race Guide`,
       description: metaDesc,
-      ...(event.hero_image_url ? { images: [{ url: event.hero_image_url }] } : {}),
+      type: 'article',
+      images: [ogImage],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${event.title} — Race Guide`,
+      description: metaDesc,
+      images: [ogImage.url],
     },
   }
 }
