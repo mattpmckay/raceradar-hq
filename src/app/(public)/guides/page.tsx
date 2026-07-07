@@ -89,7 +89,7 @@ const EDITORIAL_SECTIONS: { heading: string; category: GuideCategory; guides: Ed
         category: 'discipline',
         discipline: 'HYROX',
         readTime: '12 min read',
-        href: null,
+        href: '/guides/the-complete-hyrox-guide',
       },
       {
         title: 'Spartan Race: Sprint, Super, Beast & Ultra Explained',
