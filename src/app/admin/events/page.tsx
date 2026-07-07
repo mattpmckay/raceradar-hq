@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
+import { SubmissionActions } from '@/components/admin/SubmissionActions'
 import { formatDateShort } from '@/lib/utils'
 import { Pencil } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -19,7 +20,7 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
 
   let query = supabase
     .from('events')
-    .select('id, title, slug, discipline, event_type, start_date, is_published, is_featured, submission_source, submitter_email')
+    .select('id, title, slug, discipline, event_type, start_date, is_published, is_featured, submission_source, submitter_name, submitter_email, created_at')
     .order('created_at', { ascending: false })
     .limit(200)
 
@@ -89,11 +90,25 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
               <tr key={event.id} className="hover:bg-panel-raised/50 transition-colors">
                 <td className="px-4 py-3">
                   <span className="font-medium text-ink">{event.title}</span>
-                  {event.submission_source === 'organiser_submission' && event.submitter_email && (
-                    <p className="mt-0.5 text-xs text-ink-subtle">{event.submitter_email}</p>
+                  {event.submission_source === 'organiser_submission' && (
+                    <div className="mt-0.5 space-y-0.5">
+                      {event.submitter_name && (
+                        <p className="text-xs text-ink-muted">{event.submitter_name}</p>
+                      )}
+                      {event.submitter_email && (
+                        <p className="text-xs text-ink-subtle">{event.submitter_email}</p>
+                      )}
+                    </div>
                   )}
                 </td>
-                <td className="px-4 py-3 text-ink-muted">{formatDateShort(event.start_date)}</td>
+                <td className="px-4 py-3 text-ink-muted">
+                  <div>{formatDateShort(event.start_date)}</div>
+                  {isPendingFilter && event.created_at && (
+                    <div className="text-xs text-ink-subtle">
+                      Submitted {formatDateShort(event.created_at)}
+                    </div>
+                  )}
+                </td>
                 <td className="px-4 py-3">
                   <Badge variant="brand">{event.discipline}</Badge>
                 </td>
@@ -108,12 +123,20 @@ export default async function AdminEventsPage({ searchParams }: PageProps) {
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <Link
-                    href={`/admin/events/${event.id}/edit`}
-                    className="btn-ghost p-1.5 text-ink-muted hover:text-ink"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Link>
+                  {isPendingFilter && event.submission_source === 'organiser_submission' ? (
+                    <SubmissionActions
+                      eventId={event.id}
+                      eventSlug={event.slug}
+                      eventTitle={event.title}
+                    />
+                  ) : (
+                    <Link
+                      href={`/admin/events/${event.id}/edit`}
+                      className="btn-ghost p-1.5 text-ink-muted hover:text-ink"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Link>
+                  )}
                 </td>
               </tr>
             ))}
