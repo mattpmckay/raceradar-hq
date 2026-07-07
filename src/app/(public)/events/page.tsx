@@ -69,6 +69,7 @@ type SearchParams = {
   region?:     string
   window?:     string
   series?:     string
+  page?:       string
 }
 
 interface PageProps {
@@ -95,6 +96,8 @@ function windowEndDate(window: string | undefined, today: string): string {
   return d.toISOString().split('T')[0]
 }
 
+const PAGE_SIZE = 48
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function EventsPage({ searchParams }: PageProps) {
@@ -104,10 +107,13 @@ export default async function EventsPage({ searchParams }: PageProps) {
   const isPast   = params.window === 'past'
   const dateEnd  = windowEndDate(params.window, today)
 
+  const page   = Math.max(1, parseInt(params.page ?? '1', 10) || 1)
+  const offset = (page - 1) * PAGE_SIZE
+
   // ── Build main events query ────────────────────────────────────────────────
   let eventsQuery = supabase
     .from('events')
-    .select('*')
+    .select('*', { count: 'exact' })
     .eq('is_published', true)
 
   if (isPast) {
@@ -150,12 +156,12 @@ export default async function EventsPage({ searchParams }: PageProps) {
 
   // ── Parallel fetches ───────────────────────────────────────────────────────
   const [
-    { data: events, error },
+    { data: events, count: matchCount, error },
     { data: countRows },
     { data: { user } },
     { data: allSeries },
   ] = await Promise.all([
-    eventsQuery.limit(48),
+    eventsQuery.range(offset, offset + PAGE_SIZE - 1),
     countQuery,
     supabase.auth.getUser(),
     supabase
@@ -199,10 +205,24 @@ export default async function EventsPage({ searchParams }: PageProps) {
   }
 
   // ── Hero text ──────────────────────────────────────────────────────────────
-  const count      = events?.length ?? 0
-  const countLabel = count === 48 ? '48+' : String(count)
+  const total      = matchCount ?? 0
+  const totalPages = Math.ceil(total / PAGE_SIZE)
+  const countLabel = String(total)
   const heroTitle    = buildTitle(params)
-  const heroSubtitle = buildSubtitle(params, count, countLabel)
+  const heroSubtitle = buildSubtitle(params, total, countLabel)
+
+  // Page href: preserves all active filters, changes only the page number
+  function pageHref(p: number) {
+    const sp = new URLSearchParams()
+    if (params.q)          sp.set('q', params.q)
+    if (params.discipline) sp.set('discipline', params.discipline)
+    if (params.country)    sp.set('country', params.country)
+    if (params.region)     sp.set('region', params.region)
+    if (params.window)     sp.set('window', params.window)
+    if (params.series)     sp.set('series', params.series)
+    if (p > 1)             sp.set('page', String(p))
+    return `/events${sp.size ? `?${sp}` : ''}`
+  }
 
   // Pill href: changing discipline drops series (series are discipline-specific)
   function pillHref(value: string) {
@@ -303,9 +323,10 @@ export default async function EventsPage({ searchParams }: PageProps) {
         ) : events && events.length > 0 ? (
           <>
             <p className="mb-5 text-sm text-ink-muted">
-              {countLabel} {isPast ? 'past' : 'upcoming'} event{count !== 1 ? 's' : ''}
+              {countLabel} {isPast ? 'past' : 'upcoming'} event{total !== 1 ? 's' : ''}
               {params.discipline ? ` · ${params.discipline}` : ''}
               {params.country ? ` · ${params.country}` : ''}
+              {totalPages > 1 ? ` · page ${page} of ${totalPages}` : ''}
             </p>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {events.map((event) => (
@@ -316,6 +337,32 @@ export default async function EventsPage({ searchParams }: PageProps) {
                 />
               ))}
             </div>
+
+            {totalPages > 1 && (
+              <div className="mt-10 flex items-center justify-center gap-3">
+                {page > 1 ? (
+                  <Link href={pageHref(page - 1)} className="btn-secondary">
+                    ← Previous
+                  </Link>
+                ) : (
+                  <span className="btn-secondary opacity-40 cursor-not-allowed pointer-events-none">
+                    ← Previous
+                  </span>
+                )}
+                <span className="text-sm text-ink-muted">
+                  Page {page} of {totalPages}
+                </span>
+                {page < totalPages ? (
+                  <Link href={pageHref(page + 1)} className="btn-secondary">
+                    Next →
+                  </Link>
+                ) : (
+                  <span className="btn-secondary opacity-40 cursor-not-allowed pointer-events-none">
+                    Next →
+                  </span>
+                )}
+              </div>
+            )}
           </>
         ) : (
           <EmptyState
