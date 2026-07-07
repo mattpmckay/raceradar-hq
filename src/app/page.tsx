@@ -3,10 +3,12 @@ import type { Metadata }        from 'next'
 import { createClient }         from '@/lib/supabase/server'
 import { Header }               from '@/components/layout/Header'
 import { HeroSection }          from '@/components/home/HeroSection'
+import { BrowseByType }         from '@/components/home/BrowseByType'
 import { HowItWorksSection }    from '@/components/home/HowItWorksSection'
 import { EventsSectionServer }  from '@/components/home/EventsSectionServer'
 import { EventsSectionSkeleton } from '@/components/home/EventsSectionSkeleton'
 import { MemberValueSection }   from '@/components/home/MemberValueSection'
+import { RaceGuides }           from '@/components/home/RaceGuides'
 import { HomeFooter }           from '@/components/home/HomeFooter'
 import type { HeaderUser }      from '@/components/layout/Header'
 
@@ -45,11 +47,15 @@ export default async function HomePage() {
       <Header user={headerUser} />
       <main id="main-content">
         <HeroSection />
+        <Suspense fallback={null}>
+          <BrowseByType />
+        </Suspense>
         <HowItWorksSection />
         <Suspense fallback={<EventsSectionSkeleton />}>
           <EventsSectionServer featuredOnly />
         </Suspense>
         <MemberValueSection isLoggedIn={!!user} />
+        <RaceGuides />
       </main>
       <HomeFooter />
     </div>
